@@ -1,0 +1,28 @@
+# Dependencies (never commit)
+node_modules/
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Expo / React Native
+apps/mobile/.expo/
+apps/mobile/dist/
+
+# Env & secrets (keep **/*.example if you add templates)
+.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# OS & logs
+.DS_Store
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Vercel
+.vercel

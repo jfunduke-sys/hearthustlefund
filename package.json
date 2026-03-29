@@ -1,0 +1,14 @@
+{
+  "name": "heart-and-hustle",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w web",
+    "build:web": "npm run build -w web",
+    "dev:mobile": "npm run start -w mobile",
+    "lint:web": "npm run lint -w web"
+  }
+}
