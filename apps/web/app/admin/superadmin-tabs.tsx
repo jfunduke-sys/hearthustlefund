@@ -111,6 +111,7 @@ export function SuperadminTabs({
   const [rejectNotes, setRejectNotes] = useState("");
   const [standaloneOpen, setStandaloneOpen] = useState(false);
   const [standaloneEmail, setStandaloneEmail] = useState("");
+  const [viewOpen, setViewOpen] = useState<SchoolRequest | null>(null);
 
   const openRequests = useMemo(
     () =>
@@ -252,7 +253,14 @@ export function SuperadminTabs({
                       </TableCell>
                       <TableCell>{requestBadge(r.status)}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex flex-wrap justify-end gap-2">
+                        <div className="flex flex-col items-end gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setViewOpen(r)}
+                          >
+                            View
+                          </Button>
                           <Button
                             size="sm"
                             disabled={
@@ -268,7 +276,7 @@ export function SuperadminTabs({
                               })
                             }
                           >
-                            Approve &amp; code
+                            Approve and Generate Code
                           </Button>
                           <Button
                             size="sm"
@@ -652,6 +660,108 @@ export function SuperadminTabs({
               }
             >
               Generate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!viewOpen}
+        onOpenChange={(open: boolean) => {
+          if (!open) setViewOpen(null);
+        }}
+      >
+        <DialogContent className="max-h-[min(85vh,720px)] max-w-lg overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>School fundraiser request</DialogTitle>
+            <DialogDescription>
+              Full intake form data{viewOpen ? ` — ${viewOpen.school_name}` : ""}.
+            </DialogDescription>
+          </DialogHeader>
+          {viewOpen ? (
+            <dl className="space-y-3 text-sm text-slate-800">
+              <div>
+                <dt className="font-semibold text-slate-600">School name</dt>
+                <dd>{viewOpen.school_name}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">School district</dt>
+                <dd>{viewOpen.school_district}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">School address</dt>
+                <dd>{formatAddress(viewOpen)}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">
+                  Sport, club, or activity
+                </dt>
+                <dd>{viewOpen.sport_club_activity?.trim() || "—"}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">
+                  Proposed fundraiser dates
+                </dt>
+                <dd>
+                  {formatDisplayDate(viewOpen.fundraiser_start_date)} –{" "}
+                  {formatDisplayDate(viewOpen.fundraiser_end_date)}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">
+                  Coach / lead (first &amp; last)
+                </dt>
+                <dd>
+                  {[
+                    viewOpen.admin_first_name?.trim(),
+                    viewOpen.admin_last_name?.trim(),
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || schoolRequestLeadDisplayName(viewOpen)}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">Coach email</dt>
+                <dd>{viewOpen.admin_email}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">Coach phone</dt>
+                <dd>{viewOpen.admin_phone}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">
+                  Estimated student-athletes
+                </dt>
+                <dd>{viewOpen.estimated_athletes ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">Additional notes</dt>
+                <dd className="whitespace-pre-wrap">
+                  {viewOpen.notes?.trim() ? viewOpen.notes : "—"}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">Status</dt>
+                <dd>{requestBadge(viewOpen.status)}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">Submitted</dt>
+                <dd>{formatDisplayDateTime(viewOpen.created_at)}</dd>
+              </div>
+              <div className="flex gap-4 border-t border-slate-200 pt-3 text-xs text-slate-600">
+                <span>
+                  Paperwork sent: {viewOpen.paperwork_sent ? "Yes" : "No"}
+                </span>
+                <span>
+                  Paperwork returned:{" "}
+                  {viewOpen.paperwork_returned ? "Yes" : "No"}
+                </span>
+              </div>
+            </dl>
+          ) : null}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewOpen(null)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
