@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { clearCoachActivationCookie } from "@/app/actions/coach-activation";
+import { normalizeFundraiserSetupCode } from "@heart-and-hustle/shared";
 import { allocateUniqueJoinCode } from "@/lib/join-code";
 
 async function assertCoach() {
@@ -72,11 +73,12 @@ export async function createFundraiserAction(input: {
   const user = await assertCoach();
   const admin = createAdminClient();
   const email = user.email!.toLowerCase().trim();
+  const codeNorm = normalizeFundraiserSetupCode(input.code);
 
   const { data: codeRow, error: codeErr } = await admin
     .from("fundraiser_codes")
     .select("*")
-    .eq("code", input.code.trim())
+    .eq("code", codeNorm)
     .maybeSingle();
 
   if (codeErr || !codeRow) throw new Error("Invalid fundraiser code");

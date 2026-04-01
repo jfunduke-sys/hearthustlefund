@@ -18,6 +18,9 @@ export const CAMPAIGN_SETUP_CODE = {
   /** One line on participant join flows (app/web) — same meaning as `description`. */
   joinFlowReminder:
     "The HH-… campaign setup code is only for creating the fundraiser in the coach portal—not for joining here.",
+  /** Shown near coach code inputs — matching ignores dashes and capitalization. */
+  inputFormatHint:
+    "Dashes and capitalization are optional — your code is recognized automatically.",
 } as const;
 
 /** Anyone with this can register as a participant (one row in `athletes`). Athletes, assistant coaches, parents helping text—same flow, same data model. */
@@ -27,6 +30,9 @@ export const TEAM_JOIN = {
     `Your coach shares a 7-character team code. Open the Heart & Hustle app, enter the code, then create your email and password to get your personal donation link and texting tools. ${NEW_PASSWORD_REQUIREMENT_COPY}`,
   slugHelp:
     "In the mobile app, enter the 7-character code from your coach. (That’s different from the HH campaign setup code coaches use on the website.)",
+  /** Shown under the team code field in the app. */
+  inputFormatHint:
+    "Spaces aren’t needed — type letters and numbers; we’ll match your code.",
 } as const;
 
 export type FundraisingSmsParams = {

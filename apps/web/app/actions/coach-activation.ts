@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizeFundraiserSetupCode } from "@heart-and-hustle/shared";
 import {
   COOKIE_NAME,
   signCoachActivationToken,
@@ -18,7 +19,7 @@ export async function verifyAndSetCoachActivationCookie(
   codeRaw: string
 ): Promise<VerifyCoachCodeResult> {
   const email = emailRaw.toLowerCase().trim();
-  const code = codeRaw.trim();
+  const code = normalizeFundraiserSetupCode(codeRaw);
   if (!email || !code) {
     return { ok: false, error: "Enter the email and fundraiser code you received." };
   }

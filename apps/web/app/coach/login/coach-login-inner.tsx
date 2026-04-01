@@ -6,7 +6,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { verifyAndSetCoachActivationCookie } from "@/app/actions/coach-activation";
 import { BRAND } from "@/lib/brand";
-import { NEW_PASSWORD_REQUIREMENT_COPY } from "@heart-and-hustle/shared";
+import {
+  CAMPAIGN_SETUP_CODE,
+  NEW_PASSWORD_REQUIREMENT_COPY,
+  normalizeFundraiserSetupCode,
+} from "@heart-and-hustle/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,7 +67,10 @@ export default function CoachLoginInner() {
     setActivationError(null);
     setInfo(null);
     setLoading(true);
-    const res = await verifyAndSetCoachActivationCookie(actEmail, actCode);
+    const res = await verifyAndSetCoachActivationCookie(
+      actEmail,
+      normalizeFundraiserSetupCode(actCode)
+    );
     setLoading(false);
     if (!res.ok) {
       setActivationError(res.error);
@@ -109,7 +116,10 @@ export default function CoachLoginInner() {
         setActivationError(signErr.message);
         return;
       }
-      const re = await verifyAndSetCoachActivationCookie(actEmail, actCode);
+      const re = await verifyAndSetCoachActivationCookie(
+        actEmail,
+        normalizeFundraiserSetupCode(actCode)
+      );
       if (!re.ok) {
         setLoading(false);
         setActivationError(re.error);
@@ -120,7 +130,10 @@ export default function CoachLoginInner() {
           "hh_pending_activation_email",
           actEmail.trim().toLowerCase()
         );
-        sessionStorage.setItem("hh_pending_activation_code", actCode.trim());
+        sessionStorage.setItem(
+          "hh_pending_activation_code",
+          normalizeFundraiserSetupCode(actCode)
+        );
       } catch {
         /* private mode */
       }
@@ -158,7 +171,10 @@ export default function CoachLoginInner() {
     }
 
     if (data.session) {
-      const re = await verifyAndSetCoachActivationCookie(actEmail, actCode);
+      const re = await verifyAndSetCoachActivationCookie(
+        actEmail,
+        normalizeFundraiserSetupCode(actCode)
+      );
       if (!re.ok) {
         setActivationError(re.error);
         setLoading(false);
@@ -169,7 +185,10 @@ export default function CoachLoginInner() {
           "hh_pending_activation_email",
           actEmail.trim().toLowerCase()
         );
-        sessionStorage.setItem("hh_pending_activation_code", actCode.trim());
+        sessionStorage.setItem(
+          "hh_pending_activation_code",
+          normalizeFundraiserSetupCode(actCode)
+        );
       } catch {
         /* private mode */
       }
@@ -270,11 +289,21 @@ export default function CoachLoginInner() {
                         id="act-code"
                         value={actCode}
                         onChange={(e) => setActCode(e.target.value)}
+                        onBlur={() =>
+                          setActCode((c) =>
+                            c.trim()
+                              ? normalizeFundraiserSetupCode(c)
+                              : c
+                          )
+                        }
                         placeholder="HH-XXXX-XXXX"
                         className="font-mono"
                         autoComplete="off"
                         required
                       />
+                      <p className="text-xs leading-relaxed text-slate-500">
+                        {CAMPAIGN_SETUP_CODE.inputFormatHint}
+                      </p>
                     </div>
                     {activationError ? (
                       <p className="text-sm text-red-600" role="alert">

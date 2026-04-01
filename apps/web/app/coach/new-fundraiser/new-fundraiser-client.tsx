@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { createFundraiserAction } from "@/app/actions/coach";
 import { BRAND } from "@/lib/brand";
+import {
+  CAMPAIGN_SETUP_CODE,
+  normalizeFundraiserSetupCode,
+} from "@heart-and-hustle/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -131,10 +135,11 @@ export default function NewFundraiserClient({ initialCode }: Props) {
       return;
     }
     const email = user.email.toLowerCase().trim();
+    const codeNorm = normalizeFundraiserSetupCode(code);
     const { data: row } = await supabase
       .from("fundraiser_codes")
       .select("*")
-      .eq("code", code.trim())
+      .eq("code", codeNorm)
       .maybeSingle();
 
     if (!row) {
@@ -168,6 +173,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
       return;
     }
 
+    setCode(codeNorm);
     setLoading(false);
     setStep(2);
   }
@@ -215,7 +221,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
       const schoolUrl = await uploadLogo(schoolFile, "school");
       const teamUrl = await uploadLogo(teamFile, "team");
       const res = await createFundraiserAction({
-        code: code.trim(),
+        code: normalizeFundraiserSetupCode(code),
         school_name: schoolName.trim(),
         team_name: teamName.trim(),
         total_goal: goal,
@@ -320,9 +326,17 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                     id="code"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
+                    onBlur={() =>
+                      setCode((c) =>
+                        c.trim() ? normalizeFundraiserSetupCode(c) : c
+                      )
+                    }
                     placeholder="HH-XXXX-XXXX"
                     className="font-mono"
                   />
+                  <p className="text-xs leading-relaxed text-slate-500">
+                    {CAMPAIGN_SETUP_CODE.inputFormatHint}
+                  </p>
                 </div>
                 {codeError ? (
                   <p className="text-sm text-red-600">{codeError}</p>
@@ -330,7 +344,9 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                 <Button
                   type="button"
                   className="w-full"
-                  disabled={loading || !code.trim()}
+                  disabled={
+                    loading || !normalizeFundraiserSetupCode(code).trim()
+                  }
                   onClick={() => void validateCode()}
                 >
                   {loading ? "Checking…" : "Continue"}

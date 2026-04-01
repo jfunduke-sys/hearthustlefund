@@ -258,7 +258,7 @@ export default function AthleteEntry({
                 />
                 <Text style={styles.codeHint}>
                   {TEAM_JOIN_CODE_LENGTH} characters (letters & numbers). Older
-                  teams may still use a 6-digit code.
+                  teams may still use a 6-digit code. {TEAM_JOIN.inputFormatHint}
                 </Text>
                 <Pressable
                   style={styles.btnDark}
