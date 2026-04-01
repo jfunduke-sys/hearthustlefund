@@ -14,6 +14,7 @@ import type {
 import {
   formatDisplayDate,
   formatDisplayDateTime,
+  schoolRequestLeadDisplayName,
 } from "@heart-and-hustle/shared";
 import {
   approveAndGenerateCode,
@@ -209,8 +210,10 @@ export function SuperadminTabs({
                     <TableHead>School</TableHead>
                     <TableHead>Activity</TableHead>
                     <TableHead>Lead contact</TableHead>
+                    <TableHead>Proposed start</TableHead>
+                    <TableHead>Proposed end</TableHead>
                     <TableHead>Coach email</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead>Submitted</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -219,7 +222,7 @@ export function SuperadminTabs({
                   {openRequests.length === 0 && !requestsFetchError ? (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={9}
                         className="py-10 text-center text-slate-500"
                       >
                         No open requests.
@@ -236,7 +239,13 @@ export function SuperadminTabs({
                           ? r.sport_club_activity
                           : "—"}
                       </TableCell>
-                      <TableCell>{r.admin_name}</TableCell>
+                      <TableCell>{schoolRequestLeadDisplayName(r)}</TableCell>
+                      <TableCell className="whitespace-nowrap text-sm">
+                        {formatDisplayDate(r.fundraiser_start_date)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-sm">
+                        {formatDisplayDate(r.fundraiser_end_date)}
+                      </TableCell>
                       <TableCell>{r.admin_email}</TableCell>
                       <TableCell>
                         {formatDisplayDateTime(r.created_at)}
@@ -308,6 +317,8 @@ export function SuperadminTabs({
                     <TableHead>School</TableHead>
                     <TableHead>Address</TableHead>
                     <TableHead>Activity</TableHead>
+                    <TableHead>Proposed start</TableHead>
+                    <TableHead>Proposed end</TableHead>
                     <TableHead>HH start code</TableHead>
                     <TableHead>Coach email</TableHead>
                     <TableHead>Est. athletes</TableHead>
@@ -318,7 +329,7 @@ export function SuperadminTabs({
                   {approvedRows.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={9}
                         className="py-10 text-center text-slate-500"
                       >
                         No approved requests yet.
@@ -338,6 +349,12 @@ export function SuperadminTabs({
                         </TableCell>
                         <TableCell className="max-w-[8rem] text-sm">
                           {r.sport_club_activity ?? "—"}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-sm">
+                          {formatDisplayDate(r.fundraiser_start_date)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-sm">
+                          {formatDisplayDate(r.fundraiser_end_date)}
                         </TableCell>
                         <TableCell className="font-mono text-sm">
                           {code?.code ?? "—"}

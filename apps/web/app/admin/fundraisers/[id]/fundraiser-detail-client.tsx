@@ -4,6 +4,10 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Fundraiser, SchoolRequest } from "@heart-and-hustle/shared";
+import {
+  formatDisplayDate,
+  schoolRequestLeadDisplayName,
+} from "@heart-and-hustle/shared";
 import type { FundraiserAnalytics } from "@/lib/admin-fundraiser-analytics";
 import {
   setFundraiserStatus,
@@ -165,8 +169,14 @@ export function FundraiserDetailClient({
               {schoolRequest.sport_club_activity ?? "—"}
             </p>
             <p>
-              <strong>Lead:</strong> {schoolRequest.admin_name} ·{" "}
+              <strong>Lead:</strong>{" "}
+              {schoolRequestLeadDisplayName(schoolRequest)} ·{" "}
               {schoolRequest.admin_phone}
+            </p>
+            <p>
+              <strong>Proposed dates (intake):</strong>{" "}
+              {formatDisplayDate(schoolRequest.fundraiser_start_date)} –{" "}
+              {formatDisplayDate(schoolRequest.fundraiser_end_date)}
             </p>
             {schoolRequest.notes ? (
               <p className="mt-2 border-t border-slate-200 pt-2">

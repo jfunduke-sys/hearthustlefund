@@ -15,6 +15,23 @@ function trimOrEmpty(v: FormDataEntryValue | null | undefined) {
   return String(v ?? "").trim();
 }
 
+function parseISODate(s: string): Date | null {
+  const m = s.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  const y = Number(m[1]);
+  const mo = Number(m[2]) - 1;
+  const d = Number(m[3]);
+  const dt = new Date(Date.UTC(y, mo, d));
+  if (
+    dt.getUTCFullYear() !== y ||
+    dt.getUTCMonth() !== mo ||
+    dt.getUTCDate() !== d
+  ) {
+    return null;
+  }
+  return dt;
+}
+
 /** Rejects empty or whitespace-only strings. */
 function validateRequestForm(fd: FormData): string | null {
   const schoolName = trimOrEmpty(fd.get("school_name"));
@@ -38,8 +55,10 @@ function validateRequestForm(fd: FormData): string | null {
   const sport = trimOrEmpty(fd.get("sport_club_activity"));
   if (!sport) return "Sport, club, or activity is required.";
 
-  const adminName = trimOrEmpty(fd.get("admin_name"));
-  if (!adminName) return "Your full name is required.";
+  const adminFirst = trimOrEmpty(fd.get("admin_first_name"));
+  const adminLast = trimOrEmpty(fd.get("admin_last_name"));
+  if (!adminFirst) return "Coach / lead first name is required.";
+  if (!adminLast) return "Coach / lead last name is required.";
 
   const email = trimOrEmpty(fd.get("admin_email"));
   if (!email) return "Email is required.";
@@ -58,8 +77,16 @@ function validateRequestForm(fd: FormData): string | null {
     return "Enter a valid estimated number of athletes (at least 1).";
   }
 
-  const notes = trimOrEmpty(fd.get("notes"));
-  if (!notes) return "Additional notes are required.";
+  const startRaw = trimOrEmpty(fd.get("fundraiser_start_date"));
+  const endRaw = trimOrEmpty(fd.get("fundraiser_end_date"));
+  if (!startRaw) return "Proposed fundraiser start date is required.";
+  if (!endRaw) return "Proposed fundraiser end date is required.";
+  const startD = parseISODate(startRaw);
+  const endD = parseISODate(endRaw);
+  if (!startD || !endD) return "Enter valid fundraiser dates.";
+  if (endD < startD) {
+    return "End date must be on or after the start date.";
+  }
 
   return null;
 }
@@ -92,6 +119,10 @@ export default function RequestFundraiserPage() {
     const schoolZip = trimOrEmpty(fd.get("school_zip"));
     const schoolAddress = `${schoolStreet}, ${schoolCity}, ${schoolState} ${schoolZip}`;
     const estNum = parseInt(trimOrEmpty(fd.get("estimated_athletes")), 10);
+    const adminFirst = trimOrEmpty(fd.get("admin_first_name"));
+    const adminLast = trimOrEmpty(fd.get("admin_last_name"));
+    const adminFull = [adminFirst, adminLast].filter(Boolean).join(" ");
+    const notesRaw = trimOrEmpty(fd.get("notes"));
 
     setLoading(true);
     const supabase = createClient();
@@ -104,11 +135,15 @@ export default function RequestFundraiserPage() {
       school_zip: schoolZip,
       school_address: schoolAddress,
       sport_club_activity: trimOrEmpty(fd.get("sport_club_activity")),
-      admin_name: trimOrEmpty(fd.get("admin_name")),
+      admin_name: adminFull,
+      admin_first_name: adminFirst,
+      admin_last_name: adminLast,
       admin_email: trimOrEmpty(fd.get("admin_email")),
       admin_phone: trimOrEmpty(fd.get("admin_phone")),
       estimated_athletes: estNum,
-      notes: trimOrEmpty(fd.get("notes")),
+      fundraiser_start_date: trimOrEmpty(fd.get("fundraiser_start_date")),
+      fundraiser_end_date: trimOrEmpty(fd.get("fundraiser_end_date")),
+      notes: notesRaw || null,
       status: "pending",
     });
 
@@ -248,16 +283,66 @@ export default function RequestFundraiserPage() {
                     className="h-12 text-base"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="admin_name" className="text-base">
-                    Your full name (lead coach or fundraising contact)
-                  </Label>
-                  <Input
-                    id="admin_name"
-                    name="admin_name"
-                    required
-                    className="h-12 text-base"
-                  />
+                <div className="space-y-3">
+                  <p className="text-base font-semibold text-hh-dark">
+                    Proposed fundraiser dates
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    Approximate window you have in mind. The team will confirm
+                    final dates before approval.
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="fundraiser_start_date" className="text-base">
+                        Start date
+                      </Label>
+                      <Input
+                        id="fundraiser_start_date"
+                        name="fundraiser_start_date"
+                        type="date"
+                        required
+                        className="h-12 text-base"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="fundraiser_end_date" className="text-base">
+                        End date
+                      </Label>
+                      <Input
+                        id="fundraiser_end_date"
+                        name="fundraiser_end_date"
+                        type="date"
+                        required
+                        className="h-12 text-base"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="admin_first_name" className="text-base">
+                      Coach / lead first name
+                    </Label>
+                    <Input
+                      id="admin_first_name"
+                      name="admin_first_name"
+                      required
+                      autoComplete="given-name"
+                      className="h-12 text-base"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="admin_last_name" className="text-base">
+                      Coach / lead last name
+                    </Label>
+                    <Input
+                      id="admin_last_name"
+                      name="admin_last_name"
+                      required
+                      autoComplete="family-name"
+                      className="h-12 text-base"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="admin_email" className="text-base">
@@ -307,12 +392,12 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="notes" className="text-base">
-                    Additional notes
+                    Additional notes{" "}
+                    <span className="font-normal text-slate-500">(optional)</span>
                   </Label>
                   <Textarea
                     id="notes"
                     name="notes"
-                    required
                     rows={3}
                     className="min-h-[5.5rem] resize-y text-base"
                     placeholder="Anything else we should know about your program or timeline"

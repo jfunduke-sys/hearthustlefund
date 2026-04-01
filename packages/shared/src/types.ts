@@ -19,6 +19,8 @@ export interface SchoolRequest {
   /** Sport, club, or activity the fundraiser supports (e.g. varsity football, drama). */
   sport_club_activity?: string | null;
   admin_name: string;
+  admin_first_name?: string | null;
+  admin_last_name?: string | null;
   admin_email: string;
   admin_phone: string;
   estimated_athletes: number | null;
@@ -26,7 +28,18 @@ export interface SchoolRequest {
   paperwork_returned: boolean;
   status: SchoolRequestStatus;
   notes: string | null;
+  /** Proposed campaign window (from intake; ISO date YYYY-MM-DD). */
+  fundraiser_start_date?: string | null;
+  fundraiser_end_date?: string | null;
   created_at: string;
+}
+
+/** Coach / lead name from split fields, falling back to legacy `admin_name`. */
+export function schoolRequestLeadDisplayName(r: SchoolRequest): string {
+  const f = r.admin_first_name?.trim();
+  const l = r.admin_last_name?.trim();
+  if (f || l) return [f, l].filter(Boolean).join(" ");
+  return r.admin_name?.trim() || "—";
 }
 
 export interface FundraiserCode {
