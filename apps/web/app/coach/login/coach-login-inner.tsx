@@ -33,8 +33,6 @@ export default function CoachLoginInner() {
   const [loading, setLoading] = useState(false);
   const [signInError, setSignInError] = useState<string | null>(null);
   const [activationError, setActivationError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
-
   const [activationStep, setActivationStep] =
     useState<ActivationStep>("enter-code");
   const [actEmail, setActEmail] = useState("");
@@ -65,7 +63,6 @@ export default function CoachLoginInner() {
   async function onVerifyCode(e: React.FormEvent) {
     e.preventDefault();
     setActivationError(null);
-    setInfo(null);
     setLoading(true);
     const res = await verifyAndSetCoachActivationCookie(
       actEmail,
@@ -85,7 +82,6 @@ export default function CoachLoginInner() {
   async function onFinishActivation(e: React.FormEvent) {
     e.preventDefault();
     setActivationError(null);
-    setInfo(null);
 
     if (!existingAccountMode) {
       if (actPassword.length < 8) {
@@ -198,8 +194,38 @@ export default function CoachLoginInner() {
     }
 
     setLoading(false);
-    setInfo(
-      "Check your email to confirm your account (if your project requires it). After confirming, sign in with the Returning coach tab, or open the link from your email—you’ll still be able to finish setup with your code on file for a short time."
+    const { data: retry, error: signInAfter } =
+      await supabase.auth.signInWithPassword({
+        email: actEmail.trim(),
+        password: actPassword,
+      });
+    if (!signInAfter && retry.session) {
+      const re = await verifyAndSetCoachActivationCookie(
+        actEmail,
+        normalizeFundraiserSetupCode(actCode)
+      );
+      if (!re.ok) {
+        setActivationError(re.error);
+        return;
+      }
+      try {
+        sessionStorage.setItem(
+          "hh_pending_activation_email",
+          actEmail.trim().toLowerCase()
+        );
+        sessionStorage.setItem(
+          "hh_pending_activation_code",
+          normalizeFundraiserSetupCode(actCode)
+        );
+      } catch {
+        /* private mode */
+      }
+      window.location.assign("/coach/new-fundraiser");
+      return;
+    }
+    setActivationError(
+      signInAfter?.message ??
+        "Could not continue. Use the Returning coach tab to sign in with this email and password."
     );
   }
 
@@ -209,7 +235,6 @@ export default function CoachLoginInner() {
     setActPassword("");
     setActPasswordConfirm("");
     setActivationError(null);
-    setInfo(null);
   }
 
   return (
@@ -361,11 +386,6 @@ export default function CoachLoginInner() {
                     {activationError ? (
                       <p className="text-sm text-red-600" role="alert">
                         {activationError}
-                      </p>
-                    ) : null}
-                    {info ? (
-                      <p className="text-sm text-amber-800" role="status">
-                        {info}
                       </p>
                     ) : null}
                     <div className="flex flex-col gap-2">
