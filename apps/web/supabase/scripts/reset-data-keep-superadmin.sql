@@ -5,6 +5,9 @@
 -- 1) Replace REPLACE_WITH_SUPERADMIN_EMAIL below with the same address as
 --    SUPERADMIN_EMAIL (that user must already exist in Authentication → Users).
 -- 2) Run the entire script once. Destructive — back up first if unsure.
+--
+-- Storage: Supabase blocks SQL DELETE on storage.objects. To clear uploaded
+-- logos, use Dashboard → Storage → logos → select files → delete (or Storage API).
 -- =============================================================================
 
 DO $$
@@ -28,8 +31,6 @@ BEGIN
     public.fundraiser_codes,
     public.school_requests
   RESTART IDENTITY CASCADE;
-
-  DELETE FROM storage.objects WHERE bucket_id = 'logos';
 
   DELETE FROM auth.users WHERE id <> keep_id;
 END $$;
