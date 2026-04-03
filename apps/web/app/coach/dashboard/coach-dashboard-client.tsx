@@ -66,16 +66,16 @@ function progressMotivation(pct: number): string {
 }
 
 const statTones = {
-  rose: "border-rose-200/55 bg-gradient-to-br from-rose-50/95 via-rose-50/60 to-orange-50/25 shadow-sm shadow-rose-900/5 ring-1 ring-rose-900/[0.04]",
+  rose: "border-rose-300/80 bg-gradient-to-br from-rose-100 via-rose-100/90 to-rose-200/70 shadow-md shadow-rose-900/10 ring-1 ring-rose-900/[0.06]",
   amber:
-    "border-amber-200/55 bg-gradient-to-br from-amber-50/95 via-amber-50/50 to-yellow-50/30 shadow-sm shadow-amber-900/5 ring-1 ring-amber-900/[0.04]",
-  sky: "border-sky-200/55 bg-gradient-to-br from-sky-50/95 via-sky-50/55 to-cyan-50/25 shadow-sm shadow-sky-900/5 ring-1 ring-sky-900/[0.04]",
+    "border-amber-300/80 bg-gradient-to-br from-amber-100 via-amber-100/90 to-amber-200/65 shadow-md shadow-amber-900/10 ring-1 ring-amber-900/[0.06]",
+  sky: "border-sky-300/80 bg-gradient-to-br from-sky-100 via-sky-100/90 to-sky-200/65 shadow-md shadow-sky-900/10 ring-1 ring-sky-900/[0.06]",
   coral:
-    "border-red-200/45 bg-gradient-to-br from-red-50/90 via-rose-50/65 to-orange-50/20 shadow-sm shadow-red-900/5 ring-1 ring-red-900/[0.03]",
+    "border-red-300/75 bg-gradient-to-br from-red-100 via-rose-100/95 to-orange-100/70 shadow-md shadow-red-900/10 ring-1 ring-red-900/[0.06]",
   violet:
-    "border-violet-200/50 bg-gradient-to-br from-violet-50/95 via-violet-50/45 to-fuchsia-50/25 shadow-sm shadow-violet-900/5 ring-1 ring-violet-900/[0.04]",
+    "border-violet-300/75 bg-gradient-to-br from-violet-100 via-violet-100/90 to-fuchsia-200/55 shadow-md shadow-violet-900/10 ring-1 ring-violet-900/[0.06]",
   emerald:
-    "border-emerald-200/50 bg-gradient-to-br from-emerald-50/95 via-emerald-50/50 to-teal-50/25 shadow-sm shadow-emerald-900/5 ring-1 ring-emerald-900/[0.04]",
+    "border-emerald-300/75 bg-gradient-to-br from-emerald-100 via-emerald-100/90 to-teal-200/60 shadow-md shadow-emerald-900/10 ring-1 ring-emerald-900/[0.06]",
 } as const;
 
 type StatTone = keyof typeof statTones;
@@ -154,11 +154,6 @@ export default function CoachDashboardClient({
   const sortedAthletes = [...athletes].sort(
     (a, b) =>
       (raisedByAthlete[b.id] ?? 0) - (raisedByAthlete[a.id] ?? 0)
-  );
-
-  const impliedPerAthleteGoal = useMemo(
-    () => fundraiserImpliedPerAthleteGoal(fundraiser),
-    [fundraiser]
   );
 
   const analytics = useMemo(() => {
@@ -355,8 +350,12 @@ More tips will show inside the app once you're in. Thanks!`;
               </div>
               <div className="h-3 w-full overflow-hidden rounded-full bg-white/15 shadow-inner">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-amber-300 via-hh-primary to-orange-500 shadow-sm transition-all duration-500"
-                  style={{ width: `${pct}%` }}
+                  className="h-full min-h-[12px] rounded-full shadow-sm transition-all duration-500"
+                  style={{
+                    width: `${pct}%`,
+                    background:
+                      "linear-gradient(to right, #C0392B 0%, #EAB308 42%, #22C55E 100%)",
+                  }}
                 />
               </div>
             </div>
@@ -387,7 +386,7 @@ More tips will show inside the app once you're in. Thanks!`;
           </div>
 
           <CardContent className="space-y-6 bg-gradient-to-b from-slate-50/90 to-white px-5 py-6 md:px-8">
-            <div className="rounded-2xl border border-slate-200/50 bg-gradient-to-br from-rose-50/50 via-amber-50/35 to-sky-50/50 p-5 shadow-inner ring-1 ring-slate-900/[0.03] md:p-6">
+            <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-br from-rose-100/70 via-amber-100/55 to-sky-100/65 p-5 shadow-inner ring-1 ring-slate-900/[0.05] md:p-6">
               <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">
                 Pulse and analytics
               </h3>
@@ -457,26 +456,6 @@ More tips will show inside the app once you're in. Thanks!`;
                 />
               </div>
             </div>
-
-            {impliedPerAthleteGoal != null ? (
-              <p className="rounded-xl border border-amber-200/60 bg-amber-50/50 px-4 py-3 text-xs leading-relaxed text-slate-700">
-                <span className="font-semibold text-hh-dark">
-                  Default personal goal
-                </span>{" "}
-                for roster rows (when an athlete hasn&apos;t set their own):{" "}
-                <span className="font-bold text-hh-dark">
-                  ${impliedPerAthleteGoal.toFixed(2)}
-                </span>
-                {fundraiser.goal_per_athlete == null ||
-                Number(fundraiser.goal_per_athlete) <= 0 ? (
-                  <span className="text-slate-600">
-                    {" "}
-                    (team goal ÷ {fundraiser.expected_participants ?? "—"}{" "}
-                    expected participants)
-                  </span>
-                ) : null}
-              </p>
-            ) : null}
 
             <details className="group rounded-xl border border-dashed border-slate-300/90 bg-slate-50/50 [&_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100/80">
