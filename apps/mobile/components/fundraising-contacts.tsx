@@ -335,15 +335,29 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
             tintColor="#C0392B"
           />
         }
-        renderItem={({ item }) => (
-          <Pressable
-            style={[styles.row, selected[item.id] && styles.rowOn]}
-            onPress={() => toggle(item.id)}
-          >
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.phone}>{item.phone}</Text>
-          </Pressable>
-        )}
+        renderItem={({ item }) => {
+          const on = Boolean(selected[item.id]);
+          return (
+            <Pressable
+              style={[styles.row, on && styles.rowOn]}
+              onPress={() => toggle(item.id)}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: on }}
+            >
+              <View style={styles.rowMain}>
+                <Text style={styles.name} numberOfLines={1}>
+                  {item.name}
+                </Text>
+                <Text style={styles.phone} numberOfLines={1}>
+                  {item.phone}
+                </Text>
+              </View>
+              <View style={styles.checkSlot}>
+                {on ? <Text style={styles.checkMark}>✓</Text> : null}
+              </View>
+            </Pressable>
+          );
+        }}
         ListEmptyComponent={
           <Text style={styles.muted}>
             {rows.length === 0
@@ -404,14 +418,29 @@ const styles = StyleSheet.create({
   count: { marginVertical: 6, color: "#64748b" },
   status: { color: "#b45309", marginBottom: 6 },
   row: {
-    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingLeft: 12,
+    paddingRight: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#e2e8f0",
     backgroundColor: "#fff",
   },
   rowOn: { backgroundColor: "#fef3c7" },
+  rowMain: { flex: 1, minWidth: 0, paddingRight: 8 },
   name: { fontWeight: "700", color: "#1A1A2E" },
   phone: { color: "#64748b", marginTop: 2 },
+  checkSlot: {
+    width: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkMark: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#C0392B",
+  },
   muted: { textAlign: "center", color: "#94a3b8", marginTop: 24 },
   btn: {
     marginTop: 8,
