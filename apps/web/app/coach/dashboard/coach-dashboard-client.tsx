@@ -33,6 +33,30 @@ type Props = {
   raisedByAthlete: Record<string, number>;
 };
 
+/** Campaign-level per-athlete target from setup (not athlete-specific overrides). */
+function fundraiserImpliedPerAthleteGoal(fr: Fundraiser): number | null {
+  const gpa =
+    fr.goal_per_athlete != null ? Number(fr.goal_per_athlete) : NaN;
+  if (Number.isFinite(gpa) && gpa > 0) return gpa;
+  const exp = fr.expected_participants;
+  const total = Number(fr.total_goal);
+  if (exp != null && exp > 0 && Number.isFinite(total) && total > 0) {
+    return total / exp;
+  }
+  return null;
+}
+
+/**
+ * Amount we use for "personal goal" and % columns: athlete row if set, else
+ * campaign default (goal_per_athlete, else total_goal ÷ expected_participants).
+ */
+function effectivePersonalGoal(athlete: Athlete, fr: Fundraiser): number | null {
+  const pg =
+    athlete.personal_goal != null ? Number(athlete.personal_goal) : NaN;
+  if (Number.isFinite(pg) && pg > 0) return pg;
+  return fundraiserImpliedPerAthleteGoal(fr);
+}
+
 export default function CoachDashboardClient({
   fundraiser,
   coachAthlete,
@@ -64,6 +88,11 @@ export default function CoachDashboardClient({
   const sortedAthletes = [...athletes].sort(
     (a, b) =>
       (raisedByAthlete[b.id] ?? 0) - (raisedByAthlete[a.id] ?? 0)
+  );
+
+  const impliedPerAthleteGoal = useMemo(
+    () => fundraiserImpliedPerAthleteGoal(fundraiser),
+    [fundraiser]
   );
 
   async function signOut() {
@@ -186,6 +215,26 @@ More tips will show inside the app once you're in. Thanks!`;
                   style={{ width: `${pct}%` }}
                 />
               </div>
+              {impliedPerAthleteGoal != null ? (
+                <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                  {fundraiser.goal_per_athlete != null &&
+                  Number(fundraiser.goal_per_athlete) > 0 ? (
+                    <>
+                      Default <span className="font-medium">personal goal</span>{" "}
+                      per athlete (roster and % columns use this when an athlete
+                      has not set their own):{" "}
+                    </>
+                  ) : (
+                    <>
+                      Suggested per-athlete share (team goal ÷ expected{" "}
+                      {fundraiser.expected_participants ?? "—"} participants):{" "}
+                    </>
+                  )}
+                  <span className="font-semibold text-hh-dark">
+                    ${impliedPerAthleteGoal.toFixed(2)}
+                  </span>
+                </p>
+              ) : null}
             </div>
             <div className="rounded-xl border border-hh-dark/10 bg-gradient-to-br from-hh-dark to-slate-800 p-5 text-white shadow-inner">
               <p className="text-xs font-semibold uppercase tracking-wider text-white/70">
@@ -253,21 +302,43 @@ More tips will show inside the app once you're in. Thanks!`;
               <TableBody>
                 {sortedAthletes.map((a) => {
                   const raised = raisedByAthlete[a.id] ?? 0;
-                  const pg = a.personal_goal
-                    ? Math.min(100, (raised / Number(a.personal_goal)) * 100)
-                    : 0;
+                  const target = effectivePersonalGoal(a, fundraiser);
+                  const pctOfTarget =
+                    target != null && target > 0
+                      ? Math.round((raised / target) * 100)
+                      : null;
+                  const usesCampaignDefault =
+                    target != null &&
+                    (a.personal_goal == null ||
+                      !Number.isFinite(Number(a.personal_goal)) ||
+                      Number(a.personal_goal) <= 0);
                   return (
                     <TableRow key={a.id}>
                       <TableCell className="font-medium">{a.full_name}</TableCell>
                       <TableCell>{a.jersey_number ?? "—"}</TableCell>
                       <TableCell>
-                        {a.personal_goal != null
-                          ? `$${Number(a.personal_goal).toFixed(2)}`
-                          : "—"}
+                        {target != null ? (
+                          <span
+                            title={
+                              usesCampaignDefault
+                                ? "Uses campaign default; athlete can set a personal goal in the app when supported."
+                                : undefined
+                            }
+                          >
+                            ${target.toFixed(2)}
+                            {usesCampaignDefault ? (
+                              <span className="ml-1 text-xs font-normal text-slate-500">
+                                (default)
+                              </span>
+                            ) : null}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
                       </TableCell>
                       <TableCell>${raised.toFixed(2)}</TableCell>
                       <TableCell>
-                        {a.personal_goal != null ? `${pg.toFixed(0)}%` : "—"}
+                        {pctOfTarget != null ? `${pctOfTarget}%` : "—"}
                       </TableCell>
                       <TableCell>{textsByAthlete[a.id] ?? 0}</TableCell>
                       <TableCell>{donationsByAthlete[a.id] ?? 0}</TableCell>
