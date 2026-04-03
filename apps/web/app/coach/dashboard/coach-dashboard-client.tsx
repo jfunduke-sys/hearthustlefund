@@ -183,11 +183,20 @@ More tips will show inside the app once you're in. Thanks!`;
       </header>
 
       <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
-        <div className="rounded-xl border border-sky-200/80 bg-sky-50/90 px-4 py-3 text-sm text-sky-950 shadow-sm">
-          <strong className="font-semibold">Mobile app:</strong> texting
-          contacts, reminders, and adding yourself as a participant run in the{" "}
-          {PLATFORM.shortName} app with the same coach login. Use this website
-          for campaign setup, the dashboard overview, and CSV export.
+        <div className="rounded-xl border border-sky-200/80 bg-sky-50/90 px-4 py-4 text-sm text-sky-950 shadow-sm">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-sky-800">
+            Quick reference
+          </p>
+          <ul className="list-disc space-y-1.5 pl-5 leading-snug text-sky-950">
+            <li>
+              <span className="font-medium">{PLATFORM.shortName} app</span> —
+              same coach login. Text contacts and send reminders.
+            </li>
+            <li>
+              <span className="font-medium">This site</span> — campaign setup,
+              this dashboard, CSV export.
+            </li>
+          </ul>
         </div>
 
         <Card className="overflow-hidden border-slate-200/80 shadow-lg shadow-hh-dark/5">
