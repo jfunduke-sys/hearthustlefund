@@ -65,25 +65,58 @@ function progressMotivation(pct: number): string {
   return "Invite athletes and share links to see donations roll in.";
 }
 
+const statTones = {
+  rose: "border-rose-200/55 bg-gradient-to-br from-rose-50/95 via-rose-50/60 to-orange-50/25 shadow-sm shadow-rose-900/5 ring-1 ring-rose-900/[0.04]",
+  amber:
+    "border-amber-200/55 bg-gradient-to-br from-amber-50/95 via-amber-50/50 to-yellow-50/30 shadow-sm shadow-amber-900/5 ring-1 ring-amber-900/[0.04]",
+  sky: "border-sky-200/55 bg-gradient-to-br from-sky-50/95 via-sky-50/55 to-cyan-50/25 shadow-sm shadow-sky-900/5 ring-1 ring-sky-900/[0.04]",
+  coral:
+    "border-red-200/45 bg-gradient-to-br from-red-50/90 via-rose-50/65 to-orange-50/20 shadow-sm shadow-red-900/5 ring-1 ring-red-900/[0.03]",
+  violet:
+    "border-violet-200/50 bg-gradient-to-br from-violet-50/95 via-violet-50/45 to-fuchsia-50/25 shadow-sm shadow-violet-900/5 ring-1 ring-violet-900/[0.04]",
+  emerald:
+    "border-emerald-200/50 bg-gradient-to-br from-emerald-50/95 via-emerald-50/50 to-teal-50/25 shadow-sm shadow-emerald-900/5 ring-1 ring-emerald-900/[0.04]",
+} as const;
+
+type StatTone = keyof typeof statTones;
+
+const statLabelTones: Record<
+  StatTone,
+  string
+> = {
+  rose: "text-rose-800/75",
+  amber: "text-amber-900/70",
+  sky: "text-sky-800/75",
+  coral: "text-red-900/70",
+  violet: "text-violet-900/70",
+  emerald: "text-emerald-900/70",
+};
+
 function CommandStat({
   label,
   value,
   hint,
+  tone,
 }: {
   label: string;
   value: string;
   hint?: string;
+  tone: StatTone;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white to-slate-50/90 p-4 shadow-sm ring-1 ring-slate-900/[0.04]">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+    <div
+      className={`relative overflow-hidden rounded-2xl p-4 ${statTones[tone]}`}
+    >
+      <p
+        className={`text-[10px] font-bold uppercase tracking-wider ${statLabelTones[tone]}`}
+      >
         {label}
       </p>
       <p className="mt-1.5 text-xl font-bold tabular-nums tracking-tight text-hh-dark md:text-2xl">
         {value}
       </p>
       {hint ? (
-        <p className="mt-1 text-[11px] leading-snug text-slate-500">{hint}</p>
+        <p className="mt-1 text-[11px] leading-snug text-slate-600/85">{hint}</p>
       ) : null}
     </div>
   );
@@ -354,15 +387,16 @@ More tips will show inside the app once you're in. Thanks!`;
           </div>
 
           <CardContent className="space-y-6 bg-gradient-to-b from-slate-50/90 to-white px-5 py-6 md:px-8">
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+            <div className="rounded-2xl border border-slate-200/50 bg-gradient-to-br from-rose-50/50 via-amber-50/35 to-sky-50/50 p-5 shadow-inner ring-1 ring-slate-900/[0.03] md:p-6">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">
                 Pulse and analytics
               </h3>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-600/90">
                 Snapshot from donations and logged texts on this campaign.
               </p>
               <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
                 <CommandStat
+                  tone="rose"
                   label="Avg gift"
                   value={
                     analytics.avgDonation != null
@@ -376,16 +410,19 @@ More tips will show inside the app once you're in. Thanks!`;
                   }
                 />
                 <CommandStat
+                  tone="amber"
                   label="Donations"
                   value={String(analytics.donationCount)}
                   hint="All gifts to your athletes"
                 />
                 <CommandStat
+                  tone="sky"
                   label="Texts sent"
                   value={String(analytics.textsSentTotal)}
                   hint="Contacts messaged (app)"
                 />
                 <CommandStat
+                  tone="coral"
                   label="$ / text"
                   value={
                     analytics.dollarsPerText != null
@@ -399,6 +436,7 @@ More tips will show inside the app once you're in. Thanks!`;
                   }
                 />
                 <CommandStat
+                  tone="violet"
                   label="Donations / text"
                   value={
                     analytics.donationsPerText != null
@@ -412,6 +450,7 @@ More tips will show inside the app once you're in. Thanks!`;
                   }
                 />
                 <CommandStat
+                  tone="emerald"
                   label="Athletes"
                   value={String(athletes.length)}
                   hint="On this roster"
