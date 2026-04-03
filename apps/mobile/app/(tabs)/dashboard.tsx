@@ -8,6 +8,8 @@ import {
   ScrollView,
   useWindowDimensions,
   ActivityIndicator,
+  Clipboard,
+  Platform,
 } from "react-native";
 import * as SMS from "expo-sms";
 import { useRouter, useFocusEffect } from "expo-router";
@@ -83,6 +85,10 @@ export default function DashboardScreen() {
   const [reminderStatus, setReminderStatus] = useState<string | null>(null);
   const [reminderSending, setReminderSending] = useState(false);
   const [profileHelp, setProfileHelp] = useState<string | null>(null);
+  const [donateLinkCopied, setDonateLinkCopied] = useState(false);
+  const donateLinkCopyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const load = useCallback(async () => {
     if (!hasSupabaseConfig()) {
@@ -264,6 +270,14 @@ export default function DashboardScreen() {
     const t = setTimeout(() => setCelebrationLine(null), 5000);
     return () => clearTimeout(t);
   }, [celebrationLine]);
+
+  useEffect(() => {
+    return () => {
+      if (donateLinkCopyTimerRef.current != null) {
+        clearTimeout(donateLinkCopyTimerRef.current);
+      }
+    };
+  }, []);
 
   async function onRefresh() {
     setRefreshing(true);
@@ -485,9 +499,39 @@ export default function DashboardScreen() {
           )}
         </Pressable>
 
-        <Text style={styles.linkSmall} selectable>
-          Your donation link: {donateUrl(data.athlete.unique_link_token)}
-        </Text>
+        <Pressable
+          style={({ pressed }) => [
+            styles.donateLinkCard,
+            pressed && styles.donateLinkCardPressed,
+          ]}
+          onPress={() => {
+            const url = donateUrl(data.athlete.unique_link_token);
+            Clipboard.setString(url);
+            if (donateLinkCopyTimerRef.current != null) {
+              clearTimeout(donateLinkCopyTimerRef.current);
+            }
+            setDonateLinkCopied(true);
+            donateLinkCopyTimerRef.current = setTimeout(() => {
+              setDonateLinkCopied(false);
+              donateLinkCopyTimerRef.current = null;
+            }, 2200);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Copy personal donation link"
+        >
+          <Text style={styles.donateLinkTitle}>Your donation link</Text>
+          <Text style={styles.donateLinkUrl} selectable>
+            {donateUrl(data.athlete.unique_link_token)}
+          </Text>
+          <Text
+            style={[
+              styles.donateLinkAction,
+              donateLinkCopied && styles.donateLinkActionDone,
+            ]}
+          >
+            {donateLinkCopied ? "Copied to clipboard" : "Tap to copy"}
+          </Text>
+        </Pressable>
       </ScrollView>
       {showConfetti ? (
         <View style={styles.confettiLayer} pointerEvents="none">
@@ -607,7 +651,43 @@ const styles = StyleSheet.create({
   row: { color: "#334155", marginBottom: 4 },
   muted: { color: "#64748b", lineHeight: 20 },
   inlineStrong: { fontWeight: "700", color: "#1A1A2E" },
-  linkSmall: { marginTop: 20, fontSize: 11, color: "#94a3b8" },
+  donateLinkCard: {
+    marginTop: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#C0392B",
+    backgroundColor: "#fff",
+  },
+  donateLinkCardPressed: {
+    backgroundColor: "#fef2f2",
+    borderColor: "#a93226",
+  },
+  donateLinkTitle: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#64748b",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+    marginBottom: 6,
+  },
+  donateLinkUrl: {
+    fontSize: 12,
+    fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
+    color: "#1A1A2E",
+    lineHeight: 17,
+  },
+  donateLinkAction: {
+    marginTop: 8,
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#C0392B",
+  },
+  donateLinkActionDone: {
+    color: "#0f766e",
+    fontWeight: "700",
+  },
   reminderRow: {
     padding: 12,
     marginBottom: 6,
