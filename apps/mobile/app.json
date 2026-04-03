@@ -17,6 +17,7 @@
       "bundleIdentifier": "com.heartandhustle.app"
     },
     "android": {
+      "softwareKeyboardLayoutMode": "resize",
       "package": "com.heartandhustle.app",
       "adaptiveIcon": {
         "backgroundColor": "#1A1A2E",

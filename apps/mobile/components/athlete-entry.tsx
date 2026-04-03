@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -42,6 +42,20 @@ function toApiJoinSegment(code: string): string {
 
 function canLookup(code: string): boolean {
   return isValidTeamJoinCodeFormat(code) || isLegacyNumericJoinCode(code);
+}
+
+/** Unique logo URLs (school + team often share the same image after single upload). */
+function uniqueLogoUrls(fr: Fr): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const u of [fr.school_logo_url, fr.team_logo_url]) {
+    const t = u?.trim();
+    if (t && !seen.has(t)) {
+      seen.add(t);
+      out.push(t);
+    }
+  }
+  return out;
 }
 
 function parseJoinDeepLink(url: string | null): {
@@ -91,6 +105,13 @@ export default function AthleteEntry({
   const [error, setError] = useState<string | null>(null);
   const [signError, setSignError] = useState<string | null>(null);
   const [fundraiser, setFundraiser] = useState<Fr | null>(null);
+  const signInEmailRef = useRef<TextInput>(null);
+  const signInPasswordRef = useRef<TextInput>(null);
+
+  const fundraiserLogoUris = useMemo(
+    () => (fundraiser ? uniqueLogoUrls(fundraiser) : []),
+    [fundraiser]
+  );
 
   const fetchFundraiser = useCallback(async (segment: string) => {
     const base = getApiBase();
@@ -278,20 +299,22 @@ export default function AthleteEntry({
                 <Text style={styles.foundLabel}>Team found</Text>
                 <Text style={styles.school}>{fundraiser.school_name}</Text>
                 <Text style={styles.team}>{fundraiser.team_name}</Text>
-                <View style={styles.logos}>
-                  {fundraiser.school_logo_url ? (
-                    <Image
-                      source={{ uri: fundraiser.school_logo_url }}
-                      style={styles.logo}
-                    />
-                  ) : null}
-                  {fundraiser.team_logo_url ? (
-                    <Image
-                      source={{ uri: fundraiser.team_logo_url }}
-                      style={styles.logo}
-                    />
-                  ) : null}
-                </View>
+                {fundraiserLogoUris.length > 0 ? (
+                  <View style={styles.logos}>
+                    {fundraiserLogoUris.map((uri) => (
+                      <Image
+                        key={uri}
+                        source={{ uri }}
+                        style={
+                          fundraiserLogoUris.length === 1
+                            ? styles.logoLarge
+                            : styles.logo
+                        }
+                        resizeMode="cover"
+                      />
+                    ))}
+                  </View>
+                ) : null}
                 <Text style={styles.createHint}>
                   Create your account to join this fundraiser.
                 </Text>
@@ -328,20 +351,29 @@ export default function AthleteEntry({
             </Text>
             <Text style={styles.label}>Email</Text>
             <TextInput
+              ref={signInEmailRef}
               style={styles.input}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
               autoComplete="email"
+              textContentType="username"
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={() => signInPasswordRef.current?.focus()}
             />
             <Text style={styles.label}>Password</Text>
             <TextInput
+              ref={signInPasswordRef}
               style={styles.input}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               autoComplete="password"
+              textContentType="password"
+              returnKeyType="go"
+              onSubmitEditing={() => void onSignIn()}
             />
             {signError ? <Text style={styles.err}>{signError}</Text> : null}
             <Pressable
@@ -481,6 +513,18 @@ const styles = StyleSheet.create({
   },
   school: { fontSize: 17, fontWeight: "700", color: "#1A1A2E" },
   team: { fontSize: 15, color: "#C0392B", marginTop: 4, fontWeight: "600" },
-  logos: { flexDirection: "row", gap: 12, marginVertical: 12 },
+  logos: {
+    flexDirection: "row",
+    gap: 12,
+    marginVertical: 12,
+    justifyContent: "center",
+    flexWrap: "wrap",
+  },
   logo: { width: 56, height: 56, borderRadius: 8, backgroundColor: "#f1f5f9" },
+  logoLarge: {
+    width: 104,
+    height: 104,
+    borderRadius: 12,
+    backgroundColor: "#f1f5f9",
+  },
 });

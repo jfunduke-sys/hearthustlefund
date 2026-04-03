@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,13 @@ import {
   Pressable,
   StyleSheet,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Keyboard,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NEW_PASSWORD_REQUIREMENT_COPY } from "@heart-and-hustle/shared";
 import { getApiBase, supabase } from "../lib/supabase";
 import { getPostAuthHrefForCurrentUser } from "../lib/post-auth-route";
@@ -19,6 +24,10 @@ function first(v: string | string[] | undefined) {
 
 export default function SetupScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  /** Stack header (~44) + status bar — keeps focused fields above keyboard on iOS. */
+  const keyboardVerticalOffset =
+    Platform.OS === "ios" ? insets.top + 52 : 0;
   const params = useLocalSearchParams<{
     fundraiserId?: string | string[];
     schoolName?: string | string[];
@@ -34,6 +43,11 @@ export default function SetupScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const fullNameRef = useRef<TextInput>(null);
+  const jerseyRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+
   async function onSubmit() {
     setError(null);
     if (!fundraiserId || !teamName) {
@@ -48,6 +62,7 @@ export default function SetupScreen() {
       setError(NEW_PASSWORD_REQUIREMENT_COPY);
       return;
     }
+    Keyboard.dismiss();
     setLoading(true);
     try {
       const base = getApiBase();
@@ -89,47 +104,93 @@ export default function SetupScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.hint}>
-        {teamName ?? ""} · {schoolName ?? ""}
-      </Text>
-      <Text style={styles.label}>Full name</Text>
-      <TextInput style={styles.input} value={fullName} onChangeText={setFullName} />
-      <Text style={styles.label}>Team name (confirm)</Text>
-      <TextInput style={styles.input} value={teamName ?? ""} editable={false} />
-      <Text style={styles.label}>Jersey number</Text>
-      <TextInput style={styles.input} value={jersey} onChangeText={setJersey} />
-      <Text style={styles.label}>Email (account)</Text>
-      <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <Text style={styles.label}>Password</Text>
-      <Text style={styles.fieldHint}>{NEW_PASSWORD_REQUIREMENT_COPY}</Text>
-      <TextInput
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        autoComplete="new-password"
-      />
-      {error ? <Text style={styles.err}>{error}</Text> : null}
-      <Pressable style={styles.btn} onPress={() => void onSubmit()} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.btnText}>Create account &amp; join</Text>
-        )}
-      </Pressable>
-    </View>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={keyboardVerticalOffset}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
+      >
+        <Text style={styles.hint}>
+          {teamName ?? ""} · {schoolName ?? ""}
+        </Text>
+        <Text style={styles.label}>Full name</Text>
+        <TextInput
+          ref={fullNameRef}
+          style={styles.input}
+          value={fullName}
+          onChangeText={setFullName}
+          textContentType="name"
+          autoComplete="name"
+          returnKeyType="next"
+          blurOnSubmit={false}
+          onSubmitEditing={() => jerseyRef.current?.focus()}
+        />
+        <Text style={styles.label}>Team name (confirm)</Text>
+        <TextInput style={styles.input} value={teamName ?? ""} editable={false} />
+        <Text style={styles.label}>Jersey number</Text>
+        <TextInput
+          ref={jerseyRef}
+          style={styles.input}
+          value={jersey}
+          onChangeText={setJersey}
+          textContentType="none"
+          returnKeyType="next"
+          blurOnSubmit={false}
+          onSubmitEditing={() => emailRef.current?.focus()}
+        />
+        <Text style={styles.label}>Email (account)</Text>
+        <TextInput
+          ref={emailRef}
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
+          returnKeyType="next"
+          blurOnSubmit={false}
+          onSubmitEditing={() => passwordRef.current?.focus()}
+        />
+        <Text style={styles.label}>Password</Text>
+        <Text style={styles.fieldHint}>{NEW_PASSWORD_REQUIREMENT_COPY}</Text>
+        <TextInput
+          ref={passwordRef}
+          style={styles.input}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoComplete="new-password"
+          textContentType="newPassword"
+          returnKeyType="done"
+          onSubmitEditing={() => void onSubmit()}
+        />
+        {error ? <Text style={styles.err}>{error}</Text> : null}
+        <Pressable style={styles.btn} onPress={() => void onSubmit()} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.btnText}>Create account & join</Text>
+          )}
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  flex: { flex: 1, backgroundColor: "#f8fafc" },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 48,
+    flexGrow: 1,
+  },
   hint: { fontSize: 15, color: "#64748b", marginBottom: 16 },
   label: { fontWeight: "600", color: "#1A1A2E", marginTop: 10, marginBottom: 4 },
   fieldHint: {

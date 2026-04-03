@@ -7,13 +7,18 @@ import {
   Pressable,
   StyleSheet,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as SMS from "expo-sms";
 import { useFocusEffect } from "expo-router";
 import { getSessionUser } from "../lib/auth-user";
 import { supabase, donateUrl } from "../lib/supabase";
-import { isPlausiblePhoneDigits, normalizePhoneDigits } from "../lib/phone";
+import {
+  hasListablePhoneDigits,
+  isPlausiblePhoneDigits,
+  normalizePhoneDigits,
+} from "../lib/phone";
 import { buildInitialFundraisingSms } from "@heart-and-hustle/shared";
 
 type ContactRow = {
@@ -32,6 +37,8 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [addingContact, setAddingContact] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [coachNeedsParticipant, setCoachNeedsParticipant] = useState(false);
   /** Clears checkmarks when the user switches to a different athlete / fundraiser. */
@@ -85,9 +92,13 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       const out: ContactRow[] = [];
       for (const c of data) {
         const name = c.name || "Contact";
-        for (const p of c.phoneNumbers ?? []) {
+        const numbers = c.phoneNumbers ?? [];
+        if (numbers.length === 0) continue;
+        for (const p of numbers) {
           const phone = (p.number || "").trim();
           if (!phone) continue;
+          const digits = normalizePhoneDigits(phone);
+          if (!hasListablePhoneDigits(digits)) continue;
           out.push({
             id: `${c.id}-${phone}`,
             name,
@@ -109,6 +120,39 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       void loadContacts();
     }, [loadContacts])
   );
+
+  const openAddContactForm = useCallback(async () => {
+    setStatus(null);
+    setAddingContact(true);
+    try {
+      const { status } = await Contacts.requestPermissionsAsync();
+      if (status !== "granted") {
+        setStatus("Contacts permission is required to add contacts.");
+        return;
+      }
+      // iOS requires a contact object when contactId is omitted; (null, null) yields "invalid props".
+      await Contacts.presentFormAsync(undefined, {
+        contactType: Contacts.ContactTypes.Person,
+        name: "",
+      }, { isNew: true });
+      await loadContacts();
+    } catch (e: unknown) {
+      setStatus(
+        e instanceof Error ? e.message : "Could not open new contact form."
+      );
+    } finally {
+      setAddingContact(false);
+    }
+  }, [loadContacts]);
+
+  const onPullRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await loadContacts();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadContacts]);
 
   function toggle(id: string) {
     setSelected((s) => ({ ...s, [id]: !s[id] }));
@@ -235,11 +279,22 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         </Text>
       ) : null}
       <TextInput
-        placeholder="Search contacts"
+        placeholder="Search contacts (with phone numbers)"
         value={query}
         onChangeText={setQuery}
         style={styles.search}
       />
+      <Pressable
+        style={[styles.addMoreBtn, addingContact && styles.addMoreBtnDisabled]}
+        onPress={() => void openAddContactForm()}
+        disabled={addingContact}
+      >
+        {addingContact ? (
+          <ActivityIndicator color="#C0392B" />
+        ) : (
+          <Text style={styles.addMoreBtnText}>Add more contacts</Text>
+        )}
+      </Pressable>
       <View style={styles.toolbar}>
         <Pressable onPress={selectAll}>
           <Text style={styles.link}>Select all</Text>
@@ -253,6 +308,13 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => void onPullRefresh()}
+            tintColor="#C0392B"
+          />
+        }
         renderItem={({ item }) => (
           <Pressable
             style={[styles.row, selected[item.id] && styles.rowOn]}
@@ -263,7 +325,11 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
           </Pressable>
         )}
         ListEmptyComponent={
-          <Text style={styles.muted}>No contacts match your search.</Text>
+          <Text style={styles.muted}>
+            {rows.length === 0
+              ? "No contacts with phone numbers found. Tap Add more contacts to create one, or add people in your Contacts app, then swipe down to refresh."
+              : "No contacts with phone numbers match your search."}
+          </Text>
         }
       />
       <Pressable
@@ -274,7 +340,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         {sending ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.btnText}>Save &amp; send texts</Text>
+          <Text style={styles.btnText}>Save & send texts</Text>
         )}
       </Pressable>
     </View>
@@ -298,9 +364,21 @@ const styles = StyleSheet.create({
     borderColor: "#cbd5e1",
     borderRadius: 10,
     padding: 10,
-    marginVertical: 8,
+    marginTop: 8,
+    marginBottom: 4,
     backgroundColor: "#fff",
   },
+  addMoreBtn: {
+    borderWidth: 2,
+    borderColor: "#C0392B",
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginBottom: 8,
+    backgroundColor: "#fff",
+  },
+  addMoreBtnDisabled: { opacity: 0.7 },
+  addMoreBtnText: { color: "#C0392B", fontWeight: "700", fontSize: 15 },
   toolbar: { flexDirection: "row", justifyContent: "space-between" },
   link: { color: "#C0392B", fontWeight: "600" },
   count: { marginVertical: 6, color: "#64748b" },
