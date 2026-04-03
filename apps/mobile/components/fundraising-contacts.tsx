@@ -27,6 +27,26 @@ type ContactRow = {
   phone: string;
 };
 
+function rowsFromExistingContact(c: Contacts.ExistingContact): ContactRow[] {
+  const name = c.name || "Contact";
+  const out: ContactRow[] = [];
+  for (const p of c.phoneNumbers ?? []) {
+    const phone = (p.number || "").trim();
+    if (!phone) continue;
+    const digits = normalizePhoneDigits(phone);
+    if (!hasListablePhoneDigits(digits)) continue;
+    out.push({ id: `${c.id}-${phone}`, name, phone });
+  }
+  return out;
+}
+
+function mergeContactRows(prev: ContactRow[], added: ContactRow[]): ContactRow[] {
+  const byId = new Map<string, ContactRow>();
+  for (const r of prev) byId.set(r.id, r);
+  for (const r of added) byId.set(r.id, r);
+  return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export type FundraisingContactsVariant = "athlete" | "coach";
 
 type Props = { variant?: FundraisingContactsVariant };
@@ -37,7 +57,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [addingContact, setAddingContact] = useState(false);
+  const [pickingContact, setPickingContact] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [coachNeedsParticipant, setCoachNeedsParticipant] = useState(false);
@@ -91,20 +111,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       });
       const out: ContactRow[] = [];
       for (const c of data) {
-        const name = c.name || "Contact";
-        const numbers = c.phoneNumbers ?? [];
-        if (numbers.length === 0) continue;
-        for (const p of numbers) {
-          const phone = (p.number || "").trim();
-          if (!phone) continue;
-          const digits = normalizePhoneDigits(phone);
-          if (!hasListablePhoneDigits(digits)) continue;
-          out.push({
-            id: `${c.id}-${phone}`,
-            name,
-            phone,
-          });
-        }
+        out.push(...rowsFromExistingContact(c));
       }
       out.sort((a, b) => a.name.localeCompare(b.name));
       setRows(out);
@@ -121,29 +128,42 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
     }, [loadContacts])
   );
 
-  const openAddContactForm = useCallback(async () => {
+  const openContactPicker = useCallback(async () => {
     setStatus(null);
-    setAddingContact(true);
+    setPickingContact(true);
     try {
       const { status } = await Contacts.requestPermissionsAsync();
       if (status !== "granted") {
-        setStatus("Contacts permission is required to add contacts.");
+        setStatus("Contacts permission is required.");
         return;
       }
-      // iOS requires a contact object when contactId is omitted; (null, null) yields "invalid props".
-      await Contacts.presentFormAsync(undefined, {
-        contactType: Contacts.ContactTypes.Person,
-        name: "",
-      }, { isNew: true });
-      await loadContacts();
+      const picked = await Contacts.presentContactPickerAsync();
+      if (!picked) return;
+
+      const newRows = rowsFromExistingContact(picked);
+      if (newRows.length === 0) {
+        setStatus(
+          "That contact has no phone number we can use (need at least 7 digits)."
+        );
+        return;
+      }
+
+      setRows((prev) => mergeContactRows(prev, newRows));
+      setSelected((s) => {
+        const next = { ...s };
+        for (const r of newRows) {
+          next[r.id] = true;
+        }
+        return next;
+      });
     } catch (e: unknown) {
       setStatus(
-        e instanceof Error ? e.message : "Could not open new contact form."
+        e instanceof Error ? e.message : "Could not open your contacts list."
       );
     } finally {
-      setAddingContact(false);
+      setPickingContact(false);
     }
-  }, [loadContacts]);
+  }, []);
 
   const onPullRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -285,14 +305,14 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         style={styles.search}
       />
       <Pressable
-        style={[styles.addMoreBtn, addingContact && styles.addMoreBtnDisabled]}
-        onPress={() => void openAddContactForm()}
-        disabled={addingContact}
+        style={[styles.addMoreBtn, pickingContact && styles.addMoreBtnDisabled]}
+        onPress={() => void openContactPicker()}
+        disabled={pickingContact}
       >
-        {addingContact ? (
+        {pickingContact ? (
           <ActivityIndicator color="#C0392B" />
         ) : (
-          <Text style={styles.addMoreBtnText}>Add more contacts</Text>
+          <Text style={styles.addMoreBtnText}>Choose from contacts</Text>
         )}
       </Pressable>
       <View style={styles.toolbar}>
@@ -327,7 +347,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         ListEmptyComponent={
           <Text style={styles.muted}>
             {rows.length === 0
-              ? "No contacts with phone numbers found. Tap Add more contacts to create one, or add people in your Contacts app, then swipe down to refresh."
+              ? "No contacts with phone numbers found. Tap Choose from contacts to pick someone, or swipe down to refresh after updating the Contacts app."
               : "No contacts with phone numbers match your search."}
           </Text>
         }
