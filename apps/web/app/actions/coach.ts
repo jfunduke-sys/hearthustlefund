@@ -65,6 +65,7 @@ export async function createFundraiserAction(input: {
   team_name: string;
   total_goal: number;
   goal_per_athlete: number | null;
+  expected_participants: number | null;
   start_date: string;
   end_date: string;
   school_logo_url: string | null;
@@ -115,6 +116,7 @@ export async function createFundraiserAction(input: {
       team_name: input.team_name.trim(),
       total_goal: input.total_goal,
       goal_per_athlete: input.goal_per_athlete,
+      expected_participants: input.expected_participants,
       school_logo_url: input.school_logo_url,
       team_logo_url: input.team_logo_url,
       start_date: input.start_date,
@@ -144,6 +146,63 @@ export async function createFundraiserAction(input: {
   return {
     unique_slug: inserted.unique_slug as string,
     join_code: inserted.join_code as string,
+  };
+}
+
+export type NewFundraiserPrefill = {
+  school_name: string;
+  team_name: string;
+  start_date: string;
+  end_date: string;
+  participant_count: number | null;
+};
+
+/**
+ * Loads school request fields linked to this fundraiser code (if any) for the new fundraiser form.
+ */
+export async function getNewFundraiserPrefillAction(
+  code: string
+): Promise<NewFundraiserPrefill | null> {
+  const user = await assertCoach();
+  const admin = createAdminClient();
+  const email = user.email!.toLowerCase().trim();
+  const codeNorm = normalizeFundraiserSetupCode(code);
+
+  const { data: codeRow, error: codeErr } = await admin
+    .from("fundraiser_codes")
+    .select("school_request_id, assigned_to_email")
+    .eq("code", codeNorm)
+    .maybeSingle();
+
+  if (codeErr || !codeRow?.school_request_id) return null;
+
+  const assigned = codeRow.assigned_to_email?.trim().toLowerCase();
+  if (!assigned || assigned !== email) return null;
+
+  const { data: sr, error: srErr } = await admin
+    .from("school_requests")
+    .select(
+      "school_name, sport_club_activity, fundraiser_start_date, fundraiser_end_date, estimated_athletes"
+    )
+    .eq("id", codeRow.school_request_id)
+    .maybeSingle();
+
+  if (srErr || !sr) return null;
+
+  const fmt = (d: string | null | undefined) =>
+    typeof d === "string" && /^\d{4}-\d{2}-\d{2}/.test(d)
+      ? d.slice(0, 10)
+      : "";
+
+  return {
+    school_name: sr.school_name?.trim() ?? "",
+    team_name: (sr.sport_club_activity as string | null)?.trim() ?? "",
+    start_date: fmt(sr.fundraiser_start_date as string | null | undefined),
+    end_date: fmt(sr.fundraiser_end_date as string | null | undefined),
+    participant_count:
+      typeof sr.estimated_athletes === "number" && sr.estimated_athletes > 0
+        ? sr.estimated_athletes
+        : null,
   };
 }
 

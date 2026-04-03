@@ -64,6 +64,8 @@ export interface Fundraiser {
   team_name: string;
   total_goal: number;
   goal_per_athlete: number | null;
+  /** Expected participant count from coach setup (intake or adjusted). */
+  expected_participants?: number | null;
   school_logo_url: string | null;
   team_logo_url: string | null;
   start_date: string;

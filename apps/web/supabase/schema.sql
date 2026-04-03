@@ -51,6 +51,7 @@ create table if not exists public.fundraisers (
   team_name text not null,
   total_goal numeric(10, 2) not null,
   goal_per_athlete numeric(10, 2),
+  expected_participants int,
   school_logo_url text,
   team_logo_url text,
   start_date date not null,

@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { createFundraiserAction } from "@/app/actions/coach";
+import {
+  createFundraiserAction,
+  getNewFundraiserPrefillAction,
+} from "@/app/actions/coach";
 import { BRAND } from "@/lib/brand";
 import {
   CAMPAIGN_SETUP_CODE,
@@ -40,10 +43,22 @@ function hasPendingActivationKeys(): boolean {
   }
 }
 
+function parsePositiveInt(s: string): number | null {
+  const n = parseInt(s, 10);
+  if (!Number.isFinite(n) || n < 1) return null;
+  return n;
+}
+
+function roundMoney(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 export default function NewFundraiserClient({ initialCode }: Props) {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2>(() => (initialCode ? 2 : 1));
-  const [code, setCode] = useState(() => initialCode ?? "");
+  const [code, setCode] = useState(() =>
+    initialCode ? normalizeFundraiserSetupCode(initialCode) : ""
+  );
   const [showActivationReadyNote, setShowActivationReadyNote] = useState(
     () => !!initialCode
   );
@@ -56,6 +71,8 @@ export default function NewFundraiserClient({ initialCode }: Props) {
     slug: string;
     joinCode: string;
   } | null>(null);
+
+  const lastPrefilledCodeRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (initialCode) {
@@ -114,13 +131,38 @@ export default function NewFundraiserClient({ initialCode }: Props) {
 
   const [schoolName, setSchoolName] = useState("");
   const [teamName, setTeamName] = useState("");
+  const [participantCount, setParticipantCount] = useState("");
+  const [goalEntryMode, setGoalEntryMode] = useState<"total" | "per">("total");
   const [totalGoal, setTotalGoal] = useState("");
   const [perAthlete, setPerAthlete] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [schoolFile, setSchoolFile] = useState<File | null>(null);
-  const [teamFile, setTeamFile] = useState<File | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (step !== 2) return;
+    const codeNorm = normalizeFundraiserSetupCode(code);
+    if (!codeNorm) return;
+    if (lastPrefilledCodeRef.current === codeNorm) return;
+    lastPrefilledCodeRef.current = codeNorm;
+
+    void (async () => {
+      try {
+        const p = await getNewFundraiserPrefillAction(codeNorm);
+        if (!p) return;
+        if (p.school_name) setSchoolName(p.school_name);
+        if (p.team_name) setTeamName(p.team_name);
+        if (p.start_date) setStartDate(p.start_date);
+        if (p.end_date) setEndDate(p.end_date);
+        if (p.participant_count != null) {
+          setParticipantCount(String(p.participant_count));
+        }
+      } catch {
+        /* prefill is best-effort */
+      }
+    })();
+  }, [step, code]);
 
   async function validateCode() {
     setCodeError(null);
@@ -178,14 +220,14 @@ export default function NewFundraiserClient({ initialCode }: Props) {
     setStep(2);
   }
 
-  async function uploadLogo(file: File | null, prefix: string) {
+  async function uploadLogo(file: File | null) {
     if (!file) return null;
     const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Not signed in");
-    const path = `${user.id}/${prefix}-${Date.now()}-${file.name.replace(/[^\w.-]/g, "")}`;
+    const path = `${user.id}/school-team-${Date.now()}-${file.name.replace(/[^\w.-]/g, "")}`;
     const { error } = await supabase.storage.from("logos").upload(path, file, {
       upsert: false,
       contentType: file.type || undefined,
@@ -195,41 +237,76 @@ export default function NewFundraiserClient({ initialCode }: Props) {
     return data.publicUrl;
   }
 
+  const n = parsePositiveInt(participantCount);
+  const totalParsed = parseFloat(totalGoal);
+  const perParsed = parseFloat(perAthlete);
+
+  const computedPerFromTotal =
+    goalEntryMode === "total" &&
+    n != null &&
+    Number.isFinite(totalParsed) &&
+    totalParsed > 0
+      ? Math.ceil(totalParsed / n)
+      : null;
+
+  const computedTotalFromPer =
+    goalEntryMode === "per" &&
+    n != null &&
+    Number.isFinite(perParsed) &&
+    perParsed > 0
+      ? roundMoney(n * perParsed)
+      : null;
+
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
-    const goal = parseFloat(totalGoal);
-    if (!Number.isFinite(goal) || goal <= 0) {
-      setFormError("Enter a valid total fundraising goal.");
+
+    const participants = parsePositiveInt(participantCount);
+    if (participants == null) {
+      setFormError("Enter a valid number of participants (at least 1).");
       return;
     }
-    let gpa: number | null = null;
-    if (perAthlete.trim()) {
-      const p = parseFloat(perAthlete);
-      if (!Number.isFinite(p) || p <= 0) {
-        setFormError("Goal per athlete must be a positive number or empty.");
+
+    let finalTotal: number;
+    let finalPer: number | null;
+
+    if (goalEntryMode === "total") {
+      const g = parseFloat(totalGoal);
+      if (!Number.isFinite(g) || g <= 0) {
+        setFormError("Enter a valid total fundraising goal.");
         return;
       }
-      gpa = p;
+      finalTotal = g;
+      finalPer = Math.ceil(g / participants);
+    } else {
+      const p = parseFloat(perAthlete);
+      if (!Number.isFinite(p) || p <= 0) {
+        setFormError("Enter a valid goal per participant.");
+        return;
+      }
+      finalPer = p;
+      finalTotal = roundMoney(participants * p);
     }
+
     if (!startDate || !endDate) {
       setFormError("Start and end dates are required.");
       return;
     }
+
     setLoading(true);
     try {
-      const schoolUrl = await uploadLogo(schoolFile, "school");
-      const teamUrl = await uploadLogo(teamFile, "team");
+      const logoUrl = await uploadLogo(logoFile);
       const res = await createFundraiserAction({
         code: normalizeFundraiserSetupCode(code),
         school_name: schoolName.trim(),
         team_name: teamName.trim(),
-        total_goal: goal,
-        goal_per_athlete: gpa,
+        total_goal: finalTotal,
+        goal_per_athlete: finalPer,
+        expected_participants: participants,
         start_date: startDate,
         end_date: endDate,
-        school_logo_url: schoolUrl,
-        team_logo_url: teamUrl,
+        school_logo_url: logoUrl,
+        team_logo_url: logoUrl,
       });
       setDoneInfo({
         slug: res.unique_slug,
@@ -379,30 +456,121 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="total">Total fundraising goal ($)</Label>
+                  <Label htmlFor="participants">Number of participants</Label>
                   <Input
-                    id="total"
+                    id="participants"
                     type="number"
                     min={1}
-                    step="0.01"
-                    value={totalGoal}
-                    onChange={(e) => setTotalGoal(e.target.value)}
+                    step={1}
+                    value={participantCount}
+                    onChange={(e) => setParticipantCount(e.target.value)}
                     required
                   />
+                  <p className="text-xs text-slate-500">
+                    Prefilled from your school request when available; you can change
+                    it.
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="per">
-                    Goal per athlete ($) — optional
-                  </Label>
-                  <Input
-                    id="per"
-                    type="number"
-                    min={1}
-                    step="0.01"
-                    value={perAthlete}
-                    onChange={(e) => setPerAthlete(e.target.value)}
-                  />
-                </div>
+
+                <fieldset className="space-y-2 rounded-md border border-slate-200 p-3">
+                  <legend className="px-1 text-sm font-medium text-slate-800">
+                    Fundraising goal
+                  </legend>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <input
+                        type="radio"
+                        name="goalMode"
+                        checked={goalEntryMode === "total"}
+                        onChange={() => {
+                          setGoalEntryMode("total");
+                          if (
+                            n != null &&
+                            Number.isFinite(perParsed) &&
+                            perParsed > 0
+                          ) {
+                            setTotalGoal(String(roundMoney(n * perParsed)));
+                          }
+                        }}
+                        className="accent-hh-primary"
+                      />
+                      I know the total team goal
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <input
+                        type="radio"
+                        name="goalMode"
+                        checked={goalEntryMode === "per"}
+                        onChange={() => {
+                          setGoalEntryMode("per");
+                          if (
+                            n != null &&
+                            Number.isFinite(totalParsed) &&
+                            totalParsed > 0
+                          ) {
+                            setPerAthlete(String(Math.ceil(totalParsed / n)));
+                          }
+                        }}
+                        className="accent-hh-primary"
+                      />
+                      I know the goal per participant
+                    </label>
+                  </div>
+
+                  {goalEntryMode === "total" ? (
+                    <>
+                      <div className="space-y-2 pt-1">
+                        <Label htmlFor="total">Total fundraising goal ($)</Label>
+                        <Input
+                          id="total"
+                          type="number"
+                          min={0.01}
+                          step="0.01"
+                          value={totalGoal}
+                          onChange={(e) => setTotalGoal(e.target.value)}
+                          required
+                        />
+                      </div>
+                      {computedPerFromTotal != null ? (
+                        <p className="text-sm text-slate-700">
+                          Per participant:{" "}
+                          <strong>${computedPerFromTotal}</strong>
+                          <span className="text-slate-500">
+                            {" "}
+                            (rounded up to the nearest whole dollar)
+                          </span>
+                        </p>
+                      ) : null}
+                    </>
+                  ) : (
+                    <>
+                      <div className="space-y-2 pt-1">
+                        <Label htmlFor="per">Goal per participant ($)</Label>
+                        <Input
+                          id="per"
+                          type="number"
+                          min={0.01}
+                          step="0.01"
+                          value={perAthlete}
+                          onChange={(e) => setPerAthlete(e.target.value)}
+                          required
+                        />
+                      </div>
+                      {computedTotalFromPer != null ? (
+                        <p className="text-sm text-slate-700">
+                          Total team goal:{" "}
+                          <strong>
+                            ${computedTotalFromPer.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </strong>
+                        </p>
+                      ) : null}
+                    </>
+                  )}
+                </fieldset>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label htmlFor="start">Start date</Label>
@@ -426,24 +594,14 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="slogo">School logo</Label>
+                  <Label htmlFor="logo">School/Team Logo Upload</Label>
                   <Input
-                    id="slogo"
+                    id="logo"
                     type="file"
                     accept="image/*"
-                    onChange={(e) =>
-                      setSchoolFile(e.target.files?.[0] ?? null)
-                    }
+                    onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tlogo">Team logo (optional)</Label>
-                  <Input
-                    id="tlogo"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setTeamFile(e.target.files?.[0] ?? null)}
-                  />
+                  <p className="text-xs text-slate-500">Optional.</p>
                 </div>
                 {formError ? (
                   <p className="text-sm text-red-600">{formError}</p>
