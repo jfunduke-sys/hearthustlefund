@@ -459,11 +459,13 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                   <Label htmlFor="participants">Number of participants</Label>
                   <Input
                     id="participants"
-                    type="number"
-                    min={1}
-                    step={1}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
                     value={participantCount}
-                    onChange={(e) => setParticipantCount(e.target.value)}
+                    onChange={(e) =>
+                      setParticipantCount(e.target.value.replace(/\D/g, ""))
+                    }
                     required
                   />
                   <p className="text-xs text-slate-500">
@@ -472,103 +474,112 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                   </p>
                 </div>
 
-                <fieldset className="space-y-2 rounded-md border border-slate-200 p-3">
+                <fieldset className="space-y-4 rounded-md border border-slate-200 p-3">
                   <legend className="px-1 text-sm font-medium text-slate-800">
                     Fundraising goal
                   </legend>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <input
-                        type="radio"
-                        name="goalMode"
-                        checked={goalEntryMode === "total"}
-                        onChange={() => {
-                          setGoalEntryMode("total");
-                          if (
-                            n != null &&
-                            Number.isFinite(perParsed) &&
-                            perParsed > 0
-                          ) {
-                            setTotalGoal(String(roundMoney(n * perParsed)));
-                          }
-                        }}
-                        className="accent-hh-primary"
-                      />
-                      I know the total team goal
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
-                      <input
-                        type="radio"
-                        name="goalMode"
-                        checked={goalEntryMode === "per"}
-                        onChange={() => {
-                          setGoalEntryMode("per");
-                          if (
-                            n != null &&
-                            Number.isFinite(totalParsed) &&
-                            totalParsed > 0
-                          ) {
-                            setPerAthlete(String(Math.ceil(totalParsed / n)));
-                          }
-                        }}
-                        className="accent-hh-primary"
-                      />
-                      I know the goal per participant
-                    </label>
-                  </div>
 
-                  {goalEntryMode === "total" ? (
-                    <>
-                      <div className="space-y-2 pt-1">
-                        <Label htmlFor="total">Total fundraising goal ($)</Label>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <label className="flex min-w-[11rem] cursor-pointer items-center gap-2 sm:min-w-[13rem]">
+                        <input
+                          type="radio"
+                          name="goalMode"
+                          checked={goalEntryMode === "total"}
+                          onChange={() => {
+                            setGoalEntryMode("total");
+                            if (
+                              n != null &&
+                              Number.isFinite(perParsed) &&
+                              perParsed > 0
+                            ) {
+                              setTotalGoal(String(roundMoney(n * perParsed)));
+                            }
+                          }}
+                          className="accent-hh-primary"
+                        />
+                        <span className="text-sm font-medium text-slate-800">
+                          Team Goal Amount
+                        </span>
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm text-slate-500">$</span>
                         <Input
                           id="total"
-                          type="number"
-                          min={0.01}
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
+                          autoComplete="off"
+                          disabled={goalEntryMode !== "total"}
                           value={totalGoal}
                           onChange={(e) => setTotalGoal(e.target.value)}
-                          required
+                          className="h-9 w-[7.5rem]"
+                          required={goalEntryMode === "total"}
+                          aria-label="Team goal amount in dollars"
                         />
                       </div>
-                      {computedPerFromTotal != null ? (
-                        <p className="text-sm text-slate-700">
-                          Per participant:{" "}
-                          <strong>${computedPerFromTotal}</strong>
-                          <span className="text-slate-500">
-                            {" "}
-                            (rounded up to the nearest whole dollar)
-                          </span>
-                        </p>
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-2 pt-1">
-                        <Label htmlFor="per">Goal per participant ($)</Label>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <label className="flex min-w-[11rem] cursor-pointer items-center gap-2 sm:min-w-[13rem]">
+                        <input
+                          type="radio"
+                          name="goalMode"
+                          checked={goalEntryMode === "per"}
+                          onChange={() => {
+                            setGoalEntryMode("per");
+                            if (
+                              n != null &&
+                              Number.isFinite(totalParsed) &&
+                              totalParsed > 0
+                            ) {
+                              setPerAthlete(String(Math.ceil(totalParsed / n)));
+                            }
+                          }}
+                          className="accent-hh-primary"
+                        />
+                        <span className="text-sm font-medium text-slate-800">
+                          Per Participant Goal
+                        </span>
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm text-slate-500">$</span>
                         <Input
                           id="per"
-                          type="number"
-                          min={0.01}
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
+                          autoComplete="off"
+                          disabled={goalEntryMode !== "per"}
                           value={perAthlete}
                           onChange={(e) => setPerAthlete(e.target.value)}
-                          required
+                          className="h-9 w-[7.5rem]"
+                          required={goalEntryMode === "per"}
+                          aria-label="Per participant goal in dollars"
                         />
                       </div>
-                      {computedTotalFromPer != null ? (
-                        <p className="text-sm text-slate-700">
-                          Total team goal:{" "}
-                          <strong>
-                            ${computedTotalFromPer.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </strong>
-                        </p>
-                      ) : null}
-                    </>
-                  )}
+                    </div>
+                  </div>
+
+                  {goalEntryMode === "total" && computedPerFromTotal != null ? (
+                    <p className="text-sm text-slate-700">
+                      Per participant:{" "}
+                      <strong>${computedPerFromTotal}</strong>
+                      <span className="text-slate-500">
+                        {" "}
+                        (rounded up to the nearest whole dollar)
+                      </span>
+                    </p>
+                  ) : null}
+                  {goalEntryMode === "per" && computedTotalFromPer != null ? (
+                    <p className="text-sm text-slate-700">
+                      Total team goal:{" "}
+                      <strong>
+                        ${computedTotalFromPer.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </strong>
+                    </p>
+                  ) : null}
                 </fieldset>
 
                 <div className="grid grid-cols-2 gap-3">
