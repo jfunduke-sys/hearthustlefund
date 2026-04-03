@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { BRAND } from "@/lib/brand";
 import { recordDonationFromCheckoutSession } from "@/lib/record-donation-from-checkout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThankYouShareSection } from "./thank-you-share";
 
 type Props = {
   params: { token: string };
@@ -65,12 +66,10 @@ export default async function ThankYouPage({ params, searchParams }: Props) {
             </p>
           ) : null}
           {shareUrl ? (
-            <p>
-              Share this fundraiser:{" "}
-              <Link href={shareUrl} className="text-hh-primary underline">
-                {shareUrl}
-              </Link>
-            </p>
+            <ThankYouShareSection
+              shareUrl={shareUrl}
+              athleteName={athleteName}
+            />
           ) : null}
           <Link href="/" className="inline-block text-hh-primary hover:underline">
             ← {BRAND.name}
