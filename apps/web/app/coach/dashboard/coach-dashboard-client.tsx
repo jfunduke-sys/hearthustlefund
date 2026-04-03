@@ -57,6 +57,38 @@ function effectivePersonalGoal(athlete: Athlete, fr: Fundraiser): number | null 
   return fundraiserImpliedPerAthleteGoal(fr);
 }
 
+function progressMotivation(pct: number): string {
+  if (pct >= 100) return "Team goal reached—outstanding work.";
+  if (pct >= 75) return "Almost there—finish strong with your team.";
+  if (pct >= 50) return "Past halfway—momentum is on your side.";
+  if (pct > 0) return "Strong start—keep sharing those links.";
+  return "Invite athletes and share links to see donations roll in.";
+}
+
+function CommandStat({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white to-slate-50/90 p-4 shadow-sm ring-1 ring-slate-900/[0.04]">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1.5 text-xl font-bold tabular-nums tracking-tight text-hh-dark md:text-2xl">
+        {value}
+      </p>
+      {hint ? (
+        <p className="mt-1 text-[11px] leading-snug text-slate-500">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
 export default function CoachDashboardClient({
   fundraiser,
   coachAthlete,
@@ -68,6 +100,7 @@ export default function CoachDashboardClient({
 }: Props) {
   const router = useRouter();
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [joinCodeCopied, setJoinCodeCopied] = useState(false);
   const baseUrl =
     typeof window !== "undefined"
       ? window.location.origin
@@ -94,6 +127,27 @@ export default function CoachDashboardClient({
     () => fundraiserImpliedPerAthleteGoal(fundraiser),
     [fundraiser]
   );
+
+  const analytics = useMemo(() => {
+    const donationCount = donations.length;
+    const textsSentTotal = Object.values(textsByAthlete).reduce(
+      (s, v) => s + v,
+      0
+    );
+    const avgDonation =
+      donationCount > 0 ? totalRaised / donationCount : null;
+    const dollarsPerText =
+      textsSentTotal > 0 ? totalRaised / textsSentTotal : null;
+    const donationsPerText =
+      textsSentTotal > 0 ? donationCount / textsSentTotal : null;
+    return {
+      donationCount,
+      textsSentTotal,
+      avgDonation,
+      dollarsPerText,
+      donationsPerText,
+    };
+  }, [donations, textsByAthlete, totalRaised]);
 
   async function signOut() {
     const supabase = createClient();
@@ -134,6 +188,13 @@ More tips will show inside the app once you're in. Thanks!`;
     await navigator.clipboard.writeText(athleteInviteMessage);
     setInviteCopied(true);
     window.setTimeout(() => setInviteCopied(false), 2500);
+  }
+
+  async function copyJoinCodeOnly() {
+    if (!joinCode.trim()) return;
+    await navigator.clipboard.writeText(joinCode);
+    setJoinCodeCopied(true);
+    window.setTimeout(() => setJoinCodeCopied(false), 2000);
   }
 
   return (
@@ -199,89 +260,212 @@ More tips will show inside the app once you're in. Thanks!`;
           </ul>
         </div>
 
-        <Card className="overflow-hidden border-slate-200/80 shadow-lg shadow-hh-dark/5">
-          <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-white to-slate-50/90">
-            <CardTitle className="text-hh-dark">Campaign summary</CardTitle>
-            <p className="text-sm text-slate-600">
-              {formatDisplayDate(fundraiser.start_date)} →{" "}
-              {formatDisplayDate(fundraiser.end_date)} ·{" "}
-              <span className="font-medium text-hh-primary">{daysLeft} days</span>{" "}
-              left
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6 pt-6">
-            <div>
-              <div className="mb-2 flex justify-between text-sm font-medium text-slate-700">
-                <span>Team progress</span>
+        <Card className="overflow-hidden border-0 shadow-xl shadow-hh-dark/10 ring-1 ring-slate-200/80">
+          <div className="relative overflow-hidden bg-gradient-to-br from-hh-dark via-[#252542] to-slate-900 px-5 pb-8 pt-6 text-white md:px-8 md:pb-10 md:pt-8">
+            <div
+              className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-hh-primary/25 blur-3xl"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute -bottom-16 left-1/4 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl"
+              aria-hidden
+            />
+            <div className="relative flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-200/95">
+                    Live campaign
+                  </span>
+                  <span className="text-xs text-white/70">
+                    {formatDisplayDate(fundraiser.start_date)} →{" "}
+                    {formatDisplayDate(fundraiser.end_date)}
+                  </span>
+                </div>
+                <h2 className="mt-3 text-2xl font-extrabold tracking-tight md:text-3xl">
+                  Campaign command center
+                </h2>
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/75">
+                  {progressMotivation(pct)}
+                </p>
+                <p className="mt-3 text-xs font-medium text-amber-200/90">
+                  {daysLeft} day{daysLeft === 1 ? "" : "s"} left in the window
+                </p>
+              </div>
+              <div className="relative w-full shrink-0 md:max-w-sm md:text-right">
+                <p className="text-xs font-semibold uppercase tracking-wider text-white/60">
+                  Team total raised
+                </p>
+                <p className="mt-1 text-4xl font-black tabular-nums tracking-tight md:text-5xl">
+                  ${totalRaised.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+                <p className="mt-1 text-sm text-white/80">
+                  Goal ${goal.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}{" "}
+                  ·{" "}
+                  <span className="font-semibold text-amber-300">
+                    {pct.toFixed(0)}%
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="relative mt-8">
+              <div className="mb-2 flex justify-between text-xs font-medium text-white/70">
+                <span>Progress to team goal</span>
                 <span>
-                  ${totalRaised.toFixed(2)} / ${goal.toFixed(2)} (
-                  {pct.toFixed(0)}%)
+                  ${totalRaised.toFixed(2)} / ${goal.toFixed(2)}
                 </span>
               </div>
-              <div className="h-4 w-full overflow-hidden rounded-full bg-slate-200 shadow-inner">
+              <div className="h-3 w-full overflow-hidden rounded-full bg-white/15 shadow-inner">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-hh-primary to-orange-600 transition-all"
+                  className="h-full rounded-full bg-gradient-to-r from-amber-300 via-hh-primary to-orange-500 shadow-sm transition-all duration-500"
                   style={{ width: `${pct}%` }}
                 />
               </div>
-              {impliedPerAthleteGoal != null ? (
-                <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                  {fundraiser.goal_per_athlete != null &&
-                  Number(fundraiser.goal_per_athlete) > 0 ? (
-                    <>
-                      Default <span className="font-medium">personal goal</span>{" "}
-                      per athlete (roster and % columns use this when an athlete
-                      has not set their own):{" "}
-                    </>
-                  ) : (
-                    <>
-                      Suggested per-athlete share (team goal ÷ expected{" "}
-                      {fundraiser.expected_participants ?? "—"} participants):{" "}
-                    </>
-                  )}
-                  <span className="font-semibold text-hh-dark">
-                    ${impliedPerAthleteGoal.toFixed(2)}
-                  </span>
-                </p>
-              ) : null}
             </div>
-            <div className="rounded-xl border border-hh-dark/10 bg-gradient-to-br from-hh-dark to-slate-800 p-5 text-white shadow-inner">
-              <p className="text-xs font-semibold uppercase tracking-wider text-white/70">
-                Team join code — for athletes only (app)
-              </p>
-              <p className="mt-2 break-all font-mono text-3xl font-bold tracking-[0.12em] sm:text-4xl sm:tracking-[0.18em]">
-                {joinCode || "—".repeat(7)}
-              </p>
-              <p className="mt-3 rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm leading-relaxed text-white">
-                <span className="font-semibold">You (coach):</span> In the mobile
-                app, tap <strong>Sign in</strong> and use the{" "}
-                <strong>same email and password</strong> as this website. Do not
-                enter this team code—that code is only for athletes joining the
-                campaign.
-              </p>
-              <p className="mt-3 text-sm font-medium text-white/90">
-                Message for athletes (copy and paste into a group text or email)
-              </p>
-              <pre
-                className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-white/20 bg-black/25 px-3 py-3 text-left text-xs leading-relaxed text-white/95 sm:text-sm"
-                tabIndex={0}
-                aria-label="Instructions to send to athletes"
+            <div className="relative mt-6 flex flex-col gap-3 rounded-xl border border-white/15 bg-white/10 px-4 py-4 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-white/55">
+                  Athlete app · team join code
+                </p>
+                <p className="mt-1 break-all font-mono text-2xl font-bold tracking-[0.14em] sm:text-3xl">
+                  {joinCode || "—".repeat(7)}
+                </p>
+                <p className="mt-2 text-xs leading-snug text-white/65">
+                  Coaches: sign in to the app with this website&apos;s email—do
+                  not use this code.
+                </p>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="shrink-0 border-white/30 bg-white/95 text-hh-dark hover:bg-white"
+                disabled={!joinCode}
+                onClick={() => void copyJoinCodeOnly()}
               >
-                {athleteInviteMessage}
-              </pre>
-              <div className="mt-3 flex flex-wrap gap-2">
+                {joinCodeCopied ? "Copied!" : "Copy code"}
+              </Button>
+            </div>
+          </div>
+
+          <CardContent className="space-y-6 bg-gradient-to-b from-slate-50/90 to-white px-5 py-6 md:px-8">
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+                Pulse and analytics
+              </h3>
+              <p className="mt-1 text-xs text-slate-500">
+                Snapshot from donations and logged texts on this campaign.
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+                <CommandStat
+                  label="Avg gift"
+                  value={
+                    analytics.avgDonation != null
+                      ? `$${analytics.avgDonation.toFixed(2)}`
+                      : "—"
+                  }
+                  hint={
+                    analytics.donationCount > 0
+                      ? "Per donation received"
+                      : "No donations yet"
+                  }
+                />
+                <CommandStat
+                  label="Donations"
+                  value={String(analytics.donationCount)}
+                  hint="All gifts to your athletes"
+                />
+                <CommandStat
+                  label="Texts sent"
+                  value={String(analytics.textsSentTotal)}
+                  hint="Contacts messaged (app)"
+                />
+                <CommandStat
+                  label="$ / text"
+                  value={
+                    analytics.dollarsPerText != null
+                      ? `$${analytics.dollarsPerText.toFixed(2)}`
+                      : "—"
+                  }
+                  hint={
+                    analytics.textsSentTotal > 0
+                      ? "Raised per text logged"
+                      : "No texts logged yet"
+                  }
+                />
+                <CommandStat
+                  label="Donations / text"
+                  value={
+                    analytics.donationsPerText != null
+                      ? analytics.donationsPerText.toFixed(2)
+                      : "—"
+                  }
+                  hint={
+                    analytics.textsSentTotal > 0
+                      ? "Gifts per outreach logged"
+                      : "—"
+                  }
+                />
+                <CommandStat
+                  label="Athletes"
+                  value={String(athletes.length)}
+                  hint="On this roster"
+                />
+              </div>
+            </div>
+
+            {impliedPerAthleteGoal != null ? (
+              <p className="rounded-xl border border-amber-200/60 bg-amber-50/50 px-4 py-3 text-xs leading-relaxed text-slate-700">
+                <span className="font-semibold text-hh-dark">
+                  Default personal goal
+                </span>{" "}
+                for roster rows (when an athlete hasn&apos;t set their own):{" "}
+                <span className="font-bold text-hh-dark">
+                  ${impliedPerAthleteGoal.toFixed(2)}
+                </span>
+                {fundraiser.goal_per_athlete == null ||
+                Number(fundraiser.goal_per_athlete) <= 0 ? (
+                  <span className="text-slate-600">
+                    {" "}
+                    (team goal ÷ {fundraiser.expected_participants ?? "—"}{" "}
+                    expected participants)
+                  </span>
+                ) : null}
+              </p>
+            ) : null}
+
+            <details className="group rounded-xl border border-dashed border-slate-300/90 bg-slate-50/50 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100/80">
+                <span>Invite message for athletes (expand to view or copy)</span>
+                <span className="text-slate-400 transition-transform group-open:rotate-180">
+                  ▼
+                </span>
+              </summary>
+              <div className="border-t border-slate-200/80 px-4 py-4">
+                <pre
+                  className="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-white px-3 py-3 text-left text-xs leading-relaxed text-slate-700"
+                  tabIndex={0}
+                  aria-label="Instructions to send to athletes"
+                >
+                  {athleteInviteMessage}
+                </pre>
                 <Button
                   type="button"
                   size="sm"
-                  variant="secondary"
-                  className="bg-white text-hh-dark hover:bg-white/90"
+                  variant="outline"
+                  className="mt-3"
                   disabled={!joinCode}
                   onClick={() => void copyAthleteInvite()}
                 >
-                  {inviteCopied ? "Copied!" : "Copy message for athletes"}
+                  {inviteCopied ? "Copied!" : "Copy full message"}
                 </Button>
               </div>
-            </div>
+            </details>
           </CardContent>
         </Card>
 
@@ -291,9 +475,9 @@ More tips will show inside the app once you're in. Thanks!`;
           baseUrl={baseUrl}
         />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Athlete roster</CardTitle>
+        <Card className="overflow-hidden border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/60">
+            <CardTitle className="text-hh-dark">Athlete roster</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
@@ -359,9 +543,9 @@ More tips will show inside the app once you're in. Thanks!`;
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>All donations</CardTitle>
+        <Card className="overflow-hidden border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/60">
+            <CardTitle className="text-hh-dark">All donations</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>

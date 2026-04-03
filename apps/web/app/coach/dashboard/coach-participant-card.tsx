@@ -92,14 +92,12 @@ export default function CoachParticipantCard({
   }
 
   return (
-    <Card className="border-slate-200">
-      <CardHeader>
-        <CardTitle className="text-hh-dark">Your Participation</CardTitle>
-        <CardDescription>
-          This is your <strong>personal donation link</strong>—the same kind
-          athletes get. Donations made here count toward your own goal on this
-          campaign. Copy it and paste into an email (or anywhere else) from your
-          computer. To text contacts from your phone, use the mobile app.
+    <Card className="border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg text-hh-dark">Your participation</CardTitle>
+        <CardDescription className="text-sm leading-relaxed">
+          Your personal donate link (same as athletes). Copy for email; use the
+          app on your phone to text contacts.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
