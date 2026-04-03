@@ -44,10 +44,11 @@ type ReminderContact = {
   phone_number: string;
 };
 
-type TeamPeer = {
-  id: string;
+type LeaderboardEntry = {
+  rank: number;
+  athlete_id: string;
   full_name: string;
-  jersey_number: string | null;
+  raised: number;
 };
 
 type Row = {
@@ -68,7 +69,7 @@ type Row = {
   raisedTeam: number;
   allDonations: DonationRow[];
   reminderContacts: ReminderContact[];
-  teamPeers: TeamPeer[];
+  leaderboardTop: LeaderboardEntry[];
 };
 
 export default function DashboardScreen() {
@@ -207,15 +208,26 @@ export default function DashboardScreen() {
       .eq("donated", false)
       .not("texted_at", "is", null);
 
-    const { data: peerRows, error: peerErr } = await supabase
-      .from("athletes")
-      .select("id, full_name, jersey_number")
-      .eq("fundraiser_id", athlete.fundraiser_id)
-      .eq("show_on_team_roster", true)
-      .order("full_name");
-    if (peerErr && __DEV__) {
-      console.warn("[athletes team list]", peerErr.message);
+    const { data: lbRaw, error: lbErr } = await supabase.rpc(
+      "fundraiser_leaderboard_top",
+      { p_fundraiser_id: athlete.fundraiser_id, p_limit: 3 }
+    );
+    if (lbErr && __DEV__) {
+      console.warn("[fundraiser_leaderboard_top]", lbErr.message);
     }
+    const leaderboardTop: LeaderboardEntry[] = (lbRaw ?? []).map(
+      (r: {
+        rank: number;
+        athlete_id: string;
+        full_name: string;
+        raised: string | number;
+      }) => ({
+        rank: Number(r.rank),
+        athlete_id: r.athlete_id,
+        full_name: r.full_name,
+        raised: Number(r.raised),
+      })
+    );
 
     const allDonations = (donationsData ?? []) as DonationRow[];
     const reminderContacts = (reminderData ?? []) as ReminderContact[];
@@ -230,7 +242,7 @@ export default function DashboardScreen() {
       raisedTeam,
       allDonations,
       reminderContacts,
-      teamPeers: peerErr ? [] : ((peerRows ?? []) as TeamPeer[]),
+      leaderboardTop,
     });
   }, []);
 
@@ -409,24 +421,34 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        <Text style={[styles.section, { marginTop: 4 }]}>Team participants</Text>
-        <Text style={styles.sectionHint}>
-          People on this campaign who chose to appear on the team list. Coaches
-          can turn this on from the web dashboard.
-        </Text>
-        {data.teamPeers.length === 0 ? (
+        <Text style={[styles.section, { marginTop: 4 }]}>Team Leaderboard</Text>
+        {data.leaderboardTop.length === 0 ? (
           <Text style={styles.muted}>
-            No one is on the shared list yet, or the list hasn&apos;t loaded.
+            No rankings yet — get donations on your personal link to appear here.
           </Text>
         ) : (
-          data.teamPeers.map((p) => (
-            <View key={p.id} style={styles.peerRow}>
-              <Text style={styles.peerName}>{p.full_name}</Text>
-              {p.jersey_number ? (
-                <Text style={styles.peerJersey}>#{p.jersey_number}</Text>
-              ) : null}
-            </View>
-          ))
+          data.leaderboardTop.map((e) => {
+            const isSelf = e.athlete_id === data.athlete.id;
+            return (
+              <View
+                key={e.athlete_id}
+                style={[styles.lbRow, isSelf && styles.lbRowSelf]}
+              >
+                <Text style={styles.lbRank}>#{e.rank}</Text>
+                <View style={styles.lbNameBlock}>
+                  <Text style={styles.lbName} numberOfLines={1}>
+                    {e.full_name}
+                  </Text>
+                  {isSelf ? (
+                    <Text style={styles.lbYou}>You</Text>
+                  ) : null}
+                </View>
+                <Text style={styles.lbRaised}>
+                  ${e.raised.toFixed(2)}
+                </Text>
+              </View>
+            );
+          })
         )}
 
         <Text style={styles.section}>Your donations</Text>
@@ -634,10 +656,9 @@ const styles = StyleSheet.create({
   donationDate: { fontSize: 11, color: "#94a3b8" },
   donationName: { fontWeight: "600", color: "#1A1A2E", marginTop: 2 },
   donationAmt: { fontWeight: "800", color: "#C0392B", marginTop: 4 },
-  peerRow: {
+  lbRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     paddingVertical: 10,
     paddingHorizontal: 12,
     marginBottom: 6,
@@ -645,9 +666,33 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#e2e8f0",
+    gap: 10,
   },
-  peerName: { fontWeight: "600", color: "#1A1A2E", flex: 1 },
-  peerJersey: { fontSize: 14, color: "#64748b", marginLeft: 8 },
+  lbRowSelf: {
+    borderColor: "#fcd34d",
+    backgroundColor: "#fffbeb",
+  },
+  lbRank: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#C0392B",
+    minWidth: 28,
+  },
+  lbNameBlock: { flex: 1, minWidth: 0 },
+  lbName: { fontWeight: "600", color: "#1A1A2E", fontSize: 15 },
+  lbYou: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#b45309",
+    marginTop: 2,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  lbRaised: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#1A1A2E",
+  },
   row: { color: "#334155", marginBottom: 4 },
   muted: { color: "#64748b", lineHeight: 20 },
   inlineStrong: { fontWeight: "700", color: "#1A1A2E" },
