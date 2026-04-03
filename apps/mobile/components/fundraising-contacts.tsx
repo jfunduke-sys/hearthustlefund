@@ -27,8 +27,32 @@ type ContactRow = {
   phone: string;
 };
 
+/** iOS/Android often store given/family name without populating composite `name`. */
+function contactDisplayName(c: Contacts.Contact): string {
+  const structured = [
+    c.namePrefix,
+    c.firstName,
+    c.middleName,
+    c.lastName,
+    c.nameSuffix,
+  ]
+    .map((p) => (p ?? "").trim())
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (structured) return structured;
+  const n = (c.name ?? "").trim();
+  if (n) return n;
+  const nick = (c.nickname ?? "").trim();
+  if (nick) return nick;
+  const co = (c.company ?? "").trim();
+  if (co) return co;
+  return "Contact";
+}
+
 function rowsFromExistingContact(c: Contacts.ExistingContact): ContactRow[] {
-  const name = c.name || "Contact";
+  const name = contactDisplayName(c);
   const out: ContactRow[] = [];
   for (const p of c.phoneNumbers ?? []) {
     const phone = (p.number || "").trim();
@@ -107,7 +131,17 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         return;
       }
       const { data } = await Contacts.getContactsAsync({
-        fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers],
+        fields: [
+          Contacts.Fields.Name,
+          Contacts.Fields.FirstName,
+          Contacts.Fields.MiddleName,
+          Contacts.Fields.LastName,
+          Contacts.Fields.NamePrefix,
+          Contacts.Fields.NameSuffix,
+          Contacts.Fields.Nickname,
+          Contacts.Fields.Company,
+          Contacts.Fields.PhoneNumbers,
+        ],
       });
       const out: ContactRow[] = [];
       for (const c of data) {

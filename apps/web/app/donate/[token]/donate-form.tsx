@@ -265,8 +265,9 @@ export default function DonateForm({
                   onChange={(e) => setDonorPhone(e.target.value)}
                 />
                 <p className="text-xs text-slate-500">
-                  If provided, we may mark matching contacts as donated for
-                  reminder flows.
+                  If it matches a contact you texted, we mark them as donated so
+                  they drop off the &quot;send reminder&quot; list. Leave blank
+                  only if you don&apos;t mind them staying on that list.
                 </p>
               </div>
 

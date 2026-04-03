@@ -1,9 +1,6 @@
 import type { Stripe } from "stripe";
+import { phoneNormalizedMatchCandidates } from "@heart-and-hustle/shared";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-function normalizePhone(p: string) {
-  return p.replace(/\D/g, "");
-}
 
 /**
  * Idempotent: inserts a `donations` row from a completed Checkout Session.
@@ -65,13 +62,13 @@ export async function recordDonationFromCheckoutSession(
   }
 
   if (donorPhone) {
-    const norm = normalizePhone(donorPhone);
-    if (norm.length >= 10) {
+    const candidates = phoneNormalizedMatchCandidates(donorPhone);
+    if (candidates.length > 0) {
       const { error: upErr } = await admin
         .from("athlete_contacts")
         .update({ donated: true })
         .eq("athlete_id", athleteId)
-        .eq("phone_normalized", norm);
+        .in("phone_normalized", candidates);
       if (upErr) console.error("athlete_contacts donated update", upErr);
     }
   }
