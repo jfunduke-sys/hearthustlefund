@@ -21,6 +21,8 @@ create table if not exists public.school_requests (
   estimated_athletes int,
   fundraiser_start_date date,
   fundraiser_end_date date,
+  -- Intake: hh_rep_in_person | self_run
+  kickoff_setup_preference text,
   paperwork_sent boolean default false,
   paperwork_returned boolean default false,
   status text default 'pending',

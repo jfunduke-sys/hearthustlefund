@@ -14,6 +14,7 @@ import type {
 import {
   formatDisplayDate,
   formatDisplayDateTime,
+  formatKickoffSetupPreference,
   schoolRequestLeadDisplayName,
 } from "@heart-and-hustle/shared";
 import {
@@ -705,6 +706,16 @@ export function SuperadminTabs({
                 <dd>
                   {formatDisplayDate(viewOpen.fundraiser_start_date)} –{" "}
                   {formatDisplayDate(viewOpen.fundraiser_end_date)}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">
+                  Fundraiser kickoff
+                </dt>
+                <dd>
+                  {formatKickoffSetupPreference(
+                    viewOpen.kickoff_setup_preference
+                  )}
                 </dd>
               </div>
               <div>

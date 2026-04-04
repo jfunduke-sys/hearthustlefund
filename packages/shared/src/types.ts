@@ -4,6 +4,9 @@ export type SchoolRequestStatus =
   | "approved"
   | "rejected";
 
+/** School request intake: who runs the on-site fundraiser kickoff. */
+export type KickoffSetupPreference = "hh_rep_in_person" | "self_run";
+
 export type FundraiserStatus = "active" | "completed" | "cancelled";
 
 export interface SchoolRequest {
@@ -31,7 +34,21 @@ export interface SchoolRequest {
   /** Proposed campaign window (from intake; ISO date YYYY-MM-DD). */
   fundraiser_start_date?: string | null;
   fundraiser_end_date?: string | null;
+  kickoff_setup_preference?: KickoffSetupPreference | null;
   created_at: string;
+}
+
+/** Human-readable kickoff choice for admin / detail views. */
+export function formatKickoffSetupPreference(
+  p: KickoffSetupPreference | null | undefined
+): string {
+  if (p === "hh_rep_in_person") {
+    return "In-person kickoff with a Heart & Hustle rep (on-site setup & launch)";
+  }
+  if (p === "self_run") {
+    return "We'll handle our own kickoff (no HH rep on-site)";
+  }
+  return "—";
 }
 
 /** Coach / lead name from split fields, falling back to legacy `admin_name`. */

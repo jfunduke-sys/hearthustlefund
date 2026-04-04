@@ -88,6 +88,11 @@ function validateRequestForm(fd: FormData): string | null {
     return "End date must be on or after the start date.";
   }
 
+  const kick = trimOrEmpty(fd.get("kickoff_setup_preference"));
+  if (kick !== "hh_rep_in_person" && kick !== "self_run") {
+    return "Please choose how you’d like to run your fundraiser kickoff.";
+  }
+
   return null;
 }
 
@@ -143,6 +148,7 @@ export default function RequestFundraiserPage() {
       estimated_athletes: estNum,
       fundraiser_start_date: trimOrEmpty(fd.get("fundraiser_start_date")),
       fundraiser_end_date: trimOrEmpty(fd.get("fundraiser_end_date")),
+      kickoff_setup_preference: trimOrEmpty(fd.get("kickoff_setup_preference")),
       notes: notesRaw || null,
       status: "pending",
     });
@@ -318,6 +324,52 @@ export default function RequestFundraiserPage() {
                     </div>
                   </div>
                 </div>
+                <fieldset className="space-y-3">
+                  <legend className="text-base font-semibold text-hh-dark">
+                    Fundraiser kickoff
+                  </legend>
+                  <p className="text-sm text-slate-600">
+                    Choose one. This helps us schedule support if you want a
+                    Heart &amp; Hustle team member on-site.
+                  </p>
+                  <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                    <label className="flex cursor-pointer gap-3">
+                      <input
+                        type="radio"
+                        name="kickoff_setup_preference"
+                        value="hh_rep_in_person"
+                        required
+                        className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
+                      />
+                      <span className="text-sm leading-snug text-slate-800">
+                        <span className="font-semibold text-hh-dark">
+                          In-person kickoff with a Heart &amp; Hustle rep
+                        </span>
+                        <span className="mt-0.5 block text-slate-600">
+                          Schedule someone from our team to help set up and
+                          launch with your athletes on-site.
+                        </span>
+                      </span>
+                    </label>
+                    <label className="flex cursor-pointer gap-3">
+                      <input
+                        type="radio"
+                        name="kickoff_setup_preference"
+                        value="self_run"
+                        className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
+                      />
+                      <span className="text-sm leading-snug text-slate-800">
+                        <span className="font-semibold text-hh-dark">
+                          We&apos;ll handle our own kickoff
+                        </span>
+                        <span className="mt-0.5 block text-slate-600">
+                          Your staff runs the launch; no Heart &amp; Hustle team
+                          member needed on-site.
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="admin_first_name" className="text-base">

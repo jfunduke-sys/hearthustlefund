@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Fundraiser, SchoolRequest } from "@heart-and-hustle/shared";
 import {
   formatDisplayDate,
+  formatKickoffSetupPreference,
   schoolRequestLeadDisplayName,
 } from "@heart-and-hustle/shared";
 import type { FundraiserAnalytics } from "@/lib/admin-fundraiser-analytics";
@@ -177,6 +178,12 @@ export function FundraiserDetailClient({
               <strong>Proposed dates (intake):</strong>{" "}
               {formatDisplayDate(schoolRequest.fundraiser_start_date)} –{" "}
               {formatDisplayDate(schoolRequest.fundraiser_end_date)}
+            </p>
+            <p>
+              <strong>Kickoff (intake):</strong>{" "}
+              {formatKickoffSetupPreference(
+                schoolRequest.kickoff_setup_preference
+              )}
             </p>
             {schoolRequest.notes ? (
               <p className="mt-2 border-t border-slate-200 pt-2">
