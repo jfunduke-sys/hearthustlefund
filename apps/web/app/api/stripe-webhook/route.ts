@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const result = await recordDonationFromCheckoutSession(session);
+    const result = await recordDonationFromCheckoutSession(session, stripe);
     if (result.error) {
       console.error("donation insert", result.error);
       return NextResponse.json({ error: result.error }, { status: 500 });

@@ -1,6 +1,10 @@
-import type { Stripe } from "stripe";
+import Stripe from "stripe";
 import { phoneNormalizedMatchCandidates } from "@heart-and-hustle/shared";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  fetchStripeFeeCentsForPaymentIntent,
+  isStripePaymentIntentId,
+} from "@/lib/stripe-donation-fee";
 
 /**
  * Idempotent: inserts a `donations` row from a completed Checkout Session.
@@ -8,7 +12,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * webhooks cannot reach localhost).
  */
 export async function recordDonationFromCheckoutSession(
-  session: Stripe.Checkout.Session
+  session: Stripe.Checkout.Session,
+  stripe?: Stripe
 ): Promise<{ inserted: boolean; skipped: boolean; error?: string }> {
   const md = session.metadata ?? {};
   const athleteId = md.athlete_id;
@@ -31,14 +36,44 @@ export async function recordDonationFromCheckoutSession(
       : session.payment_intent?.id ?? session.id;
 
   const admin = createAdminClient();
+  const stripeForFees =
+    stripe ??
+    (process.env.STRIPE_SECRET_KEY
+      ? new Stripe(process.env.STRIPE_SECRET_KEY)
+      : null);
+
   const { data: existing } = await admin
     .from("donations")
-    .select("id")
+    .select("id, stripe_fee_cents")
     .eq("stripe_payment_id", paymentId)
     .maybeSingle();
 
   if (existing) {
+    if (
+      existing.stripe_fee_cents == null &&
+      stripeForFees &&
+      isStripePaymentIntentId(paymentId)
+    ) {
+      const fee = await fetchStripeFeeCentsForPaymentIntent(
+        stripeForFees,
+        paymentId
+      );
+      if (fee != null) {
+        await admin
+          .from("donations")
+          .update({ stripe_fee_cents: fee })
+          .eq("id", existing.id);
+      }
+    }
     return { inserted: false, skipped: false };
+  }
+
+  let feeCents: number | null = null;
+  if (stripeForFees && isStripePaymentIntentId(paymentId)) {
+    feeCents = await fetchStripeFeeCentsForPaymentIntent(
+      stripeForFees,
+      paymentId
+    );
   }
 
   const anonymous = md.anonymous === "true";
@@ -50,6 +85,7 @@ export async function recordDonationFromCheckoutSession(
     fundraiser_id: fundraiserId,
     athlete_id: athleteId,
     stripe_payment_id: paymentId,
+    stripe_fee_cents: feeCents,
     amount: amountCents / 100,
     donor_name: anonymous ? null : donorName,
     donor_email: donorEmail,

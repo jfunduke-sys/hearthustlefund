@@ -34,7 +34,7 @@ export default async function ThankYouPage({ params, searchParams }: Props) {
         athleteName = a?.full_name ?? null;
       }
       /* Record donation when webhooks cannot reach this host (e.g. localhost). Idempotent with webhook. */
-      const recorded = await recordDonationFromCheckoutSession(session);
+      const recorded = await recordDonationFromCheckoutSession(session, stripe);
       if (recorded.error) {
         console.error("[thank-you] donation sync", recorded.error);
       }

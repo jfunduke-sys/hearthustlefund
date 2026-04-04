@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
+import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { computeFundraiserAnalytics } from "@/lib/admin-fundraiser-analytics";
+import { buildFundraiserStripeFinancialBreakdown } from "@/lib/fundraiser-stripe-financials";
 import type {
   Athlete,
   AthleteContact,
@@ -54,11 +56,26 @@ export default async function AdminFundraiserDetailPage({
     contactList = (c ?? []) as AthleteContact[];
   }
 
+  const donationList = (donations ?? []) as Donation[];
   const analytics = computeFundraiserAnalytics(
     id,
     athleteList,
-    (donations ?? []) as Donation[],
+    donationList,
     contactList
+  );
+
+  const stripe = process.env.STRIPE_SECRET_KEY
+    ? new Stripe(process.env.STRIPE_SECRET_KEY)
+    : null;
+  const stripeBreakdown = await buildFundraiserStripeFinancialBreakdown(
+    stripe,
+    admin,
+    donationList.map((d) => ({
+      id: d.id,
+      stripe_payment_id: d.stripe_payment_id,
+      amount: d.amount,
+      stripe_fee_cents: d.stripe_fee_cents ?? null,
+    }))
   );
 
   let coachEmail: string | null = null;
@@ -93,6 +110,7 @@ export default async function AdminFundraiserDetailPage({
           fundraiser={f}
           coachEmail={coachEmail}
           analytics={analytics}
+          stripeBreakdown={stripeBreakdown}
           schoolRequest={schoolRequest}
           complianceNotes={f.admin_compliance_notes ?? null}
         />

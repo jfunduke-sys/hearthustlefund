@@ -91,6 +91,8 @@ create table if not exists public.donations (
   fundraiser_id uuid references public.fundraisers (id) on delete cascade,
   athlete_id uuid references public.athletes (id) on delete cascade,
   stripe_payment_id text unique not null,
+  -- Stripe processing fee in cents (balance_transaction.fee); backfilled for legacy rows when viewed in admin.
+  stripe_fee_cents integer,
   amount numeric(10, 2) not null,
   donor_name text,
   donor_email text,

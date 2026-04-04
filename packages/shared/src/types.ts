@@ -117,6 +117,8 @@ export interface Donation {
   fundraiser_id: string;
   athlete_id: string;
   stripe_payment_id: string;
+  /** Stripe processing fee in cents when known (from balance transaction). */
+  stripe_fee_cents?: number | null;
   amount: number;
   donor_name: string | null;
   donor_email: string | null;
@@ -124,6 +126,18 @@ export interface Donation {
   anonymous: boolean;
   created_at: string;
 }
+
+/** SuperAdmin: gross vs Stripe processing fees for one fundraiser. */
+export type FundraiserStripeFinancialBreakdown = {
+  stripeConfigured: boolean;
+  donationCount: number;
+  grossDollars: number;
+  stripeFeesDollars: number;
+  netAfterStripeFeesDollars: number;
+  effectiveFeePercentOfGross: number | null;
+  unresolvedCount: number;
+  resolvedFeeCount: number;
+};
 
 export interface AthleteContact {
   id: string;
