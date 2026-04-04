@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,6 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import * as SMS from "expo-sms";
 import { useRouter, useFocusEffect } from "expo-router";
-import { useNavigation } from "@react-navigation/native";
 import type { Fundraiser } from "@heart-and-hustle/shared";
 import {
   buildReminderSms,
@@ -122,7 +121,6 @@ function ProgressBarGradient({ pct }: { pct: number }) {
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const [data, setData] = useState<Row | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -325,37 +323,6 @@ export default function DashboardScreen() {
     };
   }, []);
 
-  useLayoutEffect(() => {
-    const uri =
-      data?.fundraiser?.team_logo_url?.trim() ||
-      data?.fundraiser?.school_logo_url?.trim() ||
-      null;
-    navigation.setOptions({
-      headerRight:
-        uri != null
-          ? () => (
-              <View style={{ marginRight: 14 }}>
-                <Image
-                  accessibilityLabel="Team or school logo"
-                  source={{ uri }}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    backgroundColor: "rgba(255,255,255,0.92)",
-                  }}
-                  resizeMode="contain"
-                />
-              </View>
-            )
-          : undefined,
-    });
-  }, [
-    navigation,
-    data?.fundraiser?.team_logo_url,
-    data?.fundraiser?.school_logo_url,
-  ]);
-
   async function onRefresh() {
     setRefreshing(true);
     await load();
@@ -439,6 +406,10 @@ export default function DashboardScreen() {
   const teamPct =
     teamGoal > 0 ? Math.min(100, (data.raisedTeam / teamGoal) * 100) : 0;
   const reminderCount = data.reminderContacts.length;
+  const headerLogoUri =
+    data.fundraiser.team_logo_url?.trim() ||
+    data.fundraiser.school_logo_url?.trim() ||
+    null;
 
   return (
     <View style={styles.root}>
@@ -448,10 +419,22 @@ export default function DashboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />
         }
       >
-        <Text style={styles.greet}>Hey {data.athlete.full_name}!</Text>
-        <Text style={styles.sub}>
-          {data.fundraiser.team_name} · {data.fundraiser.school_name}
-        </Text>
+        <View style={styles.headerRow}>
+          <View style={styles.headerTextBlock}>
+            <Text style={styles.greet}>Hey {data.athlete.full_name}!</Text>
+            <Text style={styles.sub}>
+              {data.fundraiser.team_name} · {data.fundraiser.school_name}
+            </Text>
+          </View>
+          {headerLogoUri ? (
+            <Image
+              accessibilityLabel="Team or school logo"
+              source={{ uri: headerLogoUri }}
+              style={styles.headerLogo}
+              resizeMode="contain"
+            />
+          ) : null}
+        </View>
         {celebrationLine ? (
           <Text style={styles.celebration}>{celebrationLine}</Text>
         ) : null}
@@ -622,6 +605,22 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   container: { padding: 20, paddingBottom: 48 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 16,
+  },
+  headerTextBlock: { flex: 1, minWidth: 0 },
+  headerLogo: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
   center: { flex: 1, justifyContent: "center", padding: 24 },
   helpText: {
     marginTop: 14,
@@ -647,7 +646,7 @@ const styles = StyleSheet.create({
   },
   noticeBannerText: { fontSize: 14, color: "#78350f", lineHeight: 20 },
   greet: { fontSize: 24, fontWeight: "800", color: "#1A1A2E" },
-  sub: { fontSize: 15, color: "#64748b", marginTop: 4, marginBottom: 16 },
+  sub: { fontSize: 15, color: "#64748b", marginTop: 4 },
   card: {
     backgroundColor: "#fff",
     borderRadius: 12,

@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Swipeable } from "react-native-gesture-handler";
 import * as Contacts from "expo-contacts";
 import * as SMS from "expo-sms";
 import { useFocusEffect } from "expo-router";
@@ -71,6 +73,23 @@ function mergeContactRows(prev: ContactRow[], added: ContactRow[]): ContactRow[]
   return Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
+const HIDDEN_IDS_PREFIX = "@hh/fundraising_contact_row_hidden/";
+
+async function loadHiddenContactRowIds(
+  athleteId: string | null
+): Promise<Set<string>> {
+  if (!athleteId) return new Set();
+  try {
+    const raw = await AsyncStorage.getItem(`${HIDDEN_IDS_PREFIX}${athleteId}`);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw) as unknown;
+    if (!Array.isArray(arr)) return new Set();
+    return new Set(arr.filter((x): x is string => typeof x === "string"));
+  } catch {
+    return new Set();
+  }
+}
+
 export type FundraisingContactsVariant = "athlete" | "coach";
 
 type Props = { variant?: FundraisingContactsVariant };
@@ -87,6 +106,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   const [coachNeedsParticipant, setCoachNeedsParticipant] = useState(false);
   /** Clears checkmarks when the user switches to a different athlete / fundraiser. */
   const prevAthleteIdRef = useRef<string | null>(null);
+  const currentAthleteIdRef = useRef<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -119,6 +139,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         prevAthleteIdRef.current = currentAthleteId;
         setSelected({});
       }
+      currentAthleteIdRef.current = currentAthleteId;
 
       if (variant === "coach") {
         setCoachNeedsParticipant(!currentAthleteId);
@@ -148,7 +169,8 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         out.push(...rowsFromExistingContact(c));
       }
       out.sort((a, b) => a.name.localeCompare(b.name));
-      setRows(out);
+      const hidden = await loadHiddenContactRowIds(currentAthleteId);
+      setRows(out.filter((r) => !hidden.has(r.id)));
     } catch {
       setStatus("Could not load contacts.");
     } finally {
@@ -190,6 +212,24 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         }
         return next;
       });
+
+      const aid = currentAthleteIdRef.current;
+      if (aid && newRows.length > 0) {
+        try {
+          const key = `${HIDDEN_IDS_PREFIX}${aid}`;
+          const raw = await AsyncStorage.getItem(key);
+          const arr = raw ? (JSON.parse(raw) as string[]) : [];
+          if (Array.isArray(arr) && arr.length > 0) {
+            const pickedIds = new Set(newRows.map((r) => r.id));
+            const nextHidden = arr.filter((id) => !pickedIds.has(id));
+            if (nextHidden.length !== arr.length) {
+              await AsyncStorage.setItem(key, JSON.stringify(nextHidden));
+            }
+          }
+        } catch {
+          /* ignore */
+        }
+      }
     } catch (e: unknown) {
       setStatus(
         e instanceof Error ? e.message : "Could not open your contacts list."
@@ -221,6 +261,29 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   function deselectAll() {
     setSelected({});
   }
+
+  const hideContactRow = useCallback(async (rowId: string) => {
+    setRows((prev) => prev.filter((r) => r.id !== rowId));
+    setSelected((s) => {
+      const next = { ...s };
+      delete next[rowId];
+      return next;
+    });
+    const aid = currentAthleteIdRef.current;
+    if (!aid) return;
+    try {
+      const key = `${HIDDEN_IDS_PREFIX}${aid}`;
+      const raw = await AsyncStorage.getItem(key);
+      const arr = raw ? (JSON.parse(raw) as string[]) : [];
+      if (!Array.isArray(arr)) return;
+      if (!arr.includes(rowId)) {
+        arr.push(rowId);
+        await AsyncStorage.setItem(key, JSON.stringify(arr));
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const selectedCount = Object.values(selected).filter(Boolean).length;
 
@@ -358,6 +421,10 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         </Pressable>
       </View>
       <Text style={styles.count}>{selectedCount} contacts selected</Text>
+      <Text style={styles.countHint}>
+        Swipe left on a row to remove it from this list (your phone contacts are
+        unchanged).
+      </Text>
       {status ? <Text style={styles.status}>{status}</Text> : null}
       <FlatList
         data={filtered}
@@ -372,24 +439,43 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         renderItem={({ item }) => {
           const on = Boolean(selected[item.id]);
           return (
-            <Pressable
-              style={[styles.row, on && styles.rowOn]}
-              onPress={() => toggle(item.id)}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: on }}
+            <Swipeable
+              friction={2}
+              overshootRight={false}
+              renderRightActions={() => (
+                <View style={styles.swipeRemoveWrap}>
+                  <Pressable
+                    style={styles.swipeRemoveBtn}
+                    onPress={() => void hideContactRow(item.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remove ${item.name} from list`}
+                  >
+                    <Text style={styles.swipeRemoveLabel}>Remove</Text>
+                  </Pressable>
+                </View>
+              )}
             >
-              <View style={styles.rowMain}>
-                <Text style={styles.name} numberOfLines={1}>
-                  {item.name}
-                </Text>
-                <Text style={styles.phone} numberOfLines={1}>
-                  {item.phone}
-                </Text>
+              <View>
+                <Pressable
+                  style={[styles.row, on && styles.rowOn]}
+                  onPress={() => toggle(item.id)}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: on }}
+                >
+                  <View style={styles.rowMain}>
+                    <Text style={styles.name} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+                    <Text style={styles.phone} numberOfLines={1}>
+                      {item.phone}
+                    </Text>
+                  </View>
+                  <View style={styles.checkSlot}>
+                    {on ? <Text style={styles.checkMark}>✓</Text> : null}
+                  </View>
+                </Pressable>
               </View>
-              <View style={styles.checkSlot}>
-                {on ? <Text style={styles.checkMark}>✓</Text> : null}
-              </View>
-            </Pressable>
+            </Swipeable>
           );
         }}
         ListEmptyComponent={
@@ -450,6 +536,27 @@ const styles = StyleSheet.create({
   toolbar: { flexDirection: "row", justifyContent: "space-between" },
   link: { color: "#C0392B", fontWeight: "600" },
   count: { marginVertical: 6, color: "#64748b" },
+  countHint: {
+    fontSize: 12,
+    color: "#94a3b8",
+    lineHeight: 17,
+    marginBottom: 4,
+  },
+  swipeRemoveWrap: {
+    justifyContent: "center",
+    backgroundColor: "#fee2e2",
+  },
+  swipeRemoveBtn: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 18,
+    minWidth: 88,
+  },
+  swipeRemoveLabel: {
+    color: "#b91c1c",
+    fontWeight: "800",
+    fontSize: 14,
+  },
   status: { color: "#b45309", marginBottom: 6 },
   row: {
     flexDirection: "row",
