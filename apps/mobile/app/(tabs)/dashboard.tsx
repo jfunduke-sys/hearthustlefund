@@ -614,9 +614,9 @@ const styles = StyleSheet.create({
   },
   headerTextBlock: { flex: 1, minWidth: 0 },
   headerLogo: {
-    width: 50,
-    height: 50,
-    borderRadius: 10,
+    width: 63,
+    height: 63,
+    borderRadius: 13,
     backgroundColor: "#fff",
     borderWidth: 1,
     borderColor: "#e2e8f0",
