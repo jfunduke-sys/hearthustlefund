@@ -239,12 +239,17 @@ export default function DashboardScreen() {
       }
     }
 
-    const { data: teamDons } = await supabase
-      .from("donations")
-      .select("amount")
-      .eq("fundraiser_id", athlete.fundraiser_id);
+    const { data: teamTotalRaw, error: teamTotalErr } = await supabase.rpc(
+      "fundraiser_total_raised",
+      { p_fundraiser_id: athlete.fundraiser_id }
+    );
+    if (teamTotalErr && __DEV__) {
+      console.warn("[fundraiser_total_raised]", teamTotalErr.message);
+    }
     const raisedTeam =
-      teamDons?.reduce((s, d) => s + Number(d.amount), 0) ?? 0;
+      teamTotalRaw != null && teamTotalRaw !== ""
+        ? Number(teamTotalRaw)
+        : 0;
 
     const { data: donationsData } = await supabase
       .from("donations")
