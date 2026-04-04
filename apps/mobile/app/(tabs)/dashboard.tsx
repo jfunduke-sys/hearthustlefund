@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -10,9 +10,13 @@ import {
   ActivityIndicator,
   Clipboard,
   Platform,
+  Image,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import * as SMS from "expo-sms";
 import { useRouter, useFocusEffect } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import type { Fundraiser } from "@heart-and-hustle/shared";
 import {
   buildReminderSms,
   formatDisplayDateTime,
@@ -44,13 +48,6 @@ type ReminderContact = {
   phone_number: string;
 };
 
-type LeaderboardEntry = {
-  rank: number;
-  athlete_id: string;
-  full_name: string;
-  raised: number;
-};
-
 type Row = {
   athlete: {
     id: string;
@@ -60,20 +57,72 @@ type Row = {
     jersey_number: string | null;
     fundraiser_id: string;
   };
-  fundraiser: {
-    team_name: string;
-    school_name: string;
-    total_goal: number;
-  };
+  fundraiser: Pick<
+    Fundraiser,
+    | "team_name"
+    | "school_name"
+    | "total_goal"
+    | "goal_per_athlete"
+    | "expected_participants"
+    | "school_logo_url"
+    | "team_logo_url"
+  >;
   raisedSelf: number;
   raisedTeam: number;
   allDonations: DonationRow[];
   reminderContacts: ReminderContact[];
-  leaderboardTop: LeaderboardEntry[];
 };
+
+function fundraiserImpliedPerAthleteGoal(fr: Row["fundraiser"]): number | null {
+  const gpa =
+    fr.goal_per_athlete != null ? Number(fr.goal_per_athlete) : NaN;
+  if (Number.isFinite(gpa) && gpa > 0) return gpa;
+  const exp = fr.expected_participants;
+  const total = Number(fr.total_goal);
+  if (exp != null && exp > 0 && Number.isFinite(total) && total > 0) {
+    return total / exp;
+  }
+  return null;
+}
+
+function effectivePersonalGoalForAthlete(
+  personalGoal: number | null | undefined,
+  fr: Row["fundraiser"]
+): number | null {
+  const pg = personalGoal != null ? Number(personalGoal) : NaN;
+  if (Number.isFinite(pg) && pg > 0) return pg;
+  return fundraiserImpliedPerAthleteGoal(fr);
+}
+
+const PROGRESS_GRADIENT = ["#C0392B", "#EAB308", "#22C55E"] as const;
+
+function ProgressBarGradient({ pct }: { pct: number }) {
+  const w = Math.min(100, Math.max(0, pct));
+  return (
+    <View style={styles.barBg}>
+      <View
+        style={{
+          width: `${w}%`,
+          height: 8,
+          borderRadius: 4,
+          overflow: "hidden",
+        }}
+      >
+        <LinearGradient
+          colors={[...PROGRESS_GRADIENT]}
+          locations={[0, 0.42, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={{ width: "100%", height: "100%" }}
+        />
+      </View>
+    </View>
+  );
+}
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const [data, setData] = useState<Row | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -149,7 +198,9 @@ export default function DashboardScreen() {
 
     const { data: fr } = await supabase
       .from("fundraisers")
-      .select("team_name, school_name, total_goal")
+      .select(
+        "team_name, school_name, total_goal, goal_per_athlete, expected_participants, school_logo_url, team_logo_url"
+      )
       .eq("id", athlete.fundraiser_id)
       .single();
 
@@ -208,27 +259,6 @@ export default function DashboardScreen() {
       .eq("donated", false)
       .not("texted_at", "is", null);
 
-    const { data: lbRaw, error: lbErr } = await supabase.rpc(
-      "fundraiser_leaderboard_top",
-      { p_fundraiser_id: athlete.fundraiser_id, p_limit: 3 }
-    );
-    if (lbErr && __DEV__) {
-      console.warn("[fundraiser_leaderboard_top]", lbErr.message);
-    }
-    const leaderboardTop: LeaderboardEntry[] = (lbRaw ?? []).map(
-      (r: {
-        rank: number;
-        athlete_id: string;
-        full_name: string;
-        raised: string | number;
-      }) => ({
-        rank: Number(r.rank),
-        athlete_id: r.athlete_id,
-        full_name: r.full_name,
-        raised: Number(r.raised),
-      })
-    );
-
     const allDonations = (donationsData ?? []) as DonationRow[];
     const reminderContacts = (reminderData ?? []) as ReminderContact[];
     const sel: Record<string, boolean> = {};
@@ -242,7 +272,6 @@ export default function DashboardScreen() {
       raisedTeam,
       allDonations,
       reminderContacts,
-      leaderboardTop,
     });
   }, []);
 
@@ -290,6 +319,37 @@ export default function DashboardScreen() {
       }
     };
   }, []);
+
+  useLayoutEffect(() => {
+    const uri =
+      data?.fundraiser?.team_logo_url?.trim() ||
+      data?.fundraiser?.school_logo_url?.trim() ||
+      null;
+    navigation.setOptions({
+      headerRight:
+        uri != null
+          ? () => (
+              <View style={{ marginRight: 14 }}>
+                <Image
+                  accessibilityLabel="Team or school logo"
+                  source={{ uri }}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    backgroundColor: "rgba(255,255,255,0.92)",
+                  }}
+                  resizeMode="contain"
+                />
+              </View>
+            )
+          : undefined,
+    });
+  }, [
+    navigation,
+    data?.fundraiser?.team_logo_url,
+    data?.fundraiser?.school_logo_url,
+  ]);
 
   async function onRefresh() {
     setRefreshing(true);
@@ -362,11 +422,14 @@ export default function DashboardScreen() {
     );
   }
 
-  const pg = data.athlete.personal_goal
-    ? Number(data.athlete.personal_goal)
-    : null;
+  const effectiveGoal = effectivePersonalGoalForAthlete(
+    data.athlete.personal_goal,
+    data.fundraiser
+  );
   const selfPct =
-    pg && pg > 0 ? Math.min(100, (data.raisedSelf / pg) * 100) : null;
+    effectiveGoal != null && effectiveGoal > 0
+      ? Math.min(100, (data.raisedSelf / effectiveGoal) * 100)
+      : null;
   const teamGoal = Number(data.fundraiser.total_goal);
   const teamPct =
     teamGoal > 0 ? Math.min(100, (data.raisedTeam / teamGoal) * 100) : 0;
@@ -380,7 +443,7 @@ export default function DashboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />
         }
       >
-        <Text style={styles.greet}>Hey {data.athlete.full_name}! 👋</Text>
+        <Text style={styles.greet}>Hey {data.athlete.full_name}!</Text>
         <Text style={styles.sub}>
           {data.fundraiser.team_name} · {data.fundraiser.school_name}
         </Text>
@@ -402,12 +465,12 @@ export default function DashboardScreen() {
           <Text style={styles.cardTitle}>Your progress</Text>
           <Text style={styles.stat}>
             ${data.raisedSelf.toFixed(2)}
-            {pg != null ? ` / $${pg.toFixed(2)} goal` : ""}
+            {effectiveGoal != null
+              ? ` / $${effectiveGoal.toFixed(2)} goal`
+              : ""}
           </Text>
-          {selfPct != null ? (
-            <View style={styles.barBg}>
-              <View style={[styles.barFg, { width: `${selfPct}%` }]} />
-            </View>
+          {effectiveGoal != null ? (
+            <ProgressBarGradient pct={selfPct ?? 0} />
           ) : null}
         </View>
 
@@ -416,40 +479,8 @@ export default function DashboardScreen() {
           <Text style={styles.stat}>
             ${data.raisedTeam.toFixed(2)} / ${teamGoal.toFixed(2)}
           </Text>
-          <View style={styles.barBg}>
-            <View style={[styles.barFgGold, { width: `${teamPct}%` }]} />
-          </View>
+          <ProgressBarGradient pct={teamPct} />
         </View>
-
-        <Text style={[styles.section, { marginTop: 4 }]}>Team Leaderboard</Text>
-        {data.leaderboardTop.length === 0 ? (
-          <Text style={styles.muted}>
-            No rankings yet — get donations on your personal link to appear here.
-          </Text>
-        ) : (
-          data.leaderboardTop.map((e) => {
-            const isSelf = e.athlete_id === data.athlete.id;
-            return (
-              <View
-                key={e.athlete_id}
-                style={[styles.lbRow, isSelf && styles.lbRowSelf]}
-              >
-                <Text style={styles.lbRank}>#{e.rank}</Text>
-                <View style={styles.lbNameBlock}>
-                  <Text style={styles.lbName} numberOfLines={1}>
-                    {e.full_name}
-                  </Text>
-                  {isSelf ? (
-                    <Text style={styles.lbYou}>You</Text>
-                  ) : null}
-                </View>
-                <Text style={styles.lbRaised}>
-                  ${e.raised.toFixed(2)}
-                </Text>
-              </View>
-            );
-          })
-        )}
 
         <Text style={styles.section}>Your donations</Text>
         <Text style={styles.sectionHint}>
@@ -629,8 +660,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     overflow: "hidden",
   },
-  barFg: { height: 8, backgroundColor: "#C0392B", borderRadius: 4 },
-  barFgGold: { height: 8, backgroundColor: "#F39C12", borderRadius: 4 },
   section: {
     marginTop: 8,
     fontWeight: "700",
@@ -656,43 +685,6 @@ const styles = StyleSheet.create({
   donationDate: { fontSize: 11, color: "#94a3b8" },
   donationName: { fontWeight: "600", color: "#1A1A2E", marginTop: 2 },
   donationAmt: { fontWeight: "800", color: "#C0392B", marginTop: 4 },
-  lbRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginBottom: 6,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    gap: 10,
-  },
-  lbRowSelf: {
-    borderColor: "#fcd34d",
-    backgroundColor: "#fffbeb",
-  },
-  lbRank: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#C0392B",
-    minWidth: 28,
-  },
-  lbNameBlock: { flex: 1, minWidth: 0 },
-  lbName: { fontWeight: "600", color: "#1A1A2E", fontSize: 15 },
-  lbYou: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#b45309",
-    marginTop: 2,
-    textTransform: "uppercase",
-    letterSpacing: 0.3,
-  },
-  lbRaised: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: "#1A1A2E",
-  },
   row: { color: "#334155", marginBottom: 4 },
   muted: { color: "#64748b", lineHeight: 20 },
   inlineStrong: { fontWeight: "700", color: "#1A1A2E" },
