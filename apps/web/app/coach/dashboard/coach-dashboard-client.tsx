@@ -13,6 +13,7 @@ import {
   formatDisplayDate,
   formatDisplayDateTime,
   getCampaignWindowPhase,
+  getDefaultDonorPageAboutText,
 } from "@heart-and-hustle/shared";
 import CoachParticipantCard from "./coach-participant-card";
 import { updateCoachFundraiserDonorPageAbout } from "@/app/actions/coach";
@@ -337,15 +338,14 @@ More tips will show inside the app once you're in. Thanks!`;
         <Card className="border-slate-200/90 shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg text-hh-dark">Campaign settings</CardTitle>
-            <p className="text-sm font-normal text-slate-600">
-              This message appears on every athlete&apos;s public donation page
-              under &quot;About this fundraiser.&quot; Leave it blank to use the
-              default wording.
-            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="coach-donor-about">Donor page message</Label>
+              <Label htmlFor="coach-donor-about">
+                Donor page message (shown under &quot;About this fundraiser&quot;
+                on each athlete&apos;s public donation link; leave blank to keep
+                the default text shown in gray below)
+              </Label>
               <Textarea
                 id="coach-donor-about"
                 value={donorPageAbout}
@@ -355,8 +355,11 @@ More tips will show inside the app once you're in. Thanks!`;
                 }}
                 rows={6}
                 maxLength={4000}
-                placeholder="Why donations matter — equipment, travel, program goals, or a thank-you from the team."
-                className="resize-y text-sm"
+                placeholder={getDefaultDonorPageAboutText(
+                  fundraiser.team_name,
+                  fundraiser.school_name
+                )}
+                className="resize-y text-sm placeholder:text-slate-400"
                 disabled={settingsPending}
               />
               <p className="text-xs text-slate-500">

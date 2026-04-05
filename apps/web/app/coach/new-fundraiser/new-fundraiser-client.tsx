@@ -11,6 +11,7 @@ import {
 import { BRAND } from "@/lib/brand";
 import {
   CAMPAIGN_SETUP_CODE,
+  getDefaultDonorPageAboutText,
   normalizeFundraiserSetupCode,
 } from "@heart-and-hustle/shared";
 import { Button } from "@/components/ui/button";
@@ -609,21 +610,26 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="donor-about">
-                    Donor page message (optional)
+                    Donor page message (optional — shown under &quot;About this
+                    fundraiser&quot; on each athlete&apos;s donation link; leave
+                    blank for default text in gray)
                   </Label>
                   <Textarea
                     id="donor-about"
                     value={donorPageAbout}
                     onChange={(e) => setDonorPageAbout(e.target.value)}
-                    placeholder="Tell supporters why this fundraiser matters — equipment, travel, program needs, or a thank-you from the team."
+                    placeholder={getDefaultDonorPageAboutText(
+                      teamName.trim() || "your team",
+                      schoolName.trim() || "your school"
+                    )}
                     rows={5}
                     maxLength={4000}
-                    className="resize-y text-sm"
+                    className="resize-y text-sm placeholder:text-slate-400"
                   />
                   <p className="text-xs text-slate-500">
-                    Shown on each athlete&apos;s public donation page under
-                    &quot;About this fundraiser.&quot; You can leave this blank
-                    to use a short default message.
+                    Optional. If empty, donors see the default wording (same idea
+                    as the gray placeholder — with each athlete&apos;s name on
+                    their page).
                   </p>
                 </div>
                 <div className="space-y-2">

@@ -6,4 +6,5 @@ export * from "./fundraiser-setup-code";
 export * from "./format-date";
 export * from "./campaign-window";
 export * from "./fundraiser-goals";
+export * from "./donor-page-copy";
 export * from "./phone-match";

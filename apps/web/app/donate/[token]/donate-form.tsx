@@ -13,6 +13,7 @@ import {
   campaignDonationsBlockedMessage,
   effectiveAthleteGoalForDonorPage,
   formatDisplayDate,
+  getDefaultDonorPageAboutText,
 } from "@heart-and-hustle/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,7 +112,11 @@ export default function DonateForm({
 
   const aboutText =
     fundraiser.donor_page_about?.trim() ||
-    `Your gift supports ${fundraiser.team_name} at ${fundraiser.school_name}. Funds help the program reach its goals — and directly boost ${athlete.full_name}'s fundraising progress. Thank you for cheering on our student-athletes.`;
+    getDefaultDonorPageAboutText(
+      fundraiser.team_name,
+      fundraiser.school_name,
+      athlete.full_name
+    );
 
   function dollarsToCharge(): number {
     if (amountChoice === "other") {
