@@ -11,16 +11,21 @@ import {
   Clipboard,
   Platform,
   Image,
+  Share,
+  Linking,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { Swipeable } from "react-native-gesture-handler";
 import * as SMS from "expo-sms";
 import { useRouter, useFocusEffect } from "expo-router";
 import type { Fundraiser } from "@heart-and-hustle/shared";
 import {
+  athleteDashboardOutreachBannerMessage,
   buildReminderSms,
-  campaignOutreachBlockedMessage,
   formatDisplayDateTime,
+  getCampaignDayBanner,
   getCampaignWindowPhase,
+  PLATFORM,
 } from "@heart-and-hustle/shared";
 import { DonationConfetti } from "../../components/donation-confetti";
 import {
@@ -337,6 +342,24 @@ export default function DashboardScreen() {
     setReminderSelected((s) => ({ ...s, [id]: !s[id] }));
   }
 
+  async function removeReminderContact(contactId: string) {
+    setReminderStatus(null);
+    const { error } = await supabase
+      .from("athlete_contacts")
+      .delete()
+      .eq("id", contactId);
+    if (error) {
+      setReminderStatus(error.message ?? "Could not remove contact.");
+      return;
+    }
+    setReminderSelected((s) => {
+      const next = { ...s };
+      delete next[contactId];
+      return next;
+    });
+    void load();
+  }
+
   async function sendReminders() {
     if (!data) return;
     setReminderStatus(null);
@@ -352,7 +375,7 @@ export default function DashboardScreen() {
     );
     if (phase !== "active") {
       setReminderStatus(
-        campaignOutreachBlockedMessage(
+        athleteDashboardOutreachBannerMessage(
           phase,
           data.fundraiser.start_date,
           data.fundraiser.end_date
@@ -428,6 +451,44 @@ export default function DashboardScreen() {
     data.fundraiser.start_date,
     data.fundraiser.end_date
   );
+  const activeDayBanner =
+    campaignPhase === "active"
+      ? getCampaignDayBanner(
+          data.fundraiser.start_date,
+          data.fundraiser.end_date
+        )
+      : null;
+
+  const personalDonateUrl = donateUrl(data.athlete.unique_link_token);
+  const shareText = `Support ${data.athlete.full_name} — ${data.fundraiser.team_name} (${data.fundraiser.school_name}). Give if you can: ${personalDonateUrl}`;
+  const enc = encodeURIComponent;
+  const shareEmailHref = `mailto:?subject=${enc(
+    `Support ${data.athlete.full_name} — ${data.fundraiser.team_name}`
+  )}&body=${enc(`${shareText}\n\n— ${PLATFORM.displayName}`)}`;
+  const shareSmsHref = `sms:?&body=${enc(shareText)}`;
+  const shareXHref = `https://twitter.com/intent/tweet?text=${enc(shareText)}&url=${enc(personalDonateUrl)}`;
+  const shareFacebookHref = `https://www.facebook.com/sharer/sharer.php?u=${enc(personalDonateUrl)}`;
+  const shareLinkedInHref = `https://www.linkedin.com/sharing/share-offsite/?url=${enc(personalDonateUrl)}`;
+
+  async function openShareHref(href: string) {
+    try {
+      await Linking.openURL(href);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function openNativeShareSheet() {
+    try {
+      await Share.share({
+        title: `Support ${data.athlete.full_name}`,
+        message: shareText,
+        url: Platform.OS === "ios" ? personalDonateUrl : undefined,
+      });
+    } catch {
+      /* dismissed or unavailable */
+    }
+  }
 
   return (
     <View style={styles.root}>
@@ -460,11 +521,20 @@ export default function DashboardScreen() {
         {campaignPhase !== "active" ? (
           <View style={styles.campaignWindowBanner}>
             <Text style={styles.campaignWindowBannerText}>
-              {campaignOutreachBlockedMessage(
+              {athleteDashboardOutreachBannerMessage(
                 campaignPhase,
                 data.fundraiser.start_date,
                 data.fundraiser.end_date
               )}
+            </Text>
+          </View>
+        ) : null}
+
+        {activeDayBanner?.phase === "active" ? (
+          <View style={styles.daysLeftPill}>
+            <Text style={styles.daysLeftText}>
+              {activeDayBanner.daysLeft} day
+              {activeDayBanner.daysLeft === 1 ? "" : "s"} left
             </Text>
           </View>
         ) : null}
@@ -524,8 +594,9 @@ export default function DashboardScreen() {
 
         <Text style={[styles.section, { marginTop: 20 }]}>Reminder texts</Text>
         <Text style={styles.sectionHint}>
-          People you already texted who have not donated yet — tap to select, then
-          send a follow-up.
+          People you already texted who have not donated yet — tap the checkmark
+          to include them, then send a follow-up. Swipe left on a row to remove
+          someone from this list.
         </Text>
         {data.reminderContacts.length === 0 ? (
           <Text style={styles.muted}>
@@ -534,21 +605,49 @@ export default function DashboardScreen() {
             up here when they still have not donated.
           </Text>
         ) : (
-          data.reminderContacts.map((item) => (
-            <Pressable
-              key={item.id}
-              style={[
-                styles.reminderRow,
-                reminderSelected[item.id] && styles.reminderRowOn,
-              ]}
-              onPress={() => toggleReminder(item.id)}
-            >
-              <Text style={styles.reminderName}>
-                {item.contact_name || "Contact"}
-              </Text>
-              <Text style={styles.reminderPhone}>{item.phone_number}</Text>
-            </Pressable>
-          ))
+          data.reminderContacts.map((item) => {
+            const on = Boolean(reminderSelected[item.id]);
+            return (
+              <Swipeable
+                key={item.id}
+                friction={2}
+                overshootRight={false}
+                renderRightActions={() => (
+                  <View style={styles.reminderSwipeRemoveWrap}>
+                    <Pressable
+                      style={styles.reminderSwipeRemoveBtn}
+                      onPress={() => void removeReminderContact(item.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove ${
+                        item.contact_name || "contact"
+                      } from reminder list`}
+                    >
+                      <Text style={styles.reminderSwipeRemoveLabel}>Remove</Text>
+                    </Pressable>
+                  </View>
+                )}
+              >
+                <View>
+                  <Pressable
+                    style={[styles.reminderRow, on && styles.reminderRowOn]}
+                    onPress={() => toggleReminder(item.id)}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: on }}
+                  >
+                    <View style={styles.reminderRowMain}>
+                      <Text style={styles.reminderName}>
+                        {item.contact_name || "Contact"}
+                      </Text>
+                      <Text style={styles.reminderPhone}>{item.phone_number}</Text>
+                    </View>
+                    <View style={styles.reminderCheckSlot}>
+                      {on ? <Text style={styles.reminderCheckMark}>✓</Text> : null}
+                    </View>
+                  </Pressable>
+                </View>
+              </Swipeable>
+            );
+          })
         )}
         {reminderStatus ? (
           <Text style={styles.reminderStatus}>{reminderStatus}</Text>
@@ -582,8 +681,7 @@ export default function DashboardScreen() {
             pressed && styles.donateLinkCardPressed,
           ]}
           onPress={() => {
-            const url = donateUrl(data.athlete.unique_link_token);
-            Clipboard.setString(url);
+            Clipboard.setString(personalDonateUrl);
             if (donateLinkCopyTimerRef.current != null) {
               clearTimeout(donateLinkCopyTimerRef.current);
             }
@@ -598,7 +696,7 @@ export default function DashboardScreen() {
         >
           <Text style={styles.donateLinkTitle}>Your donation link</Text>
           <Text style={styles.donateLinkUrl} selectable>
-            {donateUrl(data.athlete.unique_link_token)}
+            {personalDonateUrl}
           </Text>
           <Text
             style={[
@@ -609,6 +707,91 @@ export default function DashboardScreen() {
             {donateLinkCopied ? "Copied to clipboard" : "Tap to copy"}
           </Text>
         </Pressable>
+
+        <View style={styles.shareSection}>
+          <Text style={styles.shareHeading}>Share this link</Text>
+          <Text style={styles.shareHint}>
+            Help spread the word — no donation required. Anyone can use your link
+            to contribute during the campaign.
+          </Text>
+          <View style={styles.shareChips}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.shareChip,
+                pressed && styles.shareChipPressed,
+              ]}
+              onPress={() => void openNativeShareSheet()}
+            >
+              <Text style={styles.shareChipText}>Share…</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.shareChip,
+                pressed && styles.shareChipPressed,
+              ]}
+              onPress={() => {
+                Clipboard.setString(personalDonateUrl);
+                if (donateLinkCopyTimerRef.current != null) {
+                  clearTimeout(donateLinkCopyTimerRef.current);
+                }
+                setDonateLinkCopied(true);
+                donateLinkCopyTimerRef.current = setTimeout(() => {
+                  setDonateLinkCopied(false);
+                  donateLinkCopyTimerRef.current = null;
+                }, 2200);
+              }}
+            >
+              <Text style={styles.shareChipText}>
+                {donateLinkCopied ? "Copied!" : "Copy link"}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.shareChip,
+                pressed && styles.shareChipPressed,
+              ]}
+              onPress={() => void openShareHref(shareXHref)}
+            >
+              <Text style={styles.shareChipText}>X</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.shareChip,
+                pressed && styles.shareChipPressed,
+              ]}
+              onPress={() => void openShareHref(shareFacebookHref)}
+            >
+              <Text style={styles.shareChipText}>Facebook</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.shareChip,
+                pressed && styles.shareChipPressed,
+              ]}
+              onPress={() => void openShareHref(shareLinkedInHref)}
+            >
+              <Text style={styles.shareChipText}>LinkedIn</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.shareChip,
+                pressed && styles.shareChipPressed,
+              ]}
+              onPress={() => void openShareHref(shareSmsHref)}
+            >
+              <Text style={styles.shareChipText}>Text</Text>
+            </Pressable>
+            <Pressable
+              style={({ pressed }) => [
+                styles.shareChip,
+                pressed && styles.shareChipPressed,
+              ]}
+              onPress={() => void openShareHref(shareEmailHref)}
+            >
+              <Text style={styles.shareChipText}>Email</Text>
+            </Pressable>
+          </View>
+        </View>
       </ScrollView>
       {showConfetti ? (
         <View style={styles.confettiLayer} pointerEvents="none">
@@ -694,6 +877,21 @@ const styles = StyleSheet.create({
     color: "#78350f",
     lineHeight: 20,
   },
+  daysLeftPill: {
+    alignSelf: "flex-start",
+    backgroundColor: "#ecfdf5",
+    borderWidth: 1,
+    borderColor: "#6ee7b7",
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+  },
+  daysLeftText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#047857",
+  },
   greet: { fontSize: 24, fontWeight: "800", color: "#1A1A2E" },
   sub: { fontSize: 15, color: "#64748b", marginTop: 4 },
   card: {
@@ -778,8 +976,56 @@ const styles = StyleSheet.create({
     color: "#0f766e",
     fontWeight: "700",
   },
+  shareSection: {
+    marginTop: 14,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#fff",
+  },
+  shareHeading: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#64748b",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  shareHint: {
+    marginTop: 6,
+    fontSize: 13,
+    color: "#64748b",
+    lineHeight: 19,
+  },
+  shareChips: {
+    marginTop: 12,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  shareChip: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
+  },
+  shareChipPressed: {
+    backgroundColor: "#fff",
+    borderColor: "#C0392B",
+  },
+  shareChipText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1A1A2E",
+  },
   reminderRow: {
-    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingLeft: 12,
+    paddingRight: 8,
     marginBottom: 6,
     borderRadius: 10,
     borderWidth: 1,
@@ -787,8 +1033,37 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   reminderRowOn: { backgroundColor: "#fef3c7", borderColor: "#fcd34d" },
+  reminderRowMain: { flex: 1, minWidth: 0, paddingRight: 8 },
   reminderName: { fontWeight: "700", color: "#1A1A2E" },
   reminderPhone: { color: "#64748b", marginTop: 2, fontSize: 14 },
+  reminderCheckSlot: {
+    width: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  reminderCheckMark: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#C0392B",
+  },
+  reminderSwipeRemoveWrap: {
+    justifyContent: "center",
+    backgroundColor: "#fee2e2",
+    marginBottom: 6,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  reminderSwipeRemoveBtn: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 18,
+    minWidth: 88,
+  },
+  reminderSwipeRemoveLabel: {
+    color: "#b91c1c",
+    fontWeight: "800",
+    fontSize: 14,
+  },
   reminderStatus: { color: "#b45309", marginVertical: 8, fontSize: 14 },
   reminderBtn: {
     marginTop: 10,

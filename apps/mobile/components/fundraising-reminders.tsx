@@ -7,12 +7,14 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 import * as SMS from "expo-sms";
 import { useFocusEffect } from "expo-router";
 import { getSessionUser } from "../lib/auth-user";
 import { supabase, donateUrl } from "../lib/supabase";
 import type { CampaignWindowPhase } from "@heart-and-hustle/shared";
 import {
+  athleteDashboardOutreachBannerMessage,
   buildReminderSms,
   campaignOutreachBlockedMessage,
   getCampaignWindowPhase,
@@ -106,6 +108,24 @@ export default function FundraisingRemindersScreen({
     setSelected((s) => ({ ...s, [id]: !s[id] }));
   }
 
+  async function removeRow(contactId: string) {
+    setStatus(null);
+    const { error } = await supabase
+      .from("athlete_contacts")
+      .delete()
+      .eq("id", contactId);
+    if (error) {
+      setStatus(error.message ?? "Could not remove contact.");
+      return;
+    }
+    setSelected((s) => {
+      const next = { ...s };
+      delete next[contactId];
+      return next;
+    });
+    void load();
+  }
+
   async function sendReminders() {
     setStatus(null);
     const picked = rows.filter((r) => selected[r.id]);
@@ -137,11 +157,17 @@ export default function FundraisingRemindersScreen({
     );
     if (winPhase !== "active") {
       setStatus(
-        campaignOutreachBlockedMessage(
-          winPhase,
-          String(fr?.start_date ?? ""),
-          String(fr?.end_date ?? "")
-        )
+        variant === "athlete"
+          ? athleteDashboardOutreachBannerMessage(
+              winPhase,
+              String(fr?.start_date ?? ""),
+              String(fr?.end_date ?? "")
+            )
+          : campaignOutreachBlockedMessage(
+              winPhase,
+              String(fr?.start_date ?? ""),
+              String(fr?.end_date ?? "")
+            )
       );
       return;
     }
@@ -197,11 +223,17 @@ export default function FundraisingRemindersScreen({
     <View style={styles.container}>
       {messagingMeta.phase !== "active" ? (
         <Text style={styles.windowBanner}>
-          {campaignOutreachBlockedMessage(
-            messagingMeta.phase,
-            messagingMeta.start,
-            messagingMeta.end
-          )}
+          {variant === "athlete"
+            ? athleteDashboardOutreachBannerMessage(
+                messagingMeta.phase,
+                messagingMeta.start,
+                messagingMeta.end
+              )
+            : campaignOutreachBlockedMessage(
+                messagingMeta.phase,
+                messagingMeta.start,
+                messagingMeta.end
+              )}
         </Text>
       ) : null}
       <Text style={styles.head}>
@@ -213,15 +245,48 @@ export default function FundraisingRemindersScreen({
         <FlatList
           data={rows}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <Pressable
-              style={[styles.row, selected[item.id] && styles.rowOn]}
-              onPress={() => toggle(item.id)}
-            >
-              <Text style={styles.name}>{item.contact_name || "Contact"}</Text>
-              <Text style={styles.phone}>{item.phone_number}</Text>
-            </Pressable>
-          )}
+          renderItem={({ item }) => {
+            const on = Boolean(selected[item.id]);
+            return (
+              <Swipeable
+                friction={2}
+                overshootRight={false}
+                renderRightActions={() => (
+                  <View style={styles.swipeRemoveWrap}>
+                    <Pressable
+                      style={styles.swipeRemoveBtn}
+                      onPress={() => void removeRow(item.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove ${
+                        item.contact_name || "contact"
+                      } from reminder list`}
+                    >
+                      <Text style={styles.swipeRemoveLabel}>Remove</Text>
+                    </Pressable>
+                  </View>
+                )}
+              >
+                <View>
+                  <Pressable
+                    style={[styles.row, on && styles.rowOn]}
+                    onPress={() => toggle(item.id)}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: on }}
+                  >
+                    <View style={styles.rowMain}>
+                      <Text style={styles.name}>
+                        {item.contact_name || "Contact"}
+                      </Text>
+                      <Text style={styles.phone}>{item.phone_number}</Text>
+                    </View>
+                    <View style={styles.checkSlot}>
+                      {on ? <Text style={styles.checkMark}>✓</Text> : null}
+                    </View>
+                  </Pressable>
+                </View>
+              </Swipeable>
+            );
+          }}
         />
       )}
       {status ? <Text style={styles.status}>{status}</Text> : null}
@@ -266,14 +331,44 @@ const styles = StyleSheet.create({
   head: { color: "#475569", marginBottom: 12 },
   muted: { textAlign: "center", color: "#94a3b8", marginTop: 24 },
   row: {
-    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingLeft: 12,
+    paddingRight: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#e2e8f0",
     backgroundColor: "#fff",
   },
   rowOn: { backgroundColor: "#fef3c7" },
+  rowMain: { flex: 1, minWidth: 0, paddingRight: 8 },
   name: { fontWeight: "700", color: "#1A1A2E" },
-  phone: { color: "#64748b" },
+  phone: { color: "#64748b", marginTop: 2 },
+  checkSlot: {
+    width: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkMark: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#C0392B",
+  },
+  swipeRemoveWrap: {
+    justifyContent: "center",
+    backgroundColor: "#fee2e2",
+  },
+  swipeRemoveBtn: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 18,
+    minWidth: 88,
+  },
+  swipeRemoveLabel: {
+    color: "#b91c1c",
+    fontWeight: "800",
+    fontSize: 14,
+  },
   status: { color: "#b45309", marginVertical: 8 },
   btn: {
     marginTop: 8,

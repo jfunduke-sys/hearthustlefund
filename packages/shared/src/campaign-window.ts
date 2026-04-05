@@ -118,6 +118,24 @@ export function campaignOutreachBlockedMessage(
   return "";
 }
 
+/**
+ * Athlete app dashboard (and related in-app notices): shorter pre-launch copy
+ * without the parenthetical timezone line.
+ */
+export function athleteDashboardOutreachBannerMessage(
+  phase: CampaignWindowPhase,
+  startDateStr: string,
+  endDateStr: string
+): string {
+  if (phase === "before_start") {
+    return `Messages can be sent on ${formatDisplayDate(startDateStr)}. You can set up your profile and upload contacts anytime.`;
+  }
+  if (phase === "after_end") {
+    return campaignOutreachBlockedMessage(phase, startDateStr, endDateStr);
+  }
+  return "";
+}
+
 export function campaignDonationsBlockedMessage(
   phase: CampaignWindowPhase,
   startDateStr: string,
