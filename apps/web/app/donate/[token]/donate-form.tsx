@@ -6,7 +6,11 @@ import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { BRAND, DONATION_PRESETS, MIN_DONATION_DOLLARS } from "@/lib/brand";
 import type { Athlete, Fundraiser } from "@heart-and-hustle/shared";
-import { formatDisplayDate } from "@heart-and-hustle/shared";
+import {
+  type CampaignWindowPhase,
+  campaignDonationsBlockedMessage,
+  formatDisplayDate,
+} from "@heart-and-hustle/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +24,7 @@ const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 type Props = {
   athlete: Athlete;
   fundraiser: Fundraiser;
+  campaignPhase: CampaignWindowPhase;
   teamRaised: number;
   athleteRaised: number;
 };
@@ -27,6 +32,7 @@ type Props = {
 export default function DonateForm({
   athlete,
   fundraiser,
+  campaignPhase,
   teamRaised,
   athleteRaised,
 }: Props) {
@@ -62,6 +68,16 @@ export default function DonateForm({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (campaignPhase !== "active") {
+      setError(
+        campaignDonationsBlockedMessage(
+          campaignPhase,
+          fundraiser.start_date,
+          fundraiser.end_date
+        )
+      );
+      return;
+    }
     const dollars = dollarsToCharge();
     if (!Number.isFinite(dollars) || dollars < MIN_DONATION_DOLLARS) {
       setError(`Minimum donation is $${MIN_DONATION_DOLLARS}.`);
@@ -180,6 +196,18 @@ export default function DonateForm({
             ) : null}
           </CardHeader>
           <CardContent>
+            {campaignPhase !== "active" ? (
+              <div
+                className="mb-5 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+                role="status"
+              >
+                {campaignDonationsBlockedMessage(
+                  campaignPhase,
+                  fundraiser.start_date,
+                  fundraiser.end_date
+                )}
+              </div>
+            ) : null}
             <form className="space-y-5" onSubmit={onSubmit}>
               <div>
                 <Label>Amount</Label>
@@ -277,7 +305,12 @@ export default function DonateForm({
                 </p>
               ) : null}
 
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full"
+                size="lg"
+                disabled={loading || campaignPhase !== "active"}
+              >
                 {loading ? "Redirecting…" : "Donate now ❤"}
               </Button>
             </form>

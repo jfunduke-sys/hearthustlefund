@@ -18,7 +18,9 @@ import { useRouter, useFocusEffect } from "expo-router";
 import type { Fundraiser } from "@heart-and-hustle/shared";
 import {
   buildReminderSms,
+  campaignOutreachBlockedMessage,
   formatDisplayDateTime,
+  getCampaignWindowPhase,
 } from "@heart-and-hustle/shared";
 import { DonationConfetti } from "../../components/donation-confetti";
 import {
@@ -65,6 +67,8 @@ type Row = {
     | "expected_participants"
     | "school_logo_url"
     | "team_logo_url"
+    | "start_date"
+    | "end_date"
   >;
   raisedSelf: number;
   raisedTeam: number;
@@ -197,7 +201,7 @@ export default function DashboardScreen() {
     const { data: fr } = await supabase
       .from("fundraisers")
       .select(
-        "team_name, school_name, total_goal, goal_per_athlete, expected_participants, school_logo_url, team_logo_url"
+        "team_name, school_name, total_goal, goal_per_athlete, expected_participants, school_logo_url, team_logo_url, start_date, end_date"
       )
       .eq("id", athlete.fundraiser_id)
       .single();
@@ -342,16 +346,25 @@ export default function DashboardScreen() {
       return;
     }
 
+    const phase = getCampaignWindowPhase(
+      data.fundraiser.start_date,
+      data.fundraiser.end_date
+    );
+    if (phase !== "active") {
+      setReminderStatus(
+        campaignOutreachBlockedMessage(
+          phase,
+          data.fundraiser.start_date,
+          data.fundraiser.end_date
+        )
+      );
+      return;
+    }
+
     const user = await getSessionUser();
     if (!user) return;
 
-    const { data: fr } = await supabase
-      .from("fundraisers")
-      .select("team_name")
-      .eq("id", data.athlete.fundraiser_id)
-      .single();
-
-    const team = fr?.team_name ?? "";
+    const team = data.fundraiser.team_name;
     const link = donateUrl(data.athlete.unique_link_token);
 
     setReminderSending(true);
@@ -411,6 +424,11 @@ export default function DashboardScreen() {
     data.fundraiser.school_logo_url?.trim() ||
     null;
 
+  const campaignPhase = getCampaignWindowPhase(
+    data.fundraiser.start_date,
+    data.fundraiser.end_date
+  );
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -437,6 +455,18 @@ export default function DashboardScreen() {
         </View>
         {celebrationLine ? (
           <Text style={styles.celebration}>{celebrationLine}</Text>
+        ) : null}
+
+        {campaignPhase !== "active" ? (
+          <View style={styles.campaignWindowBanner}>
+            <Text style={styles.campaignWindowBannerText}>
+              {campaignOutreachBlockedMessage(
+                campaignPhase,
+                data.fundraiser.start_date,
+                data.fundraiser.end_date
+              )}
+            </Text>
+          </View>
         ) : null}
 
         {reminderCount > 0 ? (
@@ -526,10 +556,16 @@ export default function DashboardScreen() {
         <Pressable
           style={[
             styles.reminderBtn,
-            data.reminderContacts.length === 0 && styles.reminderBtnDisabled,
+            (data.reminderContacts.length === 0 ||
+              campaignPhase !== "active") &&
+              styles.reminderBtnDisabled,
           ]}
           onPress={() => void sendReminders()}
-          disabled={reminderSending || data.reminderContacts.length === 0}
+          disabled={
+            reminderSending ||
+            data.reminderContacts.length === 0 ||
+            campaignPhase !== "active"
+          }
         >
           {reminderSending ? (
             <ActivityIndicator color="#fff" />
@@ -645,6 +681,19 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   noticeBannerText: { fontSize: 14, color: "#78350f", lineHeight: 20 },
+  campaignWindowBanner: {
+    backgroundColor: "#fef3c7",
+    borderWidth: 1,
+    borderColor: "#f59e0b",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  campaignWindowBannerText: {
+    fontSize: 14,
+    color: "#78350f",
+    lineHeight: 20,
+  },
   greet: { fontSize: 24, fontWeight: "800", color: "#1A1A2E" },
   sub: { fontSize: 15, color: "#64748b", marginTop: 4 },
   card: {

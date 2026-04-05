@@ -11,7 +11,12 @@ import * as SMS from "expo-sms";
 import { useFocusEffect } from "expo-router";
 import { getSessionUser } from "../lib/auth-user";
 import { supabase, donateUrl } from "../lib/supabase";
-import { buildReminderSms } from "@heart-and-hustle/shared";
+import type { CampaignWindowPhase } from "@heart-and-hustle/shared";
+import {
+  buildReminderSms,
+  campaignOutreachBlockedMessage,
+  getCampaignWindowPhase,
+} from "@heart-and-hustle/shared";
 
 type Row = {
   id: string;
@@ -32,6 +37,11 @@ export default function FundraisingRemindersScreen({
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [noAthlete, setNoAthlete] = useState(false);
+  const [messagingMeta, setMessagingMeta] = useState<{
+    phase: CampaignWindowPhase;
+    start: string;
+    end: string;
+  }>({ phase: "active", start: "", end: "" });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -39,6 +49,7 @@ export default function FundraisingRemindersScreen({
     if (!user) {
       setRows([]);
       setNoAthlete(false);
+      setMessagingMeta({ phase: "active", start: "", end: "" });
       setLoading(false);
       return;
     }
@@ -52,10 +63,25 @@ export default function FundraisingRemindersScreen({
     if (athleteErr || !athlete) {
       setRows([]);
       setNoAthlete(variant === "coach");
+      setMessagingMeta({ phase: "active", start: "", end: "" });
       setLoading(false);
       return;
     }
     setNoAthlete(false);
+
+    const { data: fr } = await supabase
+      .from("fundraisers")
+      .select("start_date, end_date")
+      .eq("id", athlete.fundraiser_id)
+      .single();
+    const s = String(fr?.start_date ?? "");
+    const e = String(fr?.end_date ?? "");
+    setMessagingMeta({
+      phase: getCampaignWindowPhase(s, e),
+      start: s,
+      end: e,
+    });
+
     const { data } = await supabase
       .from("athlete_contacts")
       .select("id, contact_name, phone_number")
@@ -101,9 +127,24 @@ export default function FundraisingRemindersScreen({
 
     const { data: fr } = await supabase
       .from("fundraisers")
-      .select("team_name")
+      .select("team_name, start_date, end_date")
       .eq("id", athlete.fundraiser_id)
       .single();
+
+    const winPhase = getCampaignWindowPhase(
+      String(fr?.start_date ?? ""),
+      String(fr?.end_date ?? "")
+    );
+    if (winPhase !== "active") {
+      setStatus(
+        campaignOutreachBlockedMessage(
+          winPhase,
+          String(fr?.start_date ?? ""),
+          String(fr?.end_date ?? "")
+        )
+      );
+      return;
+    }
 
     const team = fr?.team_name ?? "";
     const link = donateUrl(athlete.unique_link_token);
@@ -154,6 +195,15 @@ export default function FundraisingRemindersScreen({
 
   return (
     <View style={styles.container}>
+      {messagingMeta.phase !== "active" ? (
+        <Text style={styles.windowBanner}>
+          {campaignOutreachBlockedMessage(
+            messagingMeta.phase,
+            messagingMeta.start,
+            messagingMeta.end
+          )}
+        </Text>
+      ) : null}
       <Text style={styles.head}>
         These contacts haven&apos;t donated yet (and were texted before).
       </Text>
@@ -178,7 +228,9 @@ export default function FundraisingRemindersScreen({
       <Pressable
         style={styles.btn}
         onPress={() => void sendReminders()}
-        disabled={sending || rows.length === 0}
+        disabled={
+          sending || rows.length === 0 || messagingMeta.phase !== "active"
+        }
       >
         {sending ? (
           <ActivityIndicator color="#fff" />
@@ -193,6 +245,17 @@ export default function FundraisingRemindersScreen({
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 12 },
   center: { flex: 1, justifyContent: "center" },
+  windowBanner: {
+    backgroundColor: "#fef3c7",
+    borderWidth: 1,
+    borderColor: "#f59e0b",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    color: "#78350f",
+    fontSize: 14,
+    lineHeight: 20,
+  },
   coachHint: {
     color: "#78350f",
     backgroundColor: "#fef3c7",

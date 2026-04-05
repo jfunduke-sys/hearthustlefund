@@ -1,5 +1,8 @@
 import Stripe from "stripe";
-import { phoneNormalizedMatchCandidates } from "@heart-and-hustle/shared";
+import {
+  isCampaignWindowActiveForDonations,
+  phoneNormalizedMatchCandidates,
+} from "@heart-and-hustle/shared";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   fetchStripeFeeCentsForPaymentIntent,
@@ -36,6 +39,26 @@ export async function recordDonationFromCheckoutSession(
       : session.payment_intent?.id ?? session.id;
 
   const admin = createAdminClient();
+
+  const { data: frDates } = await admin
+    .from("fundraisers")
+    .select("start_date, end_date")
+    .eq("id", fundraiserId)
+    .maybeSingle();
+  if (
+    frDates &&
+    !isCampaignWindowActiveForDonations(
+      String(frDates.start_date ?? ""),
+      String(frDates.end_date ?? "")
+    )
+  ) {
+    console.warn(
+      "[donation] skipped: outside campaign window",
+      fundraiserId
+    );
+    return { inserted: false, skipped: true };
+  }
+
   const stripeForFees =
     stripe ??
     (process.env.STRIPE_SECRET_KEY

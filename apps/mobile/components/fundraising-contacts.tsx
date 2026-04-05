@@ -21,7 +21,12 @@ import {
   isPlausiblePhoneDigits,
   normalizePhoneDigits,
 } from "../lib/phone";
-import { buildInitialFundraisingSms } from "@heart-and-hustle/shared";
+import type { CampaignWindowPhase } from "@heart-and-hustle/shared";
+import {
+  buildInitialFundraisingSms,
+  campaignOutreachBlockedMessage,
+  getCampaignWindowPhase,
+} from "@heart-and-hustle/shared";
 
 type ContactRow = {
   id: string;
@@ -104,6 +109,11 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [coachNeedsParticipant, setCoachNeedsParticipant] = useState(false);
+  const [messagingMeta, setMessagingMeta] = useState<{
+    phase: CampaignWindowPhase;
+    start: string;
+    end: string;
+  }>({ phase: "active", start: "", end: "" });
   /** Clears checkmarks when the user switches to a different athlete / fundraiser. */
   const prevAthleteIdRef = useRef<string | null>(null);
   const currentAthleteIdRef = useRef<string | null>(null);
@@ -128,11 +138,30 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       if (userId) {
         const { data: athleteRows } = await supabase
           .from("athletes")
-          .select("id")
+          .select("id, fundraiser_id")
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
           .limit(1);
-        currentAthleteId = athleteRows?.[0]?.id ?? null;
+        const ath0 = athleteRows?.[0];
+        currentAthleteId = ath0?.id ?? null;
+        if (ath0?.fundraiser_id) {
+          const { data: fr } = await supabase
+            .from("fundraisers")
+            .select("start_date, end_date")
+            .eq("id", ath0.fundraiser_id)
+            .single();
+          const s = String(fr?.start_date ?? "");
+          const e = String(fr?.end_date ?? "");
+          setMessagingMeta({
+            phase: getCampaignWindowPhase(s, e),
+            start: s,
+            end: e,
+          });
+        } else {
+          setMessagingMeta({ phase: "active", start: "", end: "" });
+        }
+      } else {
+        setMessagingMeta({ phase: "active", start: "", end: "" });
       }
 
       if (prevAthleteIdRef.current !== currentAthleteId) {
@@ -320,9 +349,24 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
 
     const { data: fr } = await supabase
       .from("fundraisers")
-      .select("team_name, school_name")
+      .select("team_name, school_name, start_date, end_date")
       .eq("id", athlete.fundraiser_id)
       .single();
+
+    const winPhase = getCampaignWindowPhase(
+      String(fr?.start_date ?? ""),
+      String(fr?.end_date ?? "")
+    );
+    if (winPhase !== "active") {
+      setStatus(
+        campaignOutreachBlockedMessage(
+          winPhase,
+          String(fr?.start_date ?? ""),
+          String(fr?.end_date ?? "")
+        )
+      );
+      return;
+    }
 
     const team = fr?.team_name ?? "";
     const school = fr?.school_name ?? "";
@@ -393,6 +437,15 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         <Text style={styles.coachBanner}>
           Add yourself as a participant on your campaign from the Dashboard tab.
           You&apos;ll get a personal donate link for texts, same as athletes.
+        </Text>
+      ) : null}
+      {messagingMeta.phase !== "active" ? (
+        <Text style={styles.windowBanner}>
+          {campaignOutreachBlockedMessage(
+            messagingMeta.phase,
+            messagingMeta.start,
+            messagingMeta.end
+          )}
         </Text>
       ) : null}
       <TextInput
@@ -489,7 +542,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       <Pressable
         style={styles.btn}
         onPress={() => void saveAndSend()}
-        disabled={sending}
+        disabled={sending || messagingMeta.phase !== "active"}
       >
         {sending ? (
           <ActivityIndicator color="#fff" />
@@ -504,6 +557,17 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 12, paddingBottom: 12 },
   center: { flex: 1, justifyContent: "center" },
+  windowBanner: {
+    backgroundColor: "#fef3c7",
+    borderWidth: 1,
+    borderColor: "#f59e0b",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    color: "#78350f",
+    fontSize: 14,
+    lineHeight: 20,
+  },
   coachBanner: {
     backgroundColor: "#fef3c7",
     borderRadius: 10,

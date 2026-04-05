@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MIN_DONATION_DOLLARS } from "@/lib/brand";
+import { isCampaignWindowActiveForDonations } from "@heart-and-hustle/shared";
 
 const bodySchema = z.object({
   amountDollars: z.number().min(MIN_DONATION_DOLLARS),
@@ -46,12 +47,24 @@ export async function POST(request: Request) {
 
   const { data: fr } = await admin
     .from("fundraisers")
-    .select("id, status")
+    .select("id, status, start_date, end_date")
     .eq("id", b.fundraiser_id)
     .single();
 
   if (!fr || fr.status !== "active") {
     return NextResponse.json({ error: "Fundraiser not active" }, { status: 400 });
+  }
+
+  const start = String(fr.start_date ?? "");
+  const end = String(fr.end_date ?? "");
+  if (!isCampaignWindowActiveForDonations(start, end)) {
+    return NextResponse.json(
+      {
+        error:
+          "Donations are only accepted during the campaign dates (Central Time).",
+      },
+      { status: 400 }
+    );
   }
 
   const base =

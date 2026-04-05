@@ -8,8 +8,11 @@ import { BRAND } from "@/lib/brand";
 import type { Athlete, Donation, Fundraiser } from "@heart-and-hustle/shared";
 import {
   PLATFORM,
+  campaignDonationsBlockedMessage,
+  campaignOutreachBlockedMessage,
   formatDisplayDate,
   formatDisplayDateTime,
+  getCampaignWindowPhase,
 } from "@heart-and-hustle/shared";
 import CoachParticipantCard from "./coach-participant-card";
 import { Button } from "@/components/ui/button";
@@ -151,6 +154,12 @@ export default function CoachDashboardClient({
     Math.ceil((end.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
   );
 
+  const campaignPhase = useMemo(
+    () =>
+      getCampaignWindowPhase(fundraiser.start_date, fundraiser.end_date),
+    [fundraiser.start_date, fundraiser.end_date]
+  );
+
   const sortedAthletes = [...athletes].sort(
     (a, b) =>
       (raisedByAthlete[b.id] ?? 0) - (raisedByAthlete[a.id] ?? 0)
@@ -272,6 +281,31 @@ More tips will show inside the app once you're in. Thanks!`;
       </header>
 
       <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+        {campaignPhase !== "active" ? (
+          <div
+            className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-sm"
+            role="status"
+          >
+            <p className="font-semibold text-amber-900">
+              Outside active campaign dates (Central Time)
+            </p>
+            <p className="mt-1 leading-snug">
+              {campaignOutreachBlockedMessage(
+                campaignPhase,
+                fundraiser.start_date,
+                fundraiser.end_date
+              )}
+            </p>
+            <p className="mt-2 leading-snug text-amber-900/90">
+              {campaignDonationsBlockedMessage(
+                campaignPhase,
+                fundraiser.start_date,
+                fundraiser.end_date
+              )}{" "}
+              Team setup, join codes, and roster changes are still fine.
+            </p>
+          </div>
+        ) : null}
         <div className="rounded-xl border border-sky-200/80 bg-sky-50/90 px-4 py-4 text-sm text-sky-950 shadow-sm">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-sky-800">
             Quick reference

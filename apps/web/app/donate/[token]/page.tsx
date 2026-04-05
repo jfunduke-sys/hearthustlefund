@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import DonateForm from "./donate-form";
 import type { Athlete, Fundraiser } from "@heart-and-hustle/shared";
+import { getCampaignWindowPhase } from "@heart-and-hustle/shared";
 
 export default async function DonatePage({
   params,
@@ -40,10 +41,14 @@ export default async function DonatePage({
   const athleteRaised =
     athleteDonations?.reduce((s, d) => s + Number(d.amount), 0) ?? 0;
 
+  const fr = fundraiser as Fundraiser;
+  const campaignPhase = getCampaignWindowPhase(fr.start_date, fr.end_date);
+
   return (
     <DonateForm
       athlete={athlete as Athlete}
-      fundraiser={fundraiser as Fundraiser}
+      fundraiser={fr}
+      campaignPhase={campaignPhase}
       teamRaised={teamRaised}
       athleteRaised={athleteRaised}
     />
