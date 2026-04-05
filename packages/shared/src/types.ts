@@ -95,6 +95,8 @@ export interface Fundraiser {
   admin_compliance_notes?: string | null;
   /** Set when the fundraiser is closed (completed or cancelled). */
   closed_at?: string | null;
+  /** Optional copy for public donate page (“About this fundraiser”). */
+  donor_page_about?: string | null;
   created_at: string;
 }
 

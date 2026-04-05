@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/brand";
@@ -15,7 +15,10 @@ import {
   getCampaignWindowPhase,
 } from "@heart-and-hustle/shared";
 import CoachParticipantCard from "./coach-participant-card";
+import { updateCoachFundraiserDonorPageAbout } from "@/app/actions/coach";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -135,8 +138,17 @@ export default function CoachDashboardClient({
   raisedByAthlete,
 }: Props) {
   const router = useRouter();
+  const [settingsPending, startSettingsTransition] = useTransition();
+  const [donorPageAbout, setDonorPageAbout] = useState(
+    () => fundraiser.donor_page_about ?? ""
+  );
+  const [donorAboutStatus, setDonorAboutStatus] = useState<string | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
+
+  useEffect(() => {
+    setDonorPageAbout(fundraiser.donor_page_about ?? "");
+  }, [fundraiser.id, fundraiser.donor_page_about]);
   const baseUrl =
     typeof window !== "undefined"
       ? window.location.origin
@@ -321,6 +333,66 @@ More tips will show inside the app once you're in. Thanks!`;
             </li>
           </ul>
         </div>
+
+        <Card className="border-slate-200/90 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg text-hh-dark">Campaign settings</CardTitle>
+            <p className="text-sm font-normal text-slate-600">
+              This message appears on every athlete&apos;s public donation page
+              under &quot;About this fundraiser.&quot; Leave it blank to use the
+              default wording.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="coach-donor-about">Donor page message</Label>
+              <Textarea
+                id="coach-donor-about"
+                value={donorPageAbout}
+                onChange={(e) => {
+                  setDonorPageAbout(e.target.value);
+                  setDonorAboutStatus(null);
+                }}
+                rows={6}
+                maxLength={4000}
+                placeholder="Why donations matter — equipment, travel, program goals, or a thank-you from the team."
+                className="resize-y text-sm"
+                disabled={settingsPending}
+              />
+              <p className="text-xs text-slate-500">
+                {donorPageAbout.length.toLocaleString()} / 4,000 characters
+              </p>
+            </div>
+            {donorAboutStatus ? (
+              <p className="text-sm text-slate-700" role="status">
+                {donorAboutStatus}
+              </p>
+            ) : null}
+            <Button
+              type="button"
+              disabled={settingsPending}
+              onClick={() => {
+                setDonorAboutStatus(null);
+                startSettingsTransition(async () => {
+                  try {
+                    await updateCoachFundraiserDonorPageAbout({
+                      fundraiserId: fundraiser.id,
+                      donorPageAbout,
+                    });
+                    setDonorAboutStatus("Saved. Donation pages will show this text.");
+                    router.refresh();
+                  } catch (e: unknown) {
+                    setDonorAboutStatus(
+                      e instanceof Error ? e.message : "Could not save."
+                    );
+                  }
+                });
+              }}
+            >
+              {settingsPending ? "Saving…" : "Save donor page message"}
+            </Button>
+          </CardContent>
+        </Card>
 
         <Card className="overflow-hidden border-0 shadow-xl shadow-hh-dark/10 ring-1 ring-slate-200/80">
           <div className="relative overflow-hidden bg-gradient-to-br from-hh-dark via-[#252542] to-slate-900 px-5 pb-8 pt-6 text-white md:px-8 md:pb-10 md:pt-8">

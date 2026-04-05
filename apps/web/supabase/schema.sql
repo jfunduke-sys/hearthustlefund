@@ -63,6 +63,7 @@ create table if not exists public.fundraisers (
   join_code text,
   admin_compliance_notes text,
   closed_at timestamptz,
+  donor_page_about text,
   created_at timestamptz default now()
 );
 

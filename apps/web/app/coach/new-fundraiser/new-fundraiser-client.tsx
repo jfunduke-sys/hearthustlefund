@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -137,6 +138,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
   const [perAthlete, setPerAthlete] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [donorPageAbout, setDonorPageAbout] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -307,6 +309,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
         end_date: endDate,
         school_logo_url: logoUrl,
         team_logo_url: logoUrl,
+        donor_page_about: donorPageAbout.trim() || null,
       });
       setDoneInfo({
         slug: res.unique_slug,
@@ -603,6 +606,25 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                       required
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="donor-about">
+                    Donor page message (optional)
+                  </Label>
+                  <Textarea
+                    id="donor-about"
+                    value={donorPageAbout}
+                    onChange={(e) => setDonorPageAbout(e.target.value)}
+                    placeholder="Tell supporters why this fundraiser matters — equipment, travel, program needs, or a thank-you from the team."
+                    rows={5}
+                    maxLength={4000}
+                    className="resize-y text-sm"
+                  />
+                  <p className="text-xs text-slate-500">
+                    Shown on each athlete&apos;s public donation page under
+                    &quot;About this fundraiser.&quot; You can leave this blank
+                    to use a short default message.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="logo">School/Team Logo Upload</Label>

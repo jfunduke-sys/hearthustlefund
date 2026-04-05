@@ -70,6 +70,8 @@ export async function createFundraiserAction(input: {
   end_date: string;
   school_logo_url: string | null;
   team_logo_url: string | null;
+  /** Optional “About this fundraiser” on public donate pages. */
+  donor_page_about?: string | null;
 }) {
   const user = await assertCoach();
   const admin = createAdminClient();
@@ -107,6 +109,8 @@ export async function createFundraiserAction(input: {
 
   const join_code = await allocateUniqueJoinCode(admin);
 
+  const about = input.donor_page_about?.trim() || null;
+
   const { data: inserted, error: insErr } = await admin
     .from("fundraisers")
     .insert({
@@ -121,6 +125,7 @@ export async function createFundraiserAction(input: {
       team_logo_url: input.team_logo_url,
       start_date: input.start_date,
       end_date: input.end_date,
+      donor_page_about: about,
       status: "active",
       unique_slug,
       join_code,
@@ -348,6 +353,44 @@ export async function setCoachShowOnTeamRoster(input: {
     .from("athletes")
     .update({ show_on_team_roster: input.showOnTeamRoster })
     .eq("id", input.athleteId);
+
+  if (upErr) throw new Error(upErr.message);
+
+  revalidatePath("/coach/dashboard");
+}
+
+const DONOR_PAGE_ABOUT_MAX = 4000;
+
+/**
+ * Updates the public donate page “About this fundraiser” copy for the coach’s campaign.
+ */
+export async function updateCoachFundraiserDonorPageAbout(input: {
+  fundraiserId: string;
+  donorPageAbout: string;
+}) {
+  const user = await assertCoach();
+  const admin = createAdminClient();
+  const trimmed = input.donorPageAbout.trim();
+  if (trimmed.length > DONOR_PAGE_ABOUT_MAX) {
+    throw new Error(
+      `Message must be ${DONOR_PAGE_ABOUT_MAX.toLocaleString()} characters or less.`
+    );
+  }
+
+  const { data: fr, error: frErr } = await admin
+    .from("fundraisers")
+    .select("id, coach_id")
+    .eq("id", input.fundraiserId)
+    .single();
+
+  if (frErr || !fr || fr.coach_id !== user.id) {
+    throw new Error("You can only update your own fundraiser.");
+  }
+
+  const { error: upErr } = await admin
+    .from("fundraisers")
+    .update({ donor_page_about: trimmed.length > 0 ? trimmed : null })
+    .eq("id", input.fundraiserId);
 
   if (upErr) throw new Error(upErr.message);
 

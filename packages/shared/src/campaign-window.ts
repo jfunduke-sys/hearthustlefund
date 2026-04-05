@@ -59,6 +59,51 @@ export function isCampaignWindowActiveForDonations(
   return isCampaignWindowActiveForOutreach(startDateStr, endDateStr, now);
 }
 
+/** Whole calendar days between two YYYY-MM-DD strings (b − a). */
+export function calendarDaysBetweenYMD(a: string, b: string): number {
+  const na = normalizeDateOnly(a);
+  const nb = normalizeDateOnly(b);
+  const [ya, ma, da] = na.split("-").map(Number);
+  const [yb, mb, db] = nb.split("-").map(Number);
+  const ua = Date.UTC(ya, ma - 1, da);
+  const ub = Date.UTC(yb, mb - 1, db);
+  return Math.round((ub - ua) / 86400000);
+}
+
+export type CampaignDayBanner =
+  | { phase: "before_start"; daysUntilStart: number }
+  | { phase: "active"; daysLeft: number }
+  | { phase: "after_end" };
+
+/**
+ * Banner copy for donate pages: days until start, days left (inclusive of end
+ * date), or ended. Uses the same calendar zone as campaign enforcement.
+ */
+export function getCampaignDayBanner(
+  startDateStr: string,
+  endDateStr: string,
+  now: Date = new Date(),
+  timeZone: string = CAMPAIGN_CALENDAR_TIME_ZONE
+): CampaignDayBanner | null {
+  const today = calendarDateInTimeZone(now, timeZone);
+  const s = normalizeDateOnly(startDateStr);
+  const e = normalizeDateOnly(endDateStr);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || !/^\d{4}-\d{2}-\d{2}$/.test(e)) {
+    return null;
+  }
+  if (today < s) {
+    return {
+      phase: "before_start",
+      daysUntilStart: Math.max(0, calendarDaysBetweenYMD(today, s)),
+    };
+  }
+  if (today > e) {
+    return { phase: "after_end" };
+  }
+  const daysLeft = calendarDaysBetweenYMD(today, e) + 1;
+  return { phase: "active", daysLeft: Math.max(1, daysLeft) };
+}
+
 export function campaignOutreachBlockedMessage(
   phase: CampaignWindowPhase,
   startDateStr: string,

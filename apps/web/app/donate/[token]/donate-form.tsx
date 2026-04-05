@@ -4,27 +4,79 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
-import { BRAND, DONATION_PRESETS, MIN_DONATION_DOLLARS } from "@/lib/brand";
+import { BRAND, MIN_DONATION_DOLLARS } from "@/lib/brand";
+import { DONATE_TIERS } from "@/lib/donate-tiers";
 import type { Athlete, Fundraiser } from "@heart-and-hustle/shared";
 import {
+  type CampaignDayBanner,
   type CampaignWindowPhase,
   campaignDonationsBlockedMessage,
+  effectiveAthleteGoalForDonorPage,
   formatDisplayDate,
 } from "@heart-and-hustle/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DonateShareRow } from "./donate-share-row";
 
 const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
   ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
   : null;
 
+function ProgressBlock({
+  label,
+  raised,
+  goal,
+  pct,
+  barClass,
+}: {
+  label: string;
+  raised: number;
+  goal: number | null;
+  pct: number | null;
+  barClass: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {label}
+        </p>
+        {goal != null && goal > 0 ? (
+          <span className="text-sm tabular-nums text-slate-700">
+            <span className="font-semibold text-hh-dark">
+              ${raised.toFixed(2)}
+            </span>
+            <span className="text-slate-500"> / ${goal.toFixed(2)}</span>
+            {pct != null ? (
+              <span className="ml-2 text-slate-500">{pct.toFixed(0)}%</span>
+            ) : null}
+          </span>
+        ) : (
+          <span className="text-sm font-semibold tabular-nums text-hh-dark">
+            ${raised.toFixed(2)} raised
+          </span>
+        )}
+      </div>
+      {goal != null && goal > 0 ? (
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200/90">
+          <div
+            className={`h-full rounded-full transition-all ${barClass}`}
+            style={{ width: `${Math.min(100, pct ?? 0)}%` }}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 type Props = {
   athlete: Athlete;
   fundraiser: Fundraiser;
   campaignPhase: CampaignWindowPhase;
+  dayBanner: CampaignDayBanner | null;
+  donatePageUrl: string;
   teamRaised: number;
   athleteRaised: number;
 };
@@ -33,10 +85,12 @@ export default function DonateForm({
   athlete,
   fundraiser,
   campaignPhase,
+  dayBanner,
+  donatePageUrl,
   teamRaised,
   athleteRaised,
 }: Props) {
-  const [amountChoice, setAmountChoice] = useState<number | "other" | null>(25);
+  const [amountChoice, setAmountChoice] = useState<number | "other">(50);
   const [customAmount, setCustomAmount] = useState("");
   const [anonymous, setAnonymous] = useState(false);
   const [donorName, setDonorName] = useState("");
@@ -48,21 +102,23 @@ export default function DonateForm({
   const teamGoal = Number(fundraiser.total_goal);
   const teamPct =
     teamGoal > 0 ? Math.min(100, (teamRaised / teamGoal) * 100) : 0;
-  const personalGoal = athlete.personal_goal
-    ? Number(athlete.personal_goal)
-    : null;
+
+  const athleteGoal = effectiveAthleteGoalForDonorPage(athlete, fundraiser);
   const athletePct =
-    personalGoal && personalGoal > 0
-      ? Math.min(100, (athleteRaised / personalGoal) * 100)
+    athleteGoal != null && athleteGoal > 0
+      ? Math.min(100, (athleteRaised / athleteGoal) * 100)
       : null;
+
+  const aboutText =
+    fundraiser.donor_page_about?.trim() ||
+    `Your gift supports ${fundraiser.team_name} at ${fundraiser.school_name}. Funds help the program reach its goals — and directly boost ${athlete.full_name}'s fundraising progress. Thank you for cheering on our student-athletes.`;
 
   function dollarsToCharge(): number {
     if (amountChoice === "other") {
       const v = parseFloat(customAmount);
       return Number.isFinite(v) ? v : NaN;
     }
-    if (typeof amountChoice === "number") return amountChoice;
-    return NaN;
+    return amountChoice;
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -80,7 +136,7 @@ export default function DonateForm({
     }
     const dollars = dollarsToCharge();
     if (!Number.isFinite(dollars) || dollars < MIN_DONATION_DOLLARS) {
-      setError(`Minimum donation is $${MIN_DONATION_DOLLARS}.`);
+      setError(`Enter at least $${MIN_DONATION_DOLLARS} or pick an amount above.`);
       return;
     }
     if (!anonymous && !donorName.trim()) {
@@ -124,127 +180,231 @@ export default function DonateForm({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-10">
-      <div className="mx-auto max-w-lg">
-        <Link href="/" className="text-sm text-hh-primary hover:underline">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-50 px-4 py-8 pb-16 sm:py-12">
+      <div className="mx-auto max-w-xl space-y-6">
+        <Link
+          href="/"
+          className="inline-flex text-sm font-medium text-hh-primary hover:underline"
+        >
           ← {BRAND.name}
         </Link>
 
-        <Card className="mt-6 border-hh-dark/10">
-          <CardHeader className="space-y-4">
+        {/* Hero */}
+        <header className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-md shadow-slate-900/5">
+          <div className="border-b border-slate-100 bg-gradient-to-br from-hh-dark via-[#252540] to-slate-900 px-5 py-6 text-white">
             <div className="flex items-start gap-4">
-              {fundraiser.school_logo_url ? (
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border bg-white">
-                  <Image
-                    src={fundraiser.school_logo_url}
-                    alt="School"
-                    fill
-                    className="object-contain p-1"
-                    unoptimized
-                  />
-                </div>
-              ) : null}
-              <div>
-                <CardTitle className="text-hh-dark">
-                  You&apos;re supporting {athlete.full_name}!
-                </CardTitle>
-                <p className="mt-1 text-sm text-slate-600">
+              <div className="flex shrink-0 gap-2">
+                {fundraiser.school_logo_url ? (
+                  <div className="relative h-14 w-14 overflow-hidden rounded-xl border border-white/20 bg-white/95">
+                    <Image
+                      src={fundraiser.school_logo_url}
+                      alt=""
+                      fill
+                      className="object-contain p-1"
+                      unoptimized
+                    />
+                  </div>
+                ) : null}
+                {fundraiser.team_logo_url ? (
+                  <div className="relative h-14 w-14 overflow-hidden rounded-xl border border-white/20 bg-white/95">
+                    <Image
+                      src={fundraiser.team_logo_url}
+                      alt=""
+                      fill
+                      className="object-contain p-1"
+                      unoptimized
+                    />
+                  </div>
+                ) : null}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium uppercase tracking-wider text-white/60">
+                  Support a student-athlete
+                </p>
+                <h1 className="mt-1 text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">
+                  {athlete.full_name}
+                </h1>
+                <p className="mt-1 text-sm text-white/80">
                   {fundraiser.team_name} · {fundraiser.school_name}
                 </p>
-                <p className="mt-2 text-xs text-slate-500">
-                  Campaign ends {formatDisplayDate(fundraiser.end_date)}
+                <p className="mt-2 text-xs text-white/55">
+                  Campaign {formatDisplayDate(fundraiser.start_date)} –{" "}
+                  {formatDisplayDate(fundraiser.end_date)} · Central Time
                 </p>
               </div>
+            </div>
+          </div>
+
+          {dayBanner ? (
+            <div className="px-5 py-3">
+              {dayBanner.phase === "active" ? (
+                <p className="rounded-xl bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200/80">
+                  {dayBanner.daysLeft === 1
+                    ? "Last day to donate!"
+                    : `${dayBanner.daysLeft} days left to donate`}
+                </p>
+              ) : dayBanner.phase === "before_start" ? (
+                <p className="rounded-xl bg-slate-100 px-4 py-3 text-center text-sm font-medium text-slate-800 ring-1 ring-slate-200">
+                  {dayBanner.daysUntilStart === 0
+                    ? "Campaign starts today."
+                    : dayBanner.daysUntilStart === 1
+                      ? "Campaign starts tomorrow."
+                      : `Campaign starts in ${dayBanner.daysUntilStart} days.`}
+                </p>
+              ) : (
+                <p className="rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-medium text-amber-950 ring-1 ring-amber-200">
+                  This campaign has ended. Thank you for your support.
+                </p>
+              )}
+            </div>
+          ) : null}
+        </header>
+
+        {campaignPhase !== "active" ? (
+          <div
+            className="rounded-2xl border border-amber-300/90 bg-amber-50 px-5 py-4 text-sm text-amber-950 shadow-sm"
+            role="status"
+          >
+            {campaignDonationsBlockedMessage(
+              campaignPhase,
+              fundraiser.start_date,
+              fundraiser.end_date
+            )}
+          </div>
+        ) : null}
+
+        {/* About */}
+        <section
+          className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6"
+          aria-labelledby="about-fundraiser"
+        >
+          <h2
+            id="about-fundraiser"
+            className="text-sm font-semibold uppercase tracking-wide text-slate-500"
+          >
+            About this fundraiser
+          </h2>
+          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-slate-700">
+            {aboutText}
+          </p>
+        </section>
+
+        {/* Athlete progress */}
+        <section
+          className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6"
+          aria-labelledby="athlete-progress"
+        >
+          <h2
+            id="athlete-progress"
+            className="text-sm font-semibold uppercase tracking-wide text-slate-500"
+          >
+            {athlete.full_name}&apos;s progress
+          </h2>
+          <div className="mt-4">
+            <ProgressBlock
+              label="Personal fundraising"
+              raised={athleteRaised}
+              goal={athleteGoal}
+              pct={athletePct}
+              barClass="bg-gradient-to-r from-amber-500 to-hh-accent"
+            />
+            {athleteGoal == null ? (
+              <p className="mt-2 text-xs text-slate-500">
+                A personal goal will show here when set by the athlete or coach.
+              </p>
+            ) : null}
+          </div>
+        </section>
+
+        <DonateShareRow
+          shareUrl={donatePageUrl}
+          athleteName={athlete.full_name}
+          teamName={fundraiser.team_name}
+          schoolName={fundraiser.school_name}
+        />
+
+        {/* Donation */}
+        <section
+          className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6"
+          aria-labelledby="choose-amount"
+        >
+          <h2
+            id="choose-amount"
+            className="text-sm font-semibold uppercase tracking-wide text-slate-500"
+          >
+            Choose an amount
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Select a level or enter any amount ($
+            {MIN_DONATION_DOLLARS} minimum).
+          </p>
+
+          <form className="mt-5 space-y-6" onSubmit={onSubmit}>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {DONATE_TIERS.map((tier) => {
+                const selected = amountChoice === tier.amount;
+                return (
+                  <button
+                    key={tier.amount}
+                    type="button"
+                    onClick={() => {
+                      setAmountChoice(tier.amount);
+                      setCustomAmount("");
+                    }}
+                    className={`rounded-xl border-2 p-4 text-left transition ${
+                      selected
+                        ? "border-hh-primary bg-red-50/40 ring-2 ring-hh-primary/20"
+                        : "border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-white"
+                    }`}
+                  >
+                    <p className="text-lg font-bold text-hh-dark">
+                      {tier.title}
+                    </p>
+                    <p className="mt-0.5 text-2xl font-black tabular-nums text-hh-primary">
+                      ${tier.amount.toLocaleString()}
+                    </p>
+                    {tier.subtitle ? (
+                      <p className="mt-2 text-xs leading-snug text-slate-600">
+                        {tier.subtitle}
+                      </p>
+                    ) : null}
+                  </button>
+                );
+              })}
             </div>
 
             <div>
-              <p className="text-xs font-medium uppercase text-slate-500">
-                Team progress
-              </p>
-              <div className="mt-1 flex justify-between text-sm">
-                <span>
-                  ${teamRaised.toFixed(2)} / ${teamGoal.toFixed(2)}
-                </span>
-                <span>{teamPct.toFixed(0)}%</span>
-              </div>
-              <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                <div
-                  className="h-full bg-hh-primary"
-                  style={{ width: `${teamPct}%` }}
-                />
-              </div>
-            </div>
-
-            {personalGoal ? (
-              <div>
-                <p className="text-xs font-medium uppercase text-slate-500">
-                  {athlete.full_name}&apos;s goal
-                </p>
-                <div className="mt-1 flex justify-between text-sm">
-                  <span>
-                    ${athleteRaised.toFixed(2)} / ${personalGoal.toFixed(2)}
-                  </span>
-                  <span>{athletePct != null ? `${athletePct.toFixed(0)}%` : ""}</span>
-                </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                  <div
-                    className="h-full bg-hh-accent"
-                    style={{ width: `${athletePct ?? 0}%` }}
-                  />
-                </div>
-              </div>
-            ) : null}
-          </CardHeader>
-          <CardContent>
-            {campaignPhase !== "active" ? (
-              <div
-                className="mb-5 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
-                role="status"
+              <button
+                type="button"
+                onClick={() => setAmountChoice("other")}
+                className={`w-full rounded-xl border-2 p-4 text-left transition sm:max-w-md ${
+                  amountChoice === "other"
+                    ? "border-hh-primary bg-red-50/40 ring-2 ring-hh-primary/20"
+                    : "border-slate-200 bg-slate-50/50 hover:border-slate-300"
+                }`}
               >
-                {campaignDonationsBlockedMessage(
-                  campaignPhase,
-                  fundraiser.start_date,
-                  fundraiser.end_date
-                )}
-              </div>
-            ) : null}
-            <form className="space-y-5" onSubmit={onSubmit}>
-              <div>
-                <Label>Amount</Label>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {DONATION_PRESETS.map((n) => (
-                    <Button
-                      key={n}
-                      type="button"
-                      variant={amountChoice === n ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setAmountChoice(n)}
-                    >
-                      ${n}
-                    </Button>
-                  ))}
-                  <Button
-                    type="button"
-                    variant={amountChoice === "other" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setAmountChoice("other")}
-                  >
-                    Other
-                  </Button>
-                </div>
-                {amountChoice === "other" ? (
+                <span className="font-bold text-hh-dark">Custom amount</span>
+                <span className="mt-1 block text-sm text-slate-600">
+                  Enter any whole-dollar amount you prefer.
+                </span>
+              </button>
+              {amountChoice === "other" ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2 sm:max-w-md">
+                  <span className="text-sm font-medium text-slate-600">$</span>
                   <Input
-                    className="mt-2"
                     type="number"
                     min={MIN_DONATION_DOLLARS}
                     step="1"
-                    placeholder="Custom amount (USD)"
+                    placeholder="Amount"
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.target.value)}
+                    className="max-w-[10rem]"
                   />
-                ) : null}
-              </div>
+                </div>
+              ) : null}
+            </div>
 
+            <div className="border-t border-slate-100 pt-5 space-y-4">
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="anon"
@@ -253,7 +413,7 @@ export default function DonateForm({
                     setAnonymous(v === true)
                   }
                 />
-                <Label htmlFor="anon" className="font-normal">
+                <Label htmlFor="anon" className="font-normal text-slate-700">
                   Donate anonymously
                 </Label>
               </div>
@@ -264,6 +424,7 @@ export default function DonateForm({
                     id="dname"
                     value={donorName}
                     onChange={(e) => setDonorName(e.target.value)}
+                    className="max-w-md"
                   />
                 </div>
               ) : null}
@@ -277,11 +438,8 @@ export default function DonateForm({
                   type="email"
                   value={donorEmail}
                   onChange={(e) => setDonorEmail(e.target.value)}
+                  className="max-w-md"
                 />
-                <p className="text-xs text-slate-500">
-                  Stripe can email an automatic receipt to this address when
-                  enabled in your Stripe Dashboard.
-                </p>
               </div>
 
               <div className="space-y-2">
@@ -291,31 +449,64 @@ export default function DonateForm({
                   type="tel"
                   value={donorPhone}
                   onChange={(e) => setDonorPhone(e.target.value)}
+                  className="max-w-md"
                 />
                 <p className="text-xs text-slate-500">
-                  If it matches a contact you texted, we mark them as donated so
-                  they drop off the &quot;send reminder&quot; list. Leave blank
-                  only if you don&apos;t mind them staying on that list.
+                  If it matches a contact the athlete texted, we may mark them as
+                  donated for reminder lists.
                 </p>
               </div>
+            </div>
 
-              {error ? (
-                <p className="text-sm text-red-600" role="alert">
-                  {error}
-                </p>
-              ) : null}
+            {error ? (
+              <p className="text-sm text-red-600" role="alert">
+                {error}
+              </p>
+            ) : null}
 
-              <Button
-                type="submit"
-                className="w-full"
-                size="lg"
-                disabled={loading || campaignPhase !== "active"}
-              >
-                {loading ? "Redirecting…" : "Donate now ❤"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            <Button
+              type="submit"
+              className="h-12 w-full text-base font-semibold shadow-md sm:max-w-md"
+              size="lg"
+              disabled={loading || campaignPhase !== "active"}
+            >
+              {loading
+                ? "Redirecting to secure checkout…"
+                : (() => {
+                    const d = dollarsToCharge();
+                    return Number.isFinite(d)
+                      ? `Continue with $${d.toLocaleString()} donation`
+                      : "Continue to secure checkout";
+                  })()}
+            </Button>
+          </form>
+        </section>
+
+        {/* Team campaign — bottom */}
+        <section
+          className="rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/90 p-5 shadow-md sm:p-6"
+          aria-labelledby="team-campaign"
+        >
+          <h2
+            id="team-campaign"
+            className="text-sm font-semibold uppercase tracking-wide text-slate-500"
+          >
+            Full team campaign
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Overall progress toward the program&apos;s team goal — every athlete
+            contributes to this total.
+          </p>
+          <div className="mt-5">
+            <ProgressBlock
+              label="Team goal"
+              raised={teamRaised}
+              goal={teamGoal > 0 ? teamGoal : null}
+              pct={teamGoal > 0 ? teamPct : null}
+              barClass="bg-gradient-to-r from-hh-primary to-red-600"
+            />
+          </div>
+        </section>
       </div>
     </div>
   );
