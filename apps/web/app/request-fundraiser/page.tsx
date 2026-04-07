@@ -298,10 +298,6 @@ export default function RequestFundraiserPage() {
                   <p className="text-base font-semibold text-hh-dark">
                     Proposed Fundraiser Dates
                   </p>
-                  <p className="text-sm text-slate-600">
-                    Approximate window you have in mind. The team will confirm
-                    final dates before approval.
-                  </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="fundraiser_start_date" className="text-base">
