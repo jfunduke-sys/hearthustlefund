@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getApiBase, supabase } from "../lib/supabase";
 import { getPostAuthHrefForCurrentUser } from "../lib/post-auth-route";
 import {
@@ -97,6 +98,11 @@ export default function AthleteEntry({
   prefilledCode,
 }: Props) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  /** Match setup screen — status bar + typical stack/header inset so fields stay above the keyboard. */
+  const keyboardVerticalOffset =
+    Platform.OS === "ios" ? insets.top + 52 : 0;
+  const scrollRef = useRef<ScrollView>(null);
   const [tab, setTab] = useState<"join" | "signin">(initialTab);
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
@@ -227,11 +233,16 @@ export default function AthleteEntry({
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={keyboardVerticalOffset}
     >
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
       >
         <Text style={styles.heart}>❤️‍🔥</Text>
         <Text style={styles.title}>Heart & Hustle</Text>
@@ -374,6 +385,13 @@ export default function AthleteEntry({
               textContentType="password"
               returnKeyType="go"
               onSubmitEditing={() => void onSignIn()}
+              onFocus={() => {
+                requestAnimationFrame(() => {
+                  setTimeout(() => {
+                    scrollRef.current?.scrollToEnd({ animated: true });
+                  }, 120);
+                });
+              }}
             />
             {signError ? <Text style={styles.err}>{signError}</Text> : null}
             <Pressable
@@ -399,7 +417,8 @@ const styles = StyleSheet.create({
   scroll: {
     padding: 24,
     paddingTop: 48,
-    paddingBottom: 40,
+    paddingBottom: 48,
+    flexGrow: 1,
   },
   heart: { fontSize: 40, textAlign: "center", marginBottom: 8 },
   title: {

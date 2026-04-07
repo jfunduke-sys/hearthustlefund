@@ -405,16 +405,19 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         return;
       }
 
+      const body = buildInitialFundraisingSms({
+        athleteFullName: athlete.full_name,
+        teamName: team,
+        schoolName: school,
+        donateUrl: link,
+      });
+      /** One recipient per composer — private threads, not a group text (OS opens Messages for each). */
       for (const c of picked) {
-        const body = buildInitialFundraisingSms({
-          athleteFullName: athlete.full_name,
-          teamName: team,
-          schoolName: school,
-          donateUrl: link,
-        });
         await SMS.sendSMSAsync([c.phone], body);
       }
-      setStatus("Messages composer opened. Send from your SMS app.");
+      setStatus(
+        "Done — separate private texts for each person. (Tap Send in Messages for each one when prompted.)"
+      );
       setSelected({});
     } catch (e: unknown) {
       setStatus(e instanceof Error ? e.message : "Failed");
@@ -476,7 +479,9 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       <Text style={styles.count}>{selectedCount} contacts selected</Text>
       <Text style={styles.countHint}>
         Swipe left on a row to remove it from this list (your phone contacts are
-        unchanged).
+        unchanged). Send to contacts sends a private text to each person (not a
+        group chat). Your phone will open Messages once per contact — tap Send each
+        time.
       </Text>
       {status ? <Text style={styles.status}>{status}</Text> : null}
       <FlatList
@@ -547,7 +552,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         {sending ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.btnText}>Save & send texts</Text>
+          <Text style={styles.btnText}>Send to contacts</Text>
         )}
       </Pressable>
     </View>
