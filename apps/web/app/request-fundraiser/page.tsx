@@ -35,7 +35,7 @@ function parseISODate(s: string): Date | null {
 /** Rejects empty or whitespace-only strings. */
 function validateRequestForm(fd: FormData): string | null {
   const schoolName = trimOrEmpty(fd.get("school_name"));
-  if (!schoolName) return "School name is required.";
+  if (!schoolName) return "School/organization name is required.";
 
   const district = trimOrEmpty(fd.get("school_district"));
   if (!district) return "School district is required.";
@@ -71,10 +71,10 @@ function validateRequestForm(fd: FormData): string | null {
   }
 
   const estRaw = trimOrEmpty(fd.get("estimated_athletes"));
-  if (!estRaw) return "Estimated student-athletes is required.";
+  if (!estRaw) return "Estimated number of participants is required.";
   const estNum = parseInt(estRaw, 10);
   if (Number.isNaN(estNum) || estNum < 1) {
-    return "Enter a valid estimated number of athletes (at least 1).";
+    return "Enter a valid estimated number of participants (at least 1).";
   }
 
   const startRaw = trimOrEmpty(fd.get("fundraiser_start_date"));
@@ -106,7 +106,9 @@ export default function RequestFundraiserPage() {
     e.preventDefault();
     setError(null);
     if (!ack) {
-      setError("Please confirm the Illinois paperwork acknowledgment.");
+      setError(
+        "Please confirm the verification and paperwork acknowledgment below."
+      );
       return;
     }
     const form = e.currentTarget;
@@ -201,7 +203,7 @@ export default function RequestFundraiserPage() {
               <form className="space-y-5 sm:space-y-6" onSubmit={onSubmit}>
                 <div className="space-y-2">
                   <Label htmlFor="school_name" className="text-base">
-                    School Name
+                    School/Organization Name
                   </Label>
                   <Input
                     id="school_name"
@@ -436,7 +438,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="estimated_athletes" className="text-base">
-                    Estimated Student-Athletes Participating
+                    Estimated Number of Participants
                   </Label>
                   <Input
                     id="estimated_athletes"
@@ -474,10 +476,11 @@ export default function RequestFundraiserPage() {
                     htmlFor="ack"
                     className="text-sm font-normal leading-relaxed sm:text-[15px]"
                   >
-                    I understand Illinois fundraising regulations require
-                    paperwork (including signatures from school administration
-                    where applicable) before the fundraiser can begin. Heart
-                    &amp; Hustle will contact me with next steps.
+                    I understand that Heart &amp; Hustle Fundraising will verify
+                    existing agreements and documentation on file for my school
+                    or organization, and collect any outstanding paperwork —
+                    including a W-9 and signed fundraising agreement — prior to
+                    launching my campaign.
                   </Label>
                 </div>
                 {error ? (
