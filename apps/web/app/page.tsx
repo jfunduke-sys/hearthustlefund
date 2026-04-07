@@ -37,14 +37,14 @@ export default function HomePage() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-16 sm:py-24">
-        <p className="text-sm font-medium uppercase tracking-wide text-hh-primary">
+        <h1 className="text-balance text-4xl font-bold tracking-tight text-hh-dark sm:text-5xl">
           Built by Heart. Powered by Hustle.
-        </p>
-        <h1 className="mt-3 text-balance text-4xl font-bold tracking-tight text-hh-dark sm:text-5xl">
+        </h1>
+        <p className="mt-4 max-w-3xl text-balance text-lg leading-relaxed text-slate-600 sm:text-xl">
           Safe fundraising for youth and high school teams, clubs, and
           activities.
-        </h1>
-        <ul className="mt-6 max-w-2xl space-y-3 text-base text-slate-700 sm:text-lg">
+        </p>
+        <ul className="mt-8 max-w-2xl space-y-3 text-base text-slate-700 sm:text-lg">
           <li className="flex gap-3">
             <span
               className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-hh-primary"
@@ -83,9 +83,9 @@ export default function HomePage() {
               aria-hidden
             />
             <span>
-              <strong className="font-semibold text-hh-dark">Local platform</strong>{" "}
-              — built and run by people in your community, not a distant
-              marketplace.
+              <strong className="font-semibold text-hh-dark">
+                Locally built, community driven.
+              </strong>
             </span>
           </li>
         </ul>
