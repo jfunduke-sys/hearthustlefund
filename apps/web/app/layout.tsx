@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
   title: BRAND.name,
   description:
-    "High school sports fundraising — 90% to your program, zero data selling, Illinois compliance-first.",
+    "Safe fundraising for youth and high school teams, clubs, and activities — 90% to your program, zero data selling, quick payouts, local support.",
   icons: {
     icon: "/icon.svg",
   },

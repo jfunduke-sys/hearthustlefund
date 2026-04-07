@@ -38,10 +38,11 @@ export default function HomePage() {
 
       <main className="mx-auto max-w-5xl px-4 py-16 sm:py-24">
         <p className="text-sm font-medium uppercase tracking-wide text-hh-primary">
-          High school sports fundraising
+          Built by Heart. Powered by Hustle.
         </p>
         <h1 className="mt-3 text-balance text-4xl font-bold tracking-tight text-hh-dark sm:text-5xl">
-          Built for athletes. Powered by community.
+          Safe fundraising for youth and high school teams, clubs, and
+          activities.
         </h1>
         <ul className="mt-6 max-w-2xl space-y-3 text-base text-slate-700 sm:text-lg">
           <li className="flex gap-3">
@@ -51,7 +52,7 @@ export default function HomePage() {
             />
             <span>
               <strong className="font-semibold text-hh-dark">90%</strong> of
-              donations go to your school program.
+              donations go to your program.
             </span>
           </li>
           <li className="flex gap-3">
@@ -71,25 +72,37 @@ export default function HomePage() {
             />
             <span>
               <strong className="font-semibold text-hh-dark">
-                Illinois-ready
+                Quick payouts
               </strong>{" "}
-              — paperwork and approval before any campaign goes live.
+              — funds typically reach your program within 2–3 business days.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span
+              className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-hh-primary"
+              aria-hidden
+            />
+            <span>
+              <strong className="font-semibold text-hh-dark">Local platform</strong>{" "}
+              — built and run by people in your community, not a distant
+              marketplace.
             </span>
           </li>
         </ul>
         <section className="mt-12 max-w-3xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-xl font-bold tracking-tight text-hh-dark sm:text-2xl">
-            Why schools choose {BRAND.name}
+            Why schools and clubs choose {BRAND.name}
           </h2>
           <p className="mt-2 text-sm text-slate-600 sm:text-base">
             Most fundraising platforms take a hidden cut, push products nobody
             asked for, or turn your participants and donors into a marketing list
-            for sale. We don&apos;t. Heart &amp; Hustle was built on one rule: the
-            program comes first.
+            for sale. We don&apos;t. Whether you run youth or high school sports,
+            clubs, or activities through a school district or a standalone club,
+            Heart &amp; Hustle follows one rule: the program comes first.
           </p>
           <ul className="mt-6 grid gap-5 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-6">
             <li>
-              <p className="font-semibold text-hh-dark">More for your athletes</p>
+              <p className="font-semibold text-hh-dark">More for your program</p>
               <p className="mt-1 text-sm leading-snug text-slate-600">
                 A high share of each donation is structured to flow back to your
                 program—transparent processing, not layers of middlemen.
@@ -103,17 +116,26 @@ export default function HomePage() {
               </p>
             </li>
             <li>
-              <p className="font-semibold text-hh-dark">Built for teams, not catalogs</p>
+              <p className="font-semibold text-hh-dark">Built for teams and clubs, not catalogs</p>
               <p className="mt-1 text-sm leading-snug text-slate-600">
                 Personal donation links and optional texting replace order forms,
-                deliveries, and quota pressure—so coaches focus on athletes.
+                deliveries, and quota pressure—so coaches and advisors focus on
+                participants.
               </p>
             </li>
             <li>
-              <p className="font-semibold text-hh-dark">Illinois-ready oversight</p>
+              <p className="font-semibold text-hh-dark">Quick payouts</p>
               <p className="mt-1 text-sm leading-snug text-slate-600">
-                Required paperwork and internal review happen before launch—so
-                you&apos;re not improvising compliance on your own.
+                Funds typically reach your program within 2–3 business days after
+                processing—so you&apos;re not waiting on long settlement windows.
+              </p>
+            </li>
+            <li>
+              <p className="font-semibold text-hh-dark">Local, not faceless</p>
+              <p className="mt-1 text-sm leading-snug text-slate-600">
+                The platform is built and operated locally—you work with real
+                people who understand schools and clubs, not an anonymous national
+                help desk.
               </p>
             </li>
           </ul>
