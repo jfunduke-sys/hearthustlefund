@@ -52,7 +52,11 @@ export default function HomePage() {
             />
             <span>
               <strong className="font-semibold text-hh-dark">90%</strong> of
-              donations go to your program.
+              donations go to your program
+              <span className="font-semibold text-hh-dark" aria-hidden="true">
+                *
+              </span>
+              .
             </span>
           </li>
           <li className="flex gap-3">
@@ -89,6 +93,15 @@ export default function HomePage() {
             </span>
           </li>
         </ul>
+        <p
+          className="mt-4 max-w-2xl text-sm italic leading-relaxed text-slate-500 sm:text-[15px]"
+          role="note"
+        >
+          <span className="sr-only">Regarding the 90% figure: </span>* We keep
+          10% to run a safe, compliant platform — payment processing, state
+          fundraising registration, surety bonding, and operational costs. No
+          hidden fees. No data selling. Just transparent fundraising.
+        </p>
         <section className="mt-12 max-w-3xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-xl font-bold tracking-tight text-hh-dark sm:text-2xl">
             Why schools and clubs choose {BRAND.name}
