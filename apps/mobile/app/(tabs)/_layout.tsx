@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Redirect, Tabs } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
+import { HeaderLogOut } from "../../components/header-log-out";
 import { getSessionUser } from "../../lib/auth-user";
 import { subscribeSessionPresence } from "../../lib/auth-session-listener";
 import { supabase } from "../../lib/supabase";
@@ -69,6 +70,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: "#64748b",
         headerStyle: { backgroundColor: "#1A1A2E" },
         headerTintColor: "#fff",
+        headerRight: () => <HeaderLogOut />,
         tabBarStyle: { borderTopColor: "#e2e8f0" },
       }}
     >

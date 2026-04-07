@@ -1,13 +1,17 @@
 -- =============================================================================
--- ONE-OFF: Reset app data + delete all auth users except super admin
--- Run in Supabase Dashboard → SQL Editor (project owner).
+-- ONE-OFF: Reset app data + delete all auth users except SuperAdmin
+-- Run in Supabase Dashboard → SQL Editor (use role: postgres, or owner).
 --
--- 1) Replace REPLACE_WITH_SUPERADMIN_EMAIL below with the same address as
---    SUPERADMIN_EMAIL (that user must already exist in Authentication → Users).
--- 2) Run the entire script once. Destructive — back up first if unsure.
+-- BEFORE YOU RUN:
+-- 1) Set keep_email below to the SAME string as apps/web .env SUPERADMIN_EMAIL.
+-- 2) Confirm that user already exists under Authentication → Users (create it if not).
+-- 3) Destructive — export or back up first if you need any data.
 --
--- Storage: Supabase blocks SQL DELETE on storage.objects. To clear uploaded
--- logos, use Dashboard → Storage → logos → select files → delete (or Storage API).
+-- AFTER: Coaches/athletes must sign up again. Mobile apps may still show an old
+-- session until the user taps Log out or clears app data — sign-out stale clients when testing.
+--
+-- Storage: SQL cannot bulk-delete storage.objects in all projects. To clear logos:
+-- Dashboard → Storage → your bucket → delete files (or Storage API).
 -- =============================================================================
 
 DO $$
