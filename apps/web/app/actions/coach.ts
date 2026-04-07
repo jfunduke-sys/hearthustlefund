@@ -219,25 +219,61 @@ function coachDisplayNameFromEmail(email: string | undefined): string | null {
 }
 
 /**
+ * Name from the original fundraiser request when this code was tied to a school_requests row
+ * and the request contact email matches the coach signing in.
+ */
+async function coachNameFromSchoolRequest(
+  admin: ReturnType<typeof createAdminClient>,
+  codeUsed: string | null | undefined,
+  coachEmail: string | null | undefined
+): Promise<string | null> {
+  const code = typeof codeUsed === "string" ? codeUsed.trim() : "";
+  const email = coachEmail?.trim().toLowerCase();
+  if (!code || !email) return null;
+
+  const { data: codeRow } = await admin
+    .from("fundraiser_codes")
+    .select("school_request_id")
+    .eq("code", code)
+    .maybeSingle();
+
+  if (!codeRow?.school_request_id) return null;
+
+  const { data: sr } = await admin
+    .from("school_requests")
+    .select("admin_email, admin_first_name, admin_last_name, admin_name")
+    .eq("id", codeRow.school_request_id)
+    .maybeSingle();
+
+  if (!sr) return null;
+
+  const reqEmail = String(sr.admin_email ?? "")
+    .trim()
+    .toLowerCase();
+  if (!reqEmail || reqEmail !== email) return null;
+
+  const first = String(sr.admin_first_name ?? "").trim();
+  const last = String(sr.admin_last_name ?? "").trim();
+  if (first || last) {
+    return [first, last].filter(Boolean).join(" ").trim();
+  }
+
+  const full = String(sr.admin_name ?? "").trim();
+  return full || null;
+}
+
+/**
  * Ensures the head coach has one athlete row for this fundraiser so they can use
  * the mobile app (donate link, texting) with the same login—no extra form.
  */
 export async function ensureCoachParticipantAthlete(fundraiserId: string) {
   const user = await assertCoach();
   const admin = createAdminClient();
-
-  const { data: existing } = await admin
-    .from("athletes")
-    .select("id")
-    .eq("fundraiser_id", fundraiserId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (existing) return;
+  const coachEmail = user.email ?? null;
 
   const { data: fr, error: frErr } = await admin
     .from("fundraisers")
-    .select("team_name, coach_id")
+    .select("team_name, coach_id, code_used")
     .eq("id", fundraiserId)
     .single();
 
@@ -251,15 +287,47 @@ export async function ensureCoachParticipantAthlete(fundraiserId: string) {
     (typeof meta?.name === "string" && meta.name.trim()) ||
     null;
 
-  const displayName =
+  const fromSchoolRequest = await coachNameFromSchoolRequest(
+    admin,
+    fr.code_used as string | null | undefined,
+    coachEmail
+  );
+
+  const finalName = (
+    (fromSchoolRequest?.trim() || null) ||
     fromMeta ||
-    coachDisplayNameFromEmail(user.email ?? undefined) ||
-    `Coach · ${fr.team_name}`;
+    coachDisplayNameFromEmail(coachEmail ?? undefined) ||
+    `Coach · ${fr.team_name}`
+  ).trim();
+
+  const { data: existing, error: exErr } = await admin
+    .from("athletes")
+    .select("id, full_name")
+    .eq("fundraiser_id", fundraiserId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (exErr) throw new Error(exErr.message);
+
+  if (existing) {
+    if (
+      fromSchoolRequest?.trim() &&
+      existing.full_name.trim() !== fromSchoolRequest.trim()
+    ) {
+      const { error: upErr } = await admin
+        .from("athletes")
+        .update({ full_name: fromSchoolRequest.trim() })
+        .eq("id", existing.id);
+      if (upErr) throw new Error(upErr.message);
+      revalidatePath("/coach/dashboard");
+    }
+    return;
+  }
 
   const { error: insErr } = await admin.from("athletes").insert({
     fundraiser_id: fundraiserId,
     user_id: user.id,
-    full_name: displayName.trim(),
+    full_name: finalName,
     team_name: fr.team_name,
     jersey_number: null,
     personal_goal: null,
