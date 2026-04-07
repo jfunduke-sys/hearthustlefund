@@ -37,9 +37,6 @@ function validateRequestForm(fd: FormData): string | null {
   const schoolName = trimOrEmpty(fd.get("school_name"));
   if (!schoolName) return "School/organization name is required.";
 
-  const district = trimOrEmpty(fd.get("school_district"));
-  if (!district) return "School district is required.";
-
   const street = trimOrEmpty(fd.get("school_street"));
   const city = trimOrEmpty(fd.get("school_city"));
   const state = trimOrEmpty(fd.get("school_state"));
@@ -214,12 +211,12 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="school_district" className="text-base">
-                    School District
+                    School District{" "}
+                    <span className="font-normal text-slate-500">(optional)</span>
                   </Label>
                   <Input
                     id="school_district"
                     name="school_district"
-                    required
                     className="h-12 text-base"
                   />
                 </div>
