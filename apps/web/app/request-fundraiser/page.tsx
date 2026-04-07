@@ -174,7 +174,7 @@ export default function RequestFundraiserPage() {
           href="/"
           className="text-sm font-medium text-hh-primary hover:underline"
         >
-          ← Back home
+          ← Back Home
         </Link>
 
         <h1 className="mt-8 text-center text-2xl font-extrabold tracking-tight text-hh-dark sm:mt-10 sm:text-3xl">
@@ -201,7 +201,7 @@ export default function RequestFundraiserPage() {
               <form className="space-y-5 sm:space-y-6" onSubmit={onSubmit}>
                 <div className="space-y-2">
                   <Label htmlFor="school_name" className="text-base">
-                    School name
+                    School Name
                   </Label>
                   <Input
                     id="school_name"
@@ -212,7 +212,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="school_district" className="text-base">
-                    School district
+                    School District
                   </Label>
                   <Input
                     id="school_district"
@@ -223,11 +223,11 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-3">
                   <p className="text-base font-semibold text-hh-dark">
-                    School address
+                    School Address
                   </p>
                   <div className="space-y-2">
                     <Label htmlFor="school_street" className="text-base">
-                      Street address
+                      Street Address
                     </Label>
                     <Input
                       id="school_street"
@@ -258,13 +258,19 @@ export default function RequestFundraiserPage() {
                         id="school_state"
                         name="school_state"
                         required
+                        readOnly
+                        defaultValue="IL"
                         autoComplete="address-level1"
-                        className="h-12 text-base"
+                        title="Campaigns are currently available in Illinois only."
+                        className="h-12 bg-slate-50/90 text-base"
                       />
+                      <p className="text-xs text-slate-500">
+                        Illinois only — this field is set to IL for you.
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="school_zip" className="text-base">
-                        ZIP code
+                        ZIP Code
                       </Label>
                       <Input
                         id="school_zip"
@@ -279,7 +285,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="sport_club_activity" className="text-base">
-                    Sport, club, or activity
+                    Sport, Club, or Activity
                   </Label>
                   <Input
                     id="sport_club_activity"
@@ -291,7 +297,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-3">
                   <p className="text-base font-semibold text-hh-dark">
-                    Proposed fundraiser dates
+                    Proposed Fundraiser Dates
                   </p>
                   <p className="text-sm text-slate-600">
                     Approximate window you have in mind. The team will confirm
@@ -300,7 +306,7 @@ export default function RequestFundraiserPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="fundraiser_start_date" className="text-base">
-                        Start date
+                        Start Date
                       </Label>
                       <Input
                         id="fundraiser_start_date"
@@ -312,7 +318,7 @@ export default function RequestFundraiserPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="fundraiser_end_date" className="text-base">
-                        End date
+                        End Date
                       </Label>
                       <Input
                         id="fundraiser_end_date"
@@ -326,7 +332,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <fieldset className="space-y-3">
                   <legend className="text-base font-semibold text-hh-dark">
-                    Fundraiser kickoff
+                    Fundraiser Kickoff
                   </legend>
                   <p className="text-sm text-slate-600">
                     Choose one. This helps us schedule support if you want a
@@ -343,7 +349,7 @@ export default function RequestFundraiserPage() {
                       />
                       <span className="text-sm leading-snug text-slate-800">
                         <span className="font-semibold text-hh-dark">
-                          In-person kickoff with a Heart &amp; Hustle rep
+                          In-Person Kickoff With a Heart &amp; Hustle Rep
                         </span>
                         <span className="mt-0.5 block text-slate-600">
                           Schedule someone from our team to help set up and
@@ -360,7 +366,7 @@ export default function RequestFundraiserPage() {
                       />
                       <span className="text-sm leading-snug text-slate-800">
                         <span className="font-semibold text-hh-dark">
-                          We&apos;ll handle our own kickoff
+                          We&apos;ll Handle Our Own Kickoff
                         </span>
                         <span className="mt-0.5 block text-slate-600">
                           Your staff runs the launch; no Heart &amp; Hustle team
@@ -373,7 +379,7 @@ export default function RequestFundraiserPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="admin_first_name" className="text-base">
-                      Coach / lead first name
+                      Coach / Lead First Name
                     </Label>
                     <Input
                       id="admin_first_name"
@@ -385,7 +391,7 @@ export default function RequestFundraiserPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="admin_last_name" className="text-base">
-                      Coach / lead last name
+                      Coach / Lead Last Name
                     </Label>
                     <Input
                       id="admin_last_name"
@@ -398,7 +404,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="admin_email" className="text-base">
-                    Email
+                    Email Address
                   </Label>
                   <p className="text-sm leading-relaxed text-slate-600">
                     The email you use here will be the email you use to sign in
@@ -416,7 +422,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="admin_phone" className="text-base">
-                    Your phone
+                    Your Phone
                   </Label>
                   <Input
                     id="admin_phone"
@@ -430,7 +436,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="estimated_athletes" className="text-base">
-                    Estimated student-athletes participating
+                    Estimated Student-Athletes Participating
                   </Label>
                   <Input
                     id="estimated_athletes"
@@ -444,7 +450,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="notes" className="text-base">
-                    Additional notes{" "}
+                    Additional Notes{" "}
                     <span className="font-normal text-slate-500">(optional)</span>
                   </Label>
                   <Textarea
@@ -484,7 +490,7 @@ export default function RequestFundraiserPage() {
                   className="h-12 w-full text-base font-semibold sm:h-14 sm:text-lg"
                   disabled={loading}
                 >
-                  {loading ? "Submitting…" : "Submit request"}
+                  {loading ? "Submitting…" : "Submit Request"}
                 </Button>
               </form>
             )}
