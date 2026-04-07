@@ -223,7 +223,7 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-3">
                   <p className="text-base font-semibold text-hh-dark">
-                    School Address
+                    School/Organization Address
                   </p>
                   <div className="space-y-2">
                     <Label htmlFor="school_street" className="text-base">
