@@ -677,9 +677,6 @@ export default function DashboardScreen() {
         </View>
 
         <Text style={styles.section}>Your donations</Text>
-        <Text style={styles.sectionHint}>
-          Total from your personal link: ${data.raisedSelf.toFixed(2)}
-        </Text>
         {data.allDonations.length === 0 ? (
           <Text style={styles.muted}>No donations yet — share your link!</Text>
         ) : (
