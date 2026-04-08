@@ -169,10 +169,13 @@ export default function DashboardScreen() {
   const [smsPhoneMsg, setSmsPhoneMsg] = useState<string | null>(null);
   /** sms_reminders_opt_in === false from account creation (can opt in again via Save). */
   const [smsDeclinedAtSignup, setSmsDeclinedAtSignup] = useState(false);
+  /** Session email, or username from metadata when email is missing. */
+  const [accountIdentity, setAccountIdentity] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!hasSupabaseConfig()) {
       setData(null);
+      setAccountIdentity(null);
       setProfileHelp(
         "App config: add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to apps/mobile/.env (same project as the website), then restart Expo."
       );
@@ -185,6 +188,7 @@ export default function DashboardScreen() {
     const user = await getSessionUser();
     if (!user) {
       setData(null);
+      setAccountIdentity(null);
       setProfileHelp(null);
       setShowConfetti(false);
       setCelebrationLine(null);
@@ -196,6 +200,21 @@ export default function DashboardScreen() {
       setSmsDeclinedAtSignup(false);
       return;
     }
+
+    const meta = user.user_metadata as {
+      username?: string;
+      preferred_username?: string;
+    } | undefined;
+    const fromMeta =
+      (typeof meta?.username === "string" ? meta.username.trim() : "") ||
+      (typeof meta?.preferred_username === "string"
+        ? meta.preferred_username.trim()
+        : "");
+    const emailStr =
+      typeof user.email === "string" && user.email.trim()
+        ? user.email.trim()
+        : "";
+    setAccountIdentity(emailStr || fromMeta || null);
 
     const smsMeta = user.user_metadata as {
       sms_phone?: string;
@@ -351,6 +370,7 @@ export default function DashboardScreen() {
       }
       if (event === "SIGNED_OUT") {
         setData(null);
+        setAccountIdentity(null);
         setShowConfetti(false);
         setCelebrationLine(null);
         setReminderSelected({});
@@ -636,96 +656,6 @@ export default function DashboardScreen() {
         ) : null}
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Campaign text reminders</Text>
-          {(() => {
-            const hasSavedReminderPhone = smsPhoneSavedSnapshot.length === 10;
-            if (hasSavedReminderPhone && !smsPhoneEditing) {
-              return (
-                <>
-                  <View style={styles.smsSavedRow}>
-                    <View style={styles.smsSavedTextBlock}>
-                      <Text style={styles.smsSavedLabel}>Mobile</Text>
-                      <Text style={styles.smsSavedNumber}>
-                        {formatReminderPhoneDisplay(smsPhoneSavedSnapshot)}
-                      </Text>
-                    </View>
-                    <Pressable
-                      style={styles.smsEditBtn}
-                      onPress={() => {
-                        setSmsPhoneMsg(null);
-                        setSmsPhone(smsPhoneSavedSnapshot);
-                        setSmsPhoneEditing(true);
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel="Edit reminder phone number"
-                    >
-                      <Text style={styles.smsEditBtnText}>Edit</Text>
-                    </Pressable>
-                  </View>
-                </>
-              );
-            }
-            return (
-              <>
-                {smsDeclinedAtSignup ? (
-                  <Text style={styles.smsDeclinedHint}>
-                    You chose not to receive texts when you created your account.
-                    Enter your number below and tap Save to opt in.
-                  </Text>
-                ) : null}
-                <Text style={styles.sectionHint}>
-                  {hasSavedReminderPhone
-                    ? "Update your US mobile, or tap Cancel to keep the current number."
-                    : "Optional US mobile for Heart & Hustle SMS nudges during the campaign (about every 3 days + last day). Msg & data rates may apply. Reply STOP to opt out, HELP for help."}
-                </Text>
-                <TextInput
-                  style={styles.smsPhoneInput}
-                  value={smsPhone}
-                  onChangeText={setSmsPhone}
-                  keyboardType="phone-pad"
-                  placeholder="10-digit mobile"
-                  maxLength={14}
-                />
-                <View style={styles.smsActionsRow}>
-                  <Pressable
-                    style={[
-                      styles.smsPhoneSave,
-                      smsPhoneBusy && styles.smsPhoneSaveDisabled,
-                    ]}
-                    disabled={smsPhoneBusy}
-                    onPress={() => void saveSmsPhone()}
-                  >
-                    {smsPhoneBusy ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <Text style={styles.smsPhoneSaveText}>Save number</Text>
-                    )}
-                  </Pressable>
-                  {hasSavedReminderPhone ? (
-                    <Pressable
-                      style={styles.smsCancelBtn}
-                      disabled={smsPhoneBusy}
-                      onPress={() => {
-                        setSmsPhone(smsPhoneSavedSnapshot);
-                        setSmsPhoneEditing(false);
-                        setSmsPhoneMsg(null);
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel="Cancel editing phone number"
-                    >
-                      <Text style={styles.smsCancelBtnText}>Cancel</Text>
-                    </Pressable>
-                  ) : null}
-                </View>
-              </>
-            );
-          })()}
-          {smsPhoneMsg ? (
-            <Text style={styles.smsPhoneFeedback}>{smsPhoneMsg}</Text>
-          ) : null}
-        </View>
-
-        <View style={styles.card}>
           <Text style={styles.cardTitle}>Your progress</Text>
           <Text style={styles.stat}>
             ${data.raisedSelf.toFixed(2)}
@@ -968,6 +898,101 @@ export default function DashboardScreen() {
             </Pressable>
           </View>
         </View>
+
+        <View style={[styles.card, styles.contactInfoCard]}>
+          <Text style={styles.cardTitle}>Your Contact Info</Text>
+          <View style={styles.contactInfoBlock}>
+            <Text style={styles.smsSavedLabel}>Email or username</Text>
+            <Text style={styles.contactInfoValue} selectable>
+              {accountIdentity ?? "—"}
+            </Text>
+          </View>
+          {(() => {
+            const hasSavedReminderPhone = smsPhoneSavedSnapshot.length === 10;
+            if (hasSavedReminderPhone && !smsPhoneEditing) {
+              return (
+                <View style={styles.smsSavedRow}>
+                  <View style={styles.smsSavedTextBlock}>
+                    <Text style={styles.smsSavedLabel}>Phone</Text>
+                    <Text style={styles.smsSavedNumber}>
+                      {formatReminderPhoneDisplay(smsPhoneSavedSnapshot)}
+                    </Text>
+                  </View>
+                  <Pressable
+                    style={styles.smsEditBtn}
+                    onPress={() => {
+                      setSmsPhoneMsg(null);
+                      setSmsPhone(smsPhoneSavedSnapshot);
+                      setSmsPhoneEditing(true);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Edit phone number"
+                  >
+                    <Text style={styles.smsEditBtnText}>Edit</Text>
+                  </Pressable>
+                </View>
+              );
+            }
+            return (
+              <>
+                <Text style={styles.smsSavedLabel}>Phone</Text>
+                {smsDeclinedAtSignup ? (
+                  <Text style={styles.smsDeclinedHint}>
+                    You chose not to receive texts when you created your account.
+                    Enter your number below and tap Save to opt in.
+                  </Text>
+                ) : null}
+                <Text style={styles.sectionHint}>
+                  {hasSavedReminderPhone
+                    ? "Update your US mobile, or tap Cancel to keep the current number."
+                    : "Optional US mobile for campaign reminder texts (about every 3 days + last day). Msg & data rates may apply. Reply STOP to opt out, HELP for help."}
+                </Text>
+                <TextInput
+                  style={styles.smsPhoneInput}
+                  value={smsPhone}
+                  onChangeText={setSmsPhone}
+                  keyboardType="phone-pad"
+                  placeholder="10-digit mobile"
+                  maxLength={14}
+                />
+                <View style={styles.smsActionsRow}>
+                  <Pressable
+                    style={[
+                      styles.smsPhoneSave,
+                      smsPhoneBusy && styles.smsPhoneSaveDisabled,
+                    ]}
+                    disabled={smsPhoneBusy}
+                    onPress={() => void saveSmsPhone()}
+                  >
+                    {smsPhoneBusy ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.smsPhoneSaveText}>Save number</Text>
+                    )}
+                  </Pressable>
+                  {hasSavedReminderPhone ? (
+                    <Pressable
+                      style={styles.smsCancelBtn}
+                      disabled={smsPhoneBusy}
+                      onPress={() => {
+                        setSmsPhone(smsPhoneSavedSnapshot);
+                        setSmsPhoneEditing(false);
+                        setSmsPhoneMsg(null);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel="Cancel editing phone number"
+                    >
+                      <Text style={styles.smsCancelBtnText}>Cancel</Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              </>
+            );
+          })()}
+          {smsPhoneMsg ? (
+            <Text style={styles.smsPhoneFeedback}>{smsPhoneMsg}</Text>
+          ) : null}
+        </View>
       </ScrollView>
       {showConfetti ? (
         <View style={styles.confettiLayer} pointerEvents="none">
@@ -1159,6 +1184,14 @@ const styles = StyleSheet.create({
     borderColor: "#e2e8f0",
   },
   cardTitle: { fontSize: 13, fontWeight: "700", color: "#64748b" },
+  contactInfoCard: { marginTop: 8 },
+  contactInfoBlock: { marginBottom: 14 },
+  contactInfoValue: {
+    marginTop: 4,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1A1A2E",
+  },
   stat: { fontSize: 20, fontWeight: "800", color: "#1A1A2E", marginTop: 4 },
   barBg: {
     height: 8,
