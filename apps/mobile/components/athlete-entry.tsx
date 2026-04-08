@@ -196,11 +196,15 @@ export default function AthleteEntry({
     setSignError(null);
     setLoading(true);
     try {
-      const { error: e } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+      await supabase.auth.signOut({ scope: "local" });
+      const { data, error: e } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
         password,
       });
       if (e) throw e;
+      if (!data.session) {
+        throw new Error("Session did not start. Try again.");
+      }
       router.replace(await getPostAuthHrefForCurrentUser());
     } catch (e: unknown) {
       setSignError(e instanceof Error ? e.message : "Sign in failed");

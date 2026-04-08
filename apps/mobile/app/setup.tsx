@@ -84,15 +84,20 @@ export default function SetupScreen() {
         throw new Error(payload.error || "Could not create your account.");
       }
 
-      const { error: signErr } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password,
-      });
-      if (signErr) throw signErr;
+      // Clear any partial/stale GoTrue session in AsyncStorage so auto-refresh does not
+      // run against a missing or invalid refresh token (common after reinstall / Expo Go).
+      await supabase.auth.signOut({ scope: "local" });
 
-      const { data: sess } = await supabase.auth.getSession();
-      if (!sess.session) {
-        throw new Error("Session did not start. Try signing in from the home screen.");
+      const { data: signInData, error: signErr } =
+        await supabase.auth.signInWithPassword({
+          email: loginEmail,
+          password,
+        });
+      if (signErr) throw signErr;
+      if (!signInData.session) {
+        throw new Error(
+          "Session did not start. Try signing in from the home screen."
+        );
       }
 
       router.replace(await getPostAuthHrefForCurrentUser());
