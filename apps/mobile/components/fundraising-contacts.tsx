@@ -1,8 +1,7 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   FlatList,
   Pressable,
   StyleSheet,
@@ -136,7 +135,6 @@ export type FundraisingContactsVariant = "athlete" | "coach";
 type Props = { variant?: FundraisingContactsVariant };
 
 export default function FundraisingContactsScreen({ variant = "athlete" }: Props) {
-  const [query, setQuery] = useState("");
   const [rows, setRows] = useState<ContactRow[]>([]);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
@@ -155,15 +153,6 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   /** Clears checkmarks when the user switches to a different athlete / fundraiser. */
   const prevAthleteIdRef = useRef<string | null>(null);
   const currentAthleteIdRef = useRef<string | null>(null);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(
-      (r) =>
-        r.name.toLowerCase().includes(q) || r.phone.replace(/\D/g, "").includes(q)
-    );
-  }, [rows, query]);
 
   const loadContacts = useCallback(async () => {
     setLoading(true);
@@ -322,7 +311,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
 
   function selectAll() {
     const next: Record<string, boolean> = {};
-    for (const r of filtered) next[r.id] = true;
+    for (const r of rows) next[r.id] = true;
     setSelected(next);
   }
 
@@ -357,7 +346,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
 
   async function saveAndSend() {
     setStatus(null);
-    const picked = filtered.filter((r) => selected[r.id]);
+    const picked = rows.filter((r) => selected[r.id]);
     if (picked.length === 0) {
       setStatus("Select at least one contact.");
       return;
@@ -493,12 +482,6 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       {contactsAccessNote ? (
         <Text style={styles.accessBanner}>{contactsAccessNote}</Text>
       ) : null}
-      <TextInput
-        placeholder="Search contacts (with phone numbers)"
-        value={query}
-        onChangeText={setQuery}
-        style={styles.search}
-      />
       <Pressable
         style={[styles.addMoreBtn, pickingContact && styles.addMoreBtnDisabled]}
         onPress={() => void openContactPicker()}
@@ -511,9 +494,9 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         )}
       </Pressable>
       <Text style={styles.listIntro}>
-        Names below are from your phone&apos;s address book so you can pick who to
-        text. No one is part of this fundraiser until you tap them (checkmark) and
-        send.
+        Tap <Text style={styles.listIntroStrong}>Choose from contacts</Text> to pick
+        people from your Contacts app, or select rows below (from numbers shared with
+        this app). No one is added to the fundraiser until you check them and send.
       </Text>
       <View style={styles.toolbar}>
         <Pressable onPress={selectAll}>
@@ -531,7 +514,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       </Text>
       {status ? <Text style={styles.status}>{status}</Text> : null}
       <FlatList
-        data={filtered}
+        data={rows}
         keyExtractor={(item) => item.id}
         refreshControl={
           <RefreshControl
@@ -584,9 +567,9 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         }}
         ListEmptyComponent={
           <Text style={styles.muted}>
-            {rows.length === 0
-              ? "No contacts with phone numbers found. Tap Choose from contacts to pick someone, or swipe down to refresh after updating the Contacts app."
-              : "No contacts with phone numbers match your search."}
+            No contacts loaded here yet. Tap Choose from contacts to pick people
+            from your address book, or pull down to refresh if your phone shares a
+            contact list with this app.
           </Text>
         }
       />
@@ -639,21 +622,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  search: {
-    borderWidth: 1,
-    borderColor: "#cbd5e1",
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 8,
-    marginBottom: 4,
-    backgroundColor: "#fff",
-  },
   addMoreBtn: {
     borderWidth: 2,
     borderColor: "#C0392B",
     borderRadius: 10,
     paddingVertical: 10,
     alignItems: "center",
+    marginTop: 4,
     marginBottom: 8,
     backgroundColor: "#fff",
   },
@@ -667,6 +642,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 8,
   },
+  listIntroStrong: { fontWeight: "800", color: "#1A1A2E" },
   count: { marginVertical: 6, color: "#64748b" },
   countHint: {
     fontSize: 12,

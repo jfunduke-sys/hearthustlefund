@@ -642,11 +642,6 @@ export default function DashboardScreen() {
             if (hasSavedReminderPhone && !smsPhoneEditing) {
               return (
                 <>
-                  <Text style={styles.sectionHint}>
-                    This number is on file for fundraiser reminder texts (~every 3
-                    days + last day). Msg & data rates may apply. Reply STOP to opt
-                    out, HELP for help.
-                  </Text>
                   <View style={styles.smsSavedRow}>
                     <View style={styles.smsSavedTextBlock}>
                       <Text style={styles.smsSavedLabel}>Mobile</Text>

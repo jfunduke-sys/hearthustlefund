@@ -18,7 +18,6 @@ import {
 import CoachParticipantCard from "./coach-participant-card";
 import { updateCoachFundraiserDonorPageAbout } from "@/app/actions/coach";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -143,12 +142,14 @@ export default function CoachDashboardClient({
   const [donorPageAbout, setDonorPageAbout] = useState(
     () => fundraiser.donor_page_about ?? ""
   );
+  const [donorPageEditOpen, setDonorPageEditOpen] = useState(false);
   const [donorAboutStatus, setDonorAboutStatus] = useState<string | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
 
   useEffect(() => {
     setDonorPageAbout(fundraiser.donor_page_about ?? "");
+    setDonorPageEditOpen(false);
   }, [fundraiser.id, fundraiser.donor_page_about]);
   const baseUrl =
     typeof window !== "undefined"
@@ -336,64 +337,112 @@ More tips will show inside the app once you're in. Thanks!`;
         </div>
 
         <Card className="border-slate-200/90 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg text-hh-dark">Campaign settings</CardTitle>
+          <CardHeader className="space-y-1 pb-3 pt-4">
+            <CardTitle className="text-base text-hh-dark">
+              Donor page message
+            </CardTitle>
+            <p className="text-xs text-slate-500">
+              Shown under &quot;About this fundraiser&quot; on each athlete&apos;s
+              public donation link.
+            </p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="coach-donor-about">
-                Donor page message (shown under &quot;About this fundraiser&quot;
-                on each athlete&apos;s public donation link; leave blank to keep
-                the default text shown in gray below)
-              </Label>
-              <Textarea
-                id="coach-donor-about"
-                value={donorPageAbout}
-                onChange={(e) => {
-                  setDonorPageAbout(e.target.value);
-                  setDonorAboutStatus(null);
-                }}
-                rows={6}
-                maxLength={4000}
-                placeholder={getDefaultDonorPageAboutText(
-                  fundraiser.team_name,
-                  fundraiser.school_name
-                )}
-                className="resize-y text-sm placeholder:text-slate-400"
-                disabled={settingsPending}
-              />
-              <p className="text-xs text-slate-500">
-                {donorPageAbout.length.toLocaleString()} / 4,000 characters
-              </p>
-            </div>
+          <CardContent className="space-y-3 pb-5 pt-0">
+            {donorPageEditOpen ? (
+              <>
+                <Textarea
+                  id="coach-donor-about"
+                  value={donorPageAbout}
+                  onChange={(e) => {
+                    setDonorPageAbout(e.target.value);
+                    setDonorAboutStatus(null);
+                  }}
+                  rows={5}
+                  maxLength={4000}
+                  placeholder={getDefaultDonorPageAboutText(
+                    fundraiser.team_name,
+                    fundraiser.school_name
+                  )}
+                  className="resize-y text-sm placeholder:text-slate-400"
+                  disabled={settingsPending}
+                />
+                <p className="text-xs text-slate-500">
+                  {donorPageAbout.length.toLocaleString()} / 4,000 · leave blank
+                  to use default after save
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    disabled={settingsPending}
+                    onClick={() => {
+                      setDonorAboutStatus(null);
+                      startSettingsTransition(async () => {
+                        try {
+                          await updateCoachFundraiserDonorPageAbout({
+                            fundraiserId: fundraiser.id,
+                            donorPageAbout,
+                          });
+                          setDonorAboutStatus(
+                            "Saved. Donation pages will show this text."
+                          );
+                          setDonorPageEditOpen(false);
+                          router.refresh();
+                        } catch (e: unknown) {
+                          setDonorAboutStatus(
+                            e instanceof Error ? e.message : "Could not save."
+                          );
+                        }
+                      });
+                    }}
+                  >
+                    {settingsPending ? "Saving…" : "Save"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={settingsPending}
+                    onClick={() => {
+                      setDonorPageAbout(fundraiser.donor_page_about ?? "");
+                      setDonorAboutStatus(null);
+                      setDonorPageEditOpen(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="max-h-40 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50/90 p-3 text-sm leading-relaxed text-slate-800 whitespace-pre-wrap">
+                  {donorPageAbout.trim()
+                    ? donorPageAbout
+                    : getDefaultDonorPageAboutText(
+                        fundraiser.team_name,
+                        fundraiser.school_name
+                      )}
+                </div>
+                {!donorPageAbout.trim() ? (
+                  <p className="text-xs font-medium text-amber-900/80">
+                    Using default copy — tap Edit to write your own.
+                  </p>
+                ) : null}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setDonorAboutStatus(null);
+                    setDonorPageEditOpen(true);
+                  }}
+                >
+                  Edit
+                </Button>
+              </>
+            )}
             {donorAboutStatus ? (
               <p className="text-sm text-slate-700" role="status">
                 {donorAboutStatus}
               </p>
             ) : null}
-            <Button
-              type="button"
-              disabled={settingsPending}
-              onClick={() => {
-                setDonorAboutStatus(null);
-                startSettingsTransition(async () => {
-                  try {
-                    await updateCoachFundraiserDonorPageAbout({
-                      fundraiserId: fundraiser.id,
-                      donorPageAbout,
-                    });
-                    setDonorAboutStatus("Saved. Donation pages will show this text.");
-                    router.refresh();
-                  } catch (e: unknown) {
-                    setDonorAboutStatus(
-                      e instanceof Error ? e.message : "Could not save."
-                    );
-                  }
-                });
-              }}
-            >
-              {settingsPending ? "Saving…" : "Save donor page message"}
-            </Button>
           </CardContent>
         </Card>
 
@@ -567,9 +616,11 @@ More tips will show inside the app once you're in. Thanks!`;
             </div>
 
             <details className="group rounded-xl border border-dashed border-slate-300/90 bg-slate-50/50 [&_summary::-webkit-details-marker]:hidden">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100/80">
-                <span>Invite message for athletes (expand to view or copy)</span>
-                <span className="text-slate-400 transition-transform group-open:rotate-180">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-left transition-colors hover:bg-slate-100/80 sm:px-4 sm:py-3">
+                <span className="text-xs font-extrabold uppercase leading-tight tracking-wide text-hh-dark sm:text-[13px]">
+                  Invite message for athletes — tap to view or copy
+                </span>
+                <span className="shrink-0 text-slate-500 transition-transform group-open:rotate-180">
                   ▼
                 </span>
               </summary>
