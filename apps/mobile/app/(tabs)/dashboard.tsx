@@ -13,6 +13,7 @@ import {
   Image,
   Share,
   Linking,
+  TextInput,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Swipeable } from "react-native-gesture-handler";
@@ -31,9 +32,15 @@ import { DonationConfetti } from "../../components/donation-confetti";
 import {
   fetchAthleteViaWebApi,
   fetchLatestAthleteForUser,
+  saveSmsPhoneViaWebApi,
 } from "../../lib/athlete-profile";
 import { getSessionUser } from "../../lib/auth-user";
-import { hasSupabaseConfig, supabase, donateUrl } from "../../lib/supabase";
+import {
+  getApiBase,
+  hasSupabaseConfig,
+  supabase,
+  donateUrl,
+} from "../../lib/supabase";
 import {
   evaluateAndPersistDonationCelebration,
   evaluateAndPersistGoalMilestone,
@@ -146,6 +153,9 @@ export default function DashboardScreen() {
   const donateLinkCopyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  const [smsPhone, setSmsPhone] = useState("");
+  const [smsPhoneBusy, setSmsPhoneBusy] = useState(false);
+  const [smsPhoneMsg, setSmsPhoneMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!hasSupabaseConfig()) {
@@ -166,7 +176,23 @@ export default function DashboardScreen() {
       setShowConfetti(false);
       setCelebrationLine(null);
       setReminderSelected({});
+      setSmsPhone("");
+      setSmsPhoneMsg(null);
       return;
+    }
+
+    const smsMeta = user.user_metadata as { sms_phone?: string } | undefined;
+    if (typeof smsMeta?.sms_phone === "string" && smsMeta.sms_phone) {
+      const d = smsMeta.sms_phone.replace(/\D/g, "");
+      setSmsPhone(
+        d.length === 11 && d.startsWith("1")
+          ? d.slice(1, 11)
+          : d.length === 10
+            ? d
+            : ""
+      );
+    } else {
+      setSmsPhone("");
     }
 
     const { athlete: athleteRaw, queryError } = await fetchLatestAthleteForUser(
@@ -307,6 +333,8 @@ export default function DashboardScreen() {
         setShowConfetti(false);
         setCelebrationLine(null);
         setReminderSelected({});
+        setSmsPhone("");
+        setSmsPhoneMsg(null);
       }
     });
     return () => sub.subscription.unsubscribe();
@@ -331,6 +359,37 @@ export default function DashboardScreen() {
       }
     };
   }, []);
+
+  async function saveSmsPhone() {
+    setSmsPhoneMsg(null);
+    if (!hasSupabaseConfig()) {
+      setSmsPhoneMsg("App is missing Supabase config.");
+      return;
+    }
+    const api = getApiBase();
+    if (!api?.trim()) {
+      setSmsPhoneMsg("Set EXPO_PUBLIC_API_URL to your website URL to save.");
+      return;
+    }
+    const { data: sess } = await supabase.auth.getSession();
+    const tok = sess.session?.access_token;
+    if (!tok) {
+      setSmsPhoneMsg("Not signed in.");
+      return;
+    }
+    setSmsPhoneBusy(true);
+    try {
+      const res = await saveSmsPhoneViaWebApi(tok, smsPhone);
+      if (res.ok) {
+        setSmsPhoneMsg(`Saved (${res.phone}).`);
+        await supabase.auth.refreshSession();
+      } else {
+        setSmsPhoneMsg(res.error);
+      }
+    } finally {
+      setSmsPhoneBusy(false);
+    }
+  }
 
   async function onRefresh() {
     setRefreshing(true);
@@ -548,6 +607,39 @@ export default function DashboardScreen() {
             </Text>
           </View>
         ) : null}
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Campaign text reminders</Text>
+          <Text style={styles.sectionHint}>
+            Optional US mobile for Heart & Hustle SMS nudges during the campaign
+            (about every 3 days + last day). Msg & data rates may apply.
+          </Text>
+          <TextInput
+            style={styles.smsPhoneInput}
+            value={smsPhone}
+            onChangeText={setSmsPhone}
+            keyboardType="phone-pad"
+            placeholder="10-digit mobile"
+            maxLength={14}
+          />
+          <Pressable
+            style={[
+              styles.smsPhoneSave,
+              smsPhoneBusy && styles.smsPhoneSaveDisabled,
+            ]}
+            disabled={smsPhoneBusy}
+            onPress={() => void saveSmsPhone()}
+          >
+            {smsPhoneBusy ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.smsPhoneSaveText}>Save number</Text>
+            )}
+          </Pressable>
+          {smsPhoneMsg ? (
+            <Text style={styles.smsPhoneFeedback}>{smsPhoneMsg}</Text>
+          ) : null}
+        </View>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Your progress</Text>
@@ -864,6 +956,31 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   noticeBannerText: { fontSize: 14, color: "#78350f", lineHeight: 20 },
+  smsPhoneInput: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    backgroundColor: "#fff",
+  },
+  smsPhoneSave: {
+    marginTop: 10,
+    alignSelf: "flex-start",
+    backgroundColor: "#C0392B",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+  },
+  smsPhoneSaveDisabled: { opacity: 0.65 },
+  smsPhoneSaveText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  smsPhoneFeedback: {
+    marginTop: 8,
+    fontSize: 13,
+    color: "#64748b",
+  },
   campaignWindowBanner: {
     backgroundColor: "#fef3c7",
     borderWidth: 1,

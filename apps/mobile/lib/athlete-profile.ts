@@ -77,3 +77,35 @@ export async function fetchAthleteViaWebApi(
     };
   }
 }
+
+/** Saves US mobile for Twilio campaign reminders (server stores user_metadata.sms_phone). */
+export async function saveSmsPhoneViaWebApi(
+  accessToken: string,
+  phone: string
+): Promise<{ ok: true; phone: string } | { ok: false; error: string }> {
+  const base = getApiBase();
+  try {
+    const res = await fetch(`${base}/api/mobile/sms-phone`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ phone }),
+    });
+    const json = (await res.json()) as {
+      ok?: boolean;
+      phone?: string;
+      error?: string;
+    };
+    if (!res.ok || !json.ok || !json.phone) {
+      return { ok: false, error: json.error ?? `Request failed (${res.status})` };
+    }
+    return { ok: true, phone: json.phone };
+  } catch (e: unknown) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Network error",
+    };
+  }
+}
