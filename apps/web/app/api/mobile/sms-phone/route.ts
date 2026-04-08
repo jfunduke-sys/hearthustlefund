@@ -62,7 +62,11 @@ export async function POST(request: Request) {
   const admin = createAdminClient();
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   const { error: upErr } = await admin.auth.admin.updateUserById(user.id, {
-    user_metadata: { ...meta, sms_phone: normalized },
+    user_metadata: {
+      ...meta,
+      sms_phone: normalized,
+      sms_reminders_opt_in: true,
+    },
   });
 
   if (upErr) {

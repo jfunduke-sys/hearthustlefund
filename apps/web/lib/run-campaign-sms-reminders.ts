@@ -17,7 +17,13 @@ export type CampaignSmsRunResult = {
 };
 
 function smsPhoneFromUser(user: User): string | null {
-  const meta = user.user_metadata as { sms_phone?: string } | undefined;
+  const meta = user.user_metadata as {
+    sms_phone?: string;
+    sms_reminders_opt_in?: boolean;
+  } | undefined;
+  /** Explicit opt-out at signup — never send. */
+  if (meta?.sms_reminders_opt_in === false) return null;
+
   const raw =
     typeof meta?.sms_phone === "string" && meta.sms_phone.trim()
       ? meta.sms_phone.trim()

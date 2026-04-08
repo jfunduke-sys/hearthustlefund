@@ -156,6 +156,8 @@ export default function DashboardScreen() {
   const [smsPhone, setSmsPhone] = useState("");
   const [smsPhoneBusy, setSmsPhoneBusy] = useState(false);
   const [smsPhoneMsg, setSmsPhoneMsg] = useState<string | null>(null);
+  /** sms_reminders_opt_in === false from account creation (can opt in again via Save). */
+  const [smsDeclinedAtSignup, setSmsDeclinedAtSignup] = useState(false);
 
   const load = useCallback(async () => {
     if (!hasSupabaseConfig()) {
@@ -178,10 +180,15 @@ export default function DashboardScreen() {
       setReminderSelected({});
       setSmsPhone("");
       setSmsPhoneMsg(null);
+      setSmsDeclinedAtSignup(false);
       return;
     }
 
-    const smsMeta = user.user_metadata as { sms_phone?: string } | undefined;
+    const smsMeta = user.user_metadata as {
+      sms_phone?: string;
+      sms_reminders_opt_in?: boolean;
+    } | undefined;
+    setSmsDeclinedAtSignup(smsMeta?.sms_reminders_opt_in === false);
     if (typeof smsMeta?.sms_phone === "string" && smsMeta.sms_phone) {
       const d = smsMeta.sms_phone.replace(/\D/g, "");
       setSmsPhone(
@@ -335,6 +342,7 @@ export default function DashboardScreen() {
         setReminderSelected({});
         setSmsPhone("");
         setSmsPhoneMsg(null);
+        setSmsDeclinedAtSignup(false);
       }
     });
     return () => sub.subscription.unsubscribe();
@@ -538,6 +546,7 @@ export default function DashboardScreen() {
   }
 
   async function openNativeShareSheet() {
+    if (!data) return;
     try {
       await Share.share({
         title: `Support ${data.athlete.full_name}`,
@@ -610,9 +619,16 @@ export default function DashboardScreen() {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Campaign text reminders</Text>
+          {smsDeclinedAtSignup ? (
+            <Text style={styles.smsDeclinedHint}>
+              You chose not to receive texts when you created your account. Enter
+              your number below and tap Save to opt in.
+            </Text>
+          ) : null}
           <Text style={styles.sectionHint}>
             Optional US mobile for Heart & Hustle SMS nudges during the campaign
-            (about every 3 days + last day). Msg & data rates may apply.
+            (about every 3 days + last day). Msg & data rates may apply. Reply STOP
+            to opt out, HELP for help.
           </Text>
           <TextInput
             style={styles.smsPhoneInput}
@@ -980,6 +996,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 13,
     color: "#64748b",
+  },
+  smsDeclinedHint: {
+    marginBottom: 8,
+    fontSize: 13,
+    lineHeight: 18,
+    color: "#92400e",
+    backgroundColor: "#fffbeb",
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#fcd34d",
   },
   campaignWindowBanner: {
     backgroundColor: "#fef3c7",

@@ -10,16 +10,28 @@ import {
   Platform,
   ScrollView,
   Keyboard,
+  Linking,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NEW_PASSWORD_REQUIREMENT_COPY } from "@heart-and-hustle/shared";
 import { getApiBase, supabase } from "../lib/supabase";
 import { getPostAuthHrefForCurrentUser } from "../lib/post-auth-route";
+import { normalizePhoneDigits } from "../lib/phone";
 
 function first(v: string | string[] | undefined) {
   if (Array.isArray(v)) return v[0];
   return v;
+}
+
+function openTermsUrl() {
+  const base = getApiBase().replace(/\/$/, "");
+  void Linking.openURL(`${base}/terms`);
+}
+
+function openPrivacyUrl() {
+  const base = getApiBase().replace(/\/$/, "");
+  void Linking.openURL(`${base}/privacy`);
 }
 
 export default function SetupScreen() {
@@ -40,6 +52,8 @@ export default function SetupScreen() {
   const [jersey, setJersey] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mobilePhone, setMobilePhone] = useState("");
+  const [smsRemindersOptIn, setSmsRemindersOptIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,6 +61,7 @@ export default function SetupScreen() {
   const jerseyRef = useRef<TextInput>(null);
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
+  const mobilePhoneRef = useRef<TextInput>(null);
 
   async function onSubmit() {
     setError(null);
@@ -61,6 +76,15 @@ export default function SetupScreen() {
     if (password.length < 8) {
       setError(NEW_PASSWORD_REQUIREMENT_COPY);
       return;
+    }
+    if (smsRemindersOptIn) {
+      const d = normalizePhoneDigits(mobilePhone);
+      if (d.length < 10) {
+        setError(
+          "Enter a valid 10-digit US mobile number, or turn off text reminders."
+        );
+        return;
+      }
     }
     Keyboard.dismiss();
     setLoading(true);
@@ -77,6 +101,8 @@ export default function SetupScreen() {
           fullName: fullName.trim(),
           teamName: teamName ?? "",
           jerseyNumber: jersey.trim() || null,
+          smsRemindersOptIn,
+          mobilePhone: smsRemindersOptIn ? mobilePhone.trim() : null,
         }),
       });
       const payload = (await res.json()) as { error?: string };
@@ -173,9 +199,59 @@ export default function SetupScreen() {
           secureTextEntry
           autoComplete="new-password"
           textContentType="newPassword"
+          returnKeyType="next"
+          blurOnSubmit={false}
+          onSubmitEditing={() => mobilePhoneRef.current?.focus()}
+        />
+
+        <Text style={styles.label}>Mobile phone (optional)</Text>
+        <Text style={styles.fieldHint}>
+          US number — only used if you opt in to texts below.
+        </Text>
+        <TextInput
+          ref={mobilePhoneRef}
+          style={styles.input}
+          value={mobilePhone}
+          onChangeText={setMobilePhone}
+          keyboardType="phone-pad"
+          textContentType="telephoneNumber"
+          autoComplete="tel"
+          placeholder="10-digit mobile"
           returnKeyType="done"
           onSubmitEditing={() => void onSubmit()}
         />
+
+        <Pressable
+          style={styles.checkRow}
+          onPress={() => setSmsRemindersOptIn((v) => !v)}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: smsRemindersOptIn }}
+        >
+          <View
+            style={[styles.checkBox, smsRemindersOptIn && styles.checkBoxOn]}
+          >
+            {smsRemindersOptIn ? (
+              <Text style={styles.checkMark} accessibilityLabel="">
+                ✓
+              </Text>
+            ) : null}
+          </View>
+          <Text style={styles.checkLabel}>
+            I agree to receive automated fundraising reminder texts from Heart
+            &amp; Hustle at this number during the campaign (about every 3 days
+            and on the last day). Message and data rates may apply. Reply STOP to
+            opt out, HELP for help. See{" "}
+            <Text style={styles.inlineLink} onPress={openTermsUrl}>
+              Terms
+            </Text>{" "}
+            and{" "}
+            <Text style={styles.inlineLink} onPress={openPrivacyUrl}>
+              Privacy
+            </Text>
+            .
+          </Text>
+        </Pressable>
+
         {error ? <Text style={styles.err}>{error}</Text> : null}
         <Pressable style={styles.btn} onPress={() => void onSubmit()} disabled={loading}>
           {loading ? (
@@ -211,6 +287,45 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: "#fff",
+  },
+  checkRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    marginTop: 16,
+    paddingVertical: 4,
+  },
+  checkBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#94a3b8",
+    marginTop: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  checkBoxOn: {
+    borderColor: "#C0392B",
+    backgroundColor: "#fef2f2",
+  },
+  checkMark: {
+    color: "#C0392B",
+    fontSize: 16,
+    fontWeight: "800",
+    lineHeight: 18,
+  },
+  checkLabel: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 19,
+    color: "#334155",
+  },
+  inlineLink: {
+    color: "#C0392B",
+    fontWeight: "600",
+    textDecorationLine: "underline",
   },
   err: { color: "#b91c1c", marginTop: 12 },
   btn: {
