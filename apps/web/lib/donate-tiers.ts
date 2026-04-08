@@ -4,8 +4,8 @@ export type DonateTier = {
   subtitle?: string;
 };
 
-/** Ordered high → low; $50 / $25 use short subtitles only. */
-export const DONATE_TIERS: DonateTier[] = [
+/** Large tiles: $1000 → $100 */
+export const DONATE_MAJOR_TIERS: DonateTier[] = [
   {
     amount: 1000,
     title: "G.O.A.T",
@@ -26,6 +26,11 @@ export const DONATE_TIERS: DonateTier[] = [
     title: "Hero",
     subtitle: "Makes a strong impact for our athletes.",
   },
-  { amount: 50, title: "$50", subtitle: "Every gift moves us forward." },
-  { amount: 25, title: "$25", subtitle: "Adds up fast with community support." },
 ];
+
+/** Compact row: $50 and $25 */
+export const DONATE_QUICK_AMOUNTS: readonly { amount: number; label: string }[] =
+  [
+    { amount: 50, label: "$50" },
+    { amount: 25, label: "$25" },
+  ];

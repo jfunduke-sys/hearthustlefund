@@ -5,7 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { loadStripe } from "@stripe/stripe-js";
 import { BRAND, MIN_DONATION_DOLLARS } from "@/lib/brand";
-import { DONATE_TIERS } from "@/lib/donate-tiers";
+import {
+  DONATE_MAJOR_TIERS,
+  DONATE_QUICK_AMOUNTS,
+} from "@/lib/donate-tiers";
 import type { Athlete, Fundraiser } from "@heart-and-hustle/shared";
 import {
   type CampaignDayBanner,
@@ -100,6 +103,12 @@ export default function DonateForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function scrollToDonateSection() {
+    document
+      .getElementById("donate-section")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   const teamGoal = Number(fundraiser.total_goal);
   const teamPct =
     teamGoal > 0 ? Math.min(100, (teamRaised / teamGoal) * 100) : 0;
@@ -117,6 +126,12 @@ export default function DonateForm({
       fundraiser.school_name,
       athlete.full_name
     );
+
+  /** Single hero image: prefer team logo, then school. */
+  const teamOrSchoolLogoUrl =
+    fundraiser.team_logo_url?.trim() ||
+    fundraiser.school_logo_url?.trim() ||
+    null;
 
   function dollarsToCharge(): number {
     if (amountChoice === "other") {
@@ -198,30 +213,17 @@ export default function DonateForm({
         <header className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-md shadow-slate-900/5">
           <div className="border-b border-slate-100 bg-gradient-to-br from-hh-dark via-[#252540] to-slate-900 px-5 py-6 text-white">
             <div className="flex items-start gap-4">
-              <div className="flex shrink-0 gap-2">
-                {fundraiser.school_logo_url ? (
-                  <div className="relative h-14 w-14 overflow-hidden rounded-xl border border-white/20 bg-white/95">
-                    <Image
-                      src={fundraiser.school_logo_url}
-                      alt=""
-                      fill
-                      className="object-contain p-1"
-                      unoptimized
-                    />
-                  </div>
-                ) : null}
-                {fundraiser.team_logo_url ? (
-                  <div className="relative h-14 w-14 overflow-hidden rounded-xl border border-white/20 bg-white/95">
-                    <Image
-                      src={fundraiser.team_logo_url}
-                      alt=""
-                      fill
-                      className="object-contain p-1"
-                      unoptimized
-                    />
-                  </div>
-                ) : null}
-              </div>
+              {teamOrSchoolLogoUrl ? (
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-white/95">
+                  <Image
+                    src={teamOrSchoolLogoUrl}
+                    alt=""
+                    fill
+                    className="object-contain p-1"
+                    unoptimized
+                  />
+                </div>
+              ) : null}
               <div className="min-w-0">
                 <p className="text-xs font-medium uppercase tracking-wider text-white/60">
                   Support a student-athlete
@@ -243,11 +245,21 @@ export default function DonateForm({
           {dayBanner ? (
             <div className="px-5 py-3">
               {dayBanner.phase === "active" ? (
-                <p className="rounded-xl bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200/80">
-                  {dayBanner.daysLeft === 1
-                    ? "Last day to donate!"
-                    : `${dayBanner.daysLeft} days left to donate`}
-                </p>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                  <p className="min-w-0 flex-1 rounded-xl bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-900 ring-1 ring-emerald-200/80 sm:text-left">
+                    {dayBanner.daysLeft === 1
+                      ? "Last day to donate!"
+                      : `${dayBanner.daysLeft} days left to donate`}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-auto shrink-0 border-emerald-700/30 bg-white px-4 py-3 font-semibold text-emerald-900 hover:bg-emerald-50"
+                    onClick={scrollToDonateSection}
+                  >
+                    Donate now
+                  </Button>
+                </div>
               ) : dayBanner.phase === "before_start" ? (
                 <p className="rounded-xl bg-slate-100 px-4 py-3 text-center text-sm font-medium text-slate-800 ring-1 ring-slate-200">
                   {dayBanner.daysUntilStart === 0
@@ -330,14 +342,15 @@ export default function DonateForm({
 
         {/* Donation */}
         <section
-          className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6"
+          id="donate-section"
+          className="scroll-mt-6 rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6"
           aria-labelledby="choose-amount"
         >
           <h2
             id="choose-amount"
             className="text-sm font-semibold uppercase tracking-wide text-slate-500"
           >
-            Choose an amount
+            Donate now — choose an amount
           </h2>
           <p className="mt-1 text-sm text-slate-600">
             Select a level or enter any amount ($
@@ -346,7 +359,7 @@ export default function DonateForm({
 
           <form className="mt-5 space-y-6" onSubmit={onSubmit}>
             <div className="grid gap-3 sm:grid-cols-2">
-              {DONATE_TIERS.map((tier) => {
+              {DONATE_MAJOR_TIERS.map((tier) => {
                 const selected = amountChoice === tier.amount;
                 return (
                   <button
@@ -379,34 +392,66 @@ export default function DonateForm({
             </div>
 
             <div>
-              <button
-                type="button"
-                onClick={() => setAmountChoice("other")}
-                className={`w-full rounded-xl border-2 p-4 text-left transition sm:max-w-md ${
-                  amountChoice === "other"
-                    ? "border-hh-primary bg-red-50/40 ring-2 ring-hh-primary/20"
-                    : "border-slate-200 bg-slate-50/50 hover:border-slate-300"
-                }`}
-              >
-                <span className="font-bold text-hh-dark">Custom amount</span>
-                <span className="mt-1 block text-sm text-slate-600">
-                  Enter any whole-dollar amount you prefer.
-                </span>
-              </button>
-              {amountChoice === "other" ? (
-                <div className="mt-3 flex flex-wrap items-center gap-2 sm:max-w-md">
-                  <span className="text-sm font-medium text-slate-600">$</span>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Other amounts
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {DONATE_QUICK_AMOUNTS.map(({ amount, label }) => {
+                  const selected = amountChoice === amount;
+                  return (
+                    <button
+                      key={amount}
+                      type="button"
+                      onClick={() => {
+                        setAmountChoice(amount);
+                        setCustomAmount("");
+                      }}
+                      className={`shrink-0 rounded-lg border-2 px-3 py-2 text-sm font-bold tabular-nums transition ${
+                        selected
+                          ? "border-hh-primary bg-red-50/40 text-hh-dark ring-2 ring-hh-primary/20"
+                          : "border-slate-200 bg-slate-50/80 text-slate-800 hover:border-slate-300 hover:bg-white"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAmountChoice("other");
+                    if (!customAmount) setCustomAmount("");
+                  }}
+                  className={`shrink-0 rounded-lg border-2 px-3 py-2 text-sm font-bold transition ${
+                    amountChoice === "other"
+                      ? "border-hh-primary bg-red-50/40 text-hh-dark ring-2 ring-hh-primary/20"
+                      : "border-slate-200 bg-slate-50/80 text-slate-800 hover:border-slate-300 hover:bg-white"
+                  }`}
+                >
+                  Custom
+                </button>
+                <div className="flex min-w-[7.5rem] flex-1 items-center gap-1 sm:max-w-[11rem]">
+                  <span className="text-sm font-semibold text-slate-600">$</span>
                   <Input
                     type="number"
                     min={MIN_DONATION_DOLLARS}
                     step="1"
-                    placeholder="Amount"
-                    value={customAmount}
-                    onChange={(e) => setCustomAmount(e.target.value)}
-                    className="max-w-[10rem]"
+                    placeholder="Other"
+                    value={amountChoice === "other" ? customAmount : ""}
+                    onChange={(e) => {
+                      setAmountChoice("other");
+                      setCustomAmount(e.target.value);
+                    }}
+                    onFocus={() => setAmountChoice("other")}
+                    className="h-9"
+                    aria-label="Custom donation amount in dollars"
                   />
                 </div>
-              ) : null}
+              </div>
+              <p className="mt-1.5 text-xs text-slate-500">
+                Tap Custom or enter any whole-dollar amount (minimum $
+                {MIN_DONATION_DOLLARS}).
+              </p>
             </div>
 
             <div className="border-t border-slate-100 pt-5 space-y-4">
