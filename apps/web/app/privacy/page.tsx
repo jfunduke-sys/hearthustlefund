@@ -8,7 +8,13 @@ export default function PrivacyPage() {
         ← Home
       </Link>
       <h1 className="mt-6 text-3xl font-bold text-hh-dark">Privacy policy</h1>
-      <p className="mt-2 text-sm text-slate-500">{BRAND.name}</p>
+      <p className="mt-2 text-sm text-slate-500">
+        {BRAND.name}
+        <span className="text-slate-400"> · </span>
+        <Link href="/terms" className="text-hh-primary hover:underline">
+          Terms of service
+        </Link>
+      </p>
 
       <section className="mt-8 space-y-4 text-sm leading-relaxed">
         <h2 className="text-lg font-semibold text-hh-dark">What we collect</h2>
