@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Swipeable } from "react-native-gesture-handler";
@@ -80,6 +81,41 @@ function mergeContactRows(prev: ContactRow[], added: ContactRow[]): ContactRow[]
 
 const HIDDEN_IDS_PREFIX = "@hh/fundraising_contact_row_hidden/";
 
+/** Fields for list + paging — native APIs may paginate; one page can look like “one contact”. */
+const DEVICE_CONTACT_FIELDS: Contacts.FieldType[] = [
+  Contacts.Fields.Name,
+  Contacts.Fields.FirstName,
+  Contacts.Fields.MiddleName,
+  Contacts.Fields.LastName,
+  Contacts.Fields.NamePrefix,
+  Contacts.Fields.NameSuffix,
+  Contacts.Fields.Nickname,
+  Contacts.Fields.Company,
+  Contacts.Fields.PhoneNumbers,
+];
+
+/**
+ * Loads every page from the OS. A single `getContactsAsync` call can return only the
+ * first page (`hasNextPage`) depending on platform defaults.
+ */
+async function fetchAllDeviceContacts(): Promise<Contacts.ExistingContact[]> {
+  const merged: Contacts.ExistingContact[] = [];
+  const pageSize = 300;
+  let pageOffset = 0;
+  for (let i = 0; i < 400; i++) {
+    const res = await Contacts.getContactsAsync({
+      fields: DEVICE_CONTACT_FIELDS,
+      pageSize,
+      pageOffset,
+    });
+    merged.push(...res.data);
+    if (!res.hasNextPage) break;
+    if (res.data.length === 0) break;
+    pageOffset += res.data.length;
+  }
+  return merged;
+}
+
 async function loadHiddenContactRowIds(
   athleteId: string | null
 ): Promise<Set<string>> {
@@ -108,6 +144,8 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   const [pickingContact, setPickingContact] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  /** iOS 18+: user chose “selected contacts only” for this app — OS may expose just a few. */
+  const [contactsAccessNote, setContactsAccessNote] = useState<string | null>(null);
   const [coachNeedsParticipant, setCoachNeedsParticipant] = useState(false);
   const [messagingMeta, setMessagingMeta] = useState<{
     phase: CampaignWindowPhase;
@@ -176,23 +214,24 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
 
       const { status } = await Contacts.requestPermissionsAsync();
       if (status !== "granted") {
+        setContactsAccessNote(null);
         setStatus("Contacts permission is required to send texts.");
         setLoading(false);
         return;
       }
-      const { data } = await Contacts.getContactsAsync({
-        fields: [
-          Contacts.Fields.Name,
-          Contacts.Fields.FirstName,
-          Contacts.Fields.MiddleName,
-          Contacts.Fields.LastName,
-          Contacts.Fields.NamePrefix,
-          Contacts.Fields.NameSuffix,
-          Contacts.Fields.Nickname,
-          Contacts.Fields.Company,
-          Contacts.Fields.PhoneNumbers,
-        ],
-      });
+
+      const perm = await Contacts.getPermissionsAsync();
+      if (perm.accessPrivileges === "limited") {
+        setContactsAccessNote(
+          Platform.OS === "ios"
+            ? "iOS is only sharing the contacts you picked for Expo Go — not your full address book. To change that: Settings → Privacy & Security → Contacts → Expo Go (full access or add contacts)."
+            : "This app can only see contacts you allowed. Grant full Contacts access for Expo Go in system settings if the list looks too short."
+        );
+      } else {
+        setContactsAccessNote(null);
+      }
+
+      const data = await fetchAllDeviceContacts();
       const out: ContactRow[] = [];
       for (const c of data) {
         out.push(...rowsFromExistingContact(c));
@@ -451,6 +490,9 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
           )}
         </Text>
       ) : null}
+      {contactsAccessNote ? (
+        <Text style={styles.accessBanner}>{contactsAccessNote}</Text>
+      ) : null}
       <TextInput
         placeholder="Search contacts (with phone numbers)"
         value={query}
@@ -468,6 +510,11 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
           <Text style={styles.addMoreBtnText}>Choose from contacts</Text>
         )}
       </Pressable>
+      <Text style={styles.listIntro}>
+        Names below are from your phone&apos;s address book so you can pick who to
+        text. No one is part of this fundraiser until you tap them (checkmark) and
+        send.
+      </Text>
       <View style={styles.toolbar}>
         <Pressable onPress={selectAll}>
           <Text style={styles.link}>Select all</Text>
@@ -478,10 +525,9 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       </View>
       <Text style={styles.count}>{selectedCount} contacts selected</Text>
       <Text style={styles.countHint}>
-        Swipe left on a row to remove it from this list (your phone contacts are
-        unchanged). Send to contacts sends a private text to each person (not a
-        group chat). Your phone will open Messages once per contact — tap Send each
-        time.
+        Swipe left to hide someone from this screen only (they stay in your Contacts
+        app). Send to contacts opens a private text per person (not a group chat).
+        Your phone will open Messages once per contact — tap Send each time.
       </Text>
       {status ? <Text style={styles.status}>{status}</Text> : null}
       <FlatList
@@ -582,6 +628,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  accessBanner: {
+    backgroundColor: "#e0f2fe",
+    borderWidth: 1,
+    borderColor: "#7dd3fc",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    color: "#0c4a6e",
+    fontSize: 13,
+    lineHeight: 18,
+  },
   search: {
     borderWidth: 1,
     borderColor: "#cbd5e1",
@@ -604,6 +661,12 @@ const styles = StyleSheet.create({
   addMoreBtnText: { color: "#C0392B", fontWeight: "700", fontSize: 15 },
   toolbar: { flexDirection: "row", justifyContent: "space-between" },
   link: { color: "#C0392B", fontWeight: "600" },
+  listIntro: {
+    fontSize: 13,
+    color: "#475569",
+    lineHeight: 18,
+    marginBottom: 8,
+  },
   count: { marginVertical: 6, color: "#64748b" },
   countHint: {
     fontSize: 12,
