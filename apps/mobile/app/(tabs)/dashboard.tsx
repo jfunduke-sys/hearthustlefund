@@ -46,6 +46,7 @@ import {
   evaluateAndPersistGoalMilestone,
   randomDonationCelebrationMessage,
 } from "../../lib/donation-celebration";
+import { normalizePhoneDigits } from "../../lib/phone";
 
 type DonationRow = {
   id: string;
@@ -111,6 +112,13 @@ function effectivePersonalGoalForAthlete(
 
 const PROGRESS_GRADIENT = ["#C0392B", "#EAB308", "#22C55E"] as const;
 
+/** 10-digit US local for display; pass-through if not 10 digits. */
+function formatReminderPhoneDisplay(digits: string): string {
+  const x = normalizePhoneDigits(digits).slice(-10);
+  if (x.length !== 10) return digits.trim() || "—";
+  return `(${x.slice(0, 3)}) ${x.slice(3, 6)}-${x.slice(6)}`;
+}
+
 function ProgressBarGradient({ pct }: { pct: number }) {
   const w = Math.min(100, Math.max(0, pct));
   return (
@@ -154,6 +162,9 @@ export default function DashboardScreen() {
     null
   );
   const [smsPhone, setSmsPhone] = useState("");
+  /** Last known 10-digit US number from the server (signup or Save). */
+  const [smsPhoneSavedSnapshot, setSmsPhoneSavedSnapshot] = useState("");
+  const [smsPhoneEditing, setSmsPhoneEditing] = useState(false);
   const [smsPhoneBusy, setSmsPhoneBusy] = useState(false);
   const [smsPhoneMsg, setSmsPhoneMsg] = useState<string | null>(null);
   /** sms_reminders_opt_in === false from account creation (can opt in again via Save). */
@@ -179,6 +190,8 @@ export default function DashboardScreen() {
       setCelebrationLine(null);
       setReminderSelected({});
       setSmsPhone("");
+      setSmsPhoneSavedSnapshot("");
+      setSmsPhoneEditing(false);
       setSmsPhoneMsg(null);
       setSmsDeclinedAtSignup(false);
       return;
@@ -189,18 +202,19 @@ export default function DashboardScreen() {
       sms_reminders_opt_in?: boolean;
     } | undefined;
     setSmsDeclinedAtSignup(smsMeta?.sms_reminders_opt_in === false);
+    let smsDigits = "";
     if (typeof smsMeta?.sms_phone === "string" && smsMeta.sms_phone) {
       const d = smsMeta.sms_phone.replace(/\D/g, "");
-      setSmsPhone(
+      smsDigits =
         d.length === 11 && d.startsWith("1")
           ? d.slice(1, 11)
           : d.length === 10
             ? d
-            : ""
-      );
-    } else {
-      setSmsPhone("");
+            : "";
     }
+    setSmsPhone(smsDigits);
+    setSmsPhoneSavedSnapshot(smsDigits.length === 10 ? smsDigits : "");
+    setSmsPhoneEditing(false);
 
     const { athlete: athleteRaw, queryError } = await fetchLatestAthleteForUser(
       user.id
@@ -341,6 +355,8 @@ export default function DashboardScreen() {
         setCelebrationLine(null);
         setReminderSelected({});
         setSmsPhone("");
+        setSmsPhoneSavedSnapshot("");
+        setSmsPhoneEditing(false);
         setSmsPhoneMsg(null);
         setSmsDeclinedAtSignup(false);
       }
@@ -389,8 +405,10 @@ export default function DashboardScreen() {
     try {
       const res = await saveSmsPhoneViaWebApi(tok, smsPhone);
       if (res.ok) {
-        setSmsPhoneMsg(`Saved (${res.phone}).`);
+        setSmsPhoneMsg("Saved.");
         await supabase.auth.refreshSession();
+        await load();
+        setSmsPhoneEditing(false);
       } else {
         setSmsPhoneMsg(res.error);
       }
@@ -619,39 +637,94 @@ export default function DashboardScreen() {
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Campaign text reminders</Text>
-          {smsDeclinedAtSignup ? (
-            <Text style={styles.smsDeclinedHint}>
-              You chose not to receive texts when you created your account. Enter
-              your number below and tap Save to opt in.
-            </Text>
-          ) : null}
-          <Text style={styles.sectionHint}>
-            Optional US mobile for Heart & Hustle SMS nudges during the campaign
-            (about every 3 days + last day). Msg & data rates may apply. Reply STOP
-            to opt out, HELP for help.
-          </Text>
-          <TextInput
-            style={styles.smsPhoneInput}
-            value={smsPhone}
-            onChangeText={setSmsPhone}
-            keyboardType="phone-pad"
-            placeholder="10-digit mobile"
-            maxLength={14}
-          />
-          <Pressable
-            style={[
-              styles.smsPhoneSave,
-              smsPhoneBusy && styles.smsPhoneSaveDisabled,
-            ]}
-            disabled={smsPhoneBusy}
-            onPress={() => void saveSmsPhone()}
-          >
-            {smsPhoneBusy ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.smsPhoneSaveText}>Save number</Text>
-            )}
-          </Pressable>
+          {(() => {
+            const hasSavedReminderPhone = smsPhoneSavedSnapshot.length === 10;
+            if (hasSavedReminderPhone && !smsPhoneEditing) {
+              return (
+                <>
+                  <Text style={styles.sectionHint}>
+                    This number is on file for fundraiser reminder texts (~every 3
+                    days + last day). Msg & data rates may apply. Reply STOP to opt
+                    out, HELP for help.
+                  </Text>
+                  <View style={styles.smsSavedRow}>
+                    <View style={styles.smsSavedTextBlock}>
+                      <Text style={styles.smsSavedLabel}>Mobile</Text>
+                      <Text style={styles.smsSavedNumber}>
+                        {formatReminderPhoneDisplay(smsPhoneSavedSnapshot)}
+                      </Text>
+                    </View>
+                    <Pressable
+                      style={styles.smsEditBtn}
+                      onPress={() => {
+                        setSmsPhoneMsg(null);
+                        setSmsPhone(smsPhoneSavedSnapshot);
+                        setSmsPhoneEditing(true);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel="Edit reminder phone number"
+                    >
+                      <Text style={styles.smsEditBtnText}>Edit</Text>
+                    </Pressable>
+                  </View>
+                </>
+              );
+            }
+            return (
+              <>
+                {smsDeclinedAtSignup ? (
+                  <Text style={styles.smsDeclinedHint}>
+                    You chose not to receive texts when you created your account.
+                    Enter your number below and tap Save to opt in.
+                  </Text>
+                ) : null}
+                <Text style={styles.sectionHint}>
+                  {hasSavedReminderPhone
+                    ? "Update your US mobile, or tap Cancel to keep the current number."
+                    : "Optional US mobile for Heart & Hustle SMS nudges during the campaign (about every 3 days + last day). Msg & data rates may apply. Reply STOP to opt out, HELP for help."}
+                </Text>
+                <TextInput
+                  style={styles.smsPhoneInput}
+                  value={smsPhone}
+                  onChangeText={setSmsPhone}
+                  keyboardType="phone-pad"
+                  placeholder="10-digit mobile"
+                  maxLength={14}
+                />
+                <View style={styles.smsActionsRow}>
+                  <Pressable
+                    style={[
+                      styles.smsPhoneSave,
+                      smsPhoneBusy && styles.smsPhoneSaveDisabled,
+                    ]}
+                    disabled={smsPhoneBusy}
+                    onPress={() => void saveSmsPhone()}
+                  >
+                    {smsPhoneBusy ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.smsPhoneSaveText}>Save number</Text>
+                    )}
+                  </Pressable>
+                  {hasSavedReminderPhone ? (
+                    <Pressable
+                      style={styles.smsCancelBtn}
+                      disabled={smsPhoneBusy}
+                      onPress={() => {
+                        setSmsPhone(smsPhoneSavedSnapshot);
+                        setSmsPhoneEditing(false);
+                        setSmsPhoneMsg(null);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel="Cancel editing phone number"
+                    >
+                      <Text style={styles.smsCancelBtnText}>Cancel</Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              </>
+            );
+          })()}
           {smsPhoneMsg ? (
             <Text style={styles.smsPhoneFeedback}>{smsPhoneMsg}</Text>
           ) : null}
@@ -982,14 +1055,58 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#fff",
   },
-  smsPhoneSave: {
+  smsSavedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    marginTop: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: "#f8fafc",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  smsSavedTextBlock: { flex: 1, minWidth: 0 },
+  smsSavedLabel: { fontSize: 12, fontWeight: "600", color: "#64748b" },
+  smsSavedNumber: {
+    marginTop: 4,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1A1A2E",
+  },
+  smsEditBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#C0392B",
+    backgroundColor: "#fff",
+  },
+  smsEditBtnText: { color: "#C0392B", fontWeight: "700", fontSize: 15 },
+  smsActionsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 10,
     marginTop: 10,
-    alignSelf: "flex-start",
+  },
+  smsPhoneSave: {
     backgroundColor: "#C0392B",
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 10,
   },
+  smsCancelBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    backgroundColor: "#fff",
+  },
+  smsCancelBtnText: { color: "#475569", fontWeight: "600", fontSize: 15 },
   smsPhoneSaveDisabled: { opacity: 0.65 },
   smsPhoneSaveText: { color: "#fff", fontWeight: "700", fontSize: 15 },
   smsPhoneFeedback: {
