@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
@@ -14,6 +15,11 @@ export function MarketingSiteHeader({
   className?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -56,20 +62,57 @@ export function MarketingSiteHeader({
     </>
   );
 
+  const mobileMenu =
+    mounted && menuOpen ? (
+      <div className="lg:hidden">
+        <button
+          type="button"
+          className="fixed inset-0 z-[200] bg-black/50"
+          aria-hidden
+          tabIndex={-1}
+          onClick={close}
+        />
+        <div
+          id="marketing-site-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
+          className="fixed inset-y-0 right-0 z-[210] flex w-[min(22rem,100vw)] max-w-full flex-col border-l border-slate-200 bg-white shadow-2xl"
+        >
+          <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
+            <span className="text-sm font-semibold text-hh-dark">Menu</span>
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-hh-dark"
+              aria-label="Close menu"
+              onClick={close}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <nav
+            className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4 pb-8"
+            aria-label="Main"
+          >
+            <Button variant="ghost" className="h-12 shrink-0 justify-start text-base" asChild>
+              <Link href="/" onClick={close}>
+                Home
+              </Link>
+            </Button>
+            <div className="shrink-0 border-t border-slate-100 pt-3">{navLinks}</div>
+          </nav>
+        </div>
+      </div>
+    ) : null;
+
   return (
     <header
       className={cn(
-        "border-b border-slate-200 bg-white/80 backdrop-blur",
-        menuOpen && "relative z-50",
+        "relative z-30 border-b border-slate-200 bg-white/95 backdrop-blur-sm",
         className
       )}
     >
-      <div
-        className={cn(
-          "mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-3 sm:h-[5.75rem] sm:gap-4 sm:px-6 lg:h-[6.5rem]",
-          menuOpen && "relative z-[60] bg-white"
-        )}
-      >
+      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-3 sm:h-[5.75rem] sm:gap-4 sm:px-6 lg:h-[6.5rem]">
         <Link
           href="/"
           className="flex min-h-0 min-w-0 shrink items-center py-1"
@@ -99,48 +142,7 @@ export function MarketingSiteHeader({
           {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
-
-      {menuOpen ? (
-        <>
-          <button
-            type="button"
-            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
-            aria-hidden
-            tabIndex={-1}
-            onClick={close}
-          />
-          <div
-            id="marketing-site-menu"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Site menu"
-            className="fixed inset-y-0 right-0 z-50 flex w-[min(20rem,calc(100vw-1rem))] flex-col border-l border-slate-200 bg-white shadow-2xl lg:hidden"
-          >
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-              <span className="text-sm font-semibold text-hh-dark">Menu</span>
-              <button
-                type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-hh-dark"
-                aria-label="Close menu"
-                onClick={close}
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <nav
-              className="flex flex-1 flex-col gap-3 overflow-y-auto p-4"
-              aria-label="Main"
-            >
-              <Button variant="ghost" className="h-12 justify-start text-base" asChild>
-                <Link href="/" onClick={close}>
-                  Home
-                </Link>
-              </Button>
-              <div className="border-t border-slate-100 pt-2">{navLinks}</div>
-            </nav>
-          </div>
-        </>
-      ) : null}
+      {mobileMenu ? createPortal(mobileMenu, document.body) : null}
     </header>
   );
 }
