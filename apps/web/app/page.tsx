@@ -1,43 +1,15 @@
 import Link from "next/link";
-import { BrandLogo } from "@/components/brand-logo";
+import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { BRAND } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex h-[5.75rem] max-w-5xl flex-nowrap items-stretch justify-between gap-4 px-3 sm:h-[6.5rem] sm:gap-6 sm:px-6">
-          <Link
-            href="/"
-            className="flex min-h-0 shrink-0 items-center self-stretch py-0"
-          >
-            <BrandLogo
-              priority
-              className="h-full max-h-full min-h-0 w-auto object-contain object-left"
-            />
-          </Link>
-          <nav className="flex min-h-0 min-w-0 flex-1 flex-wrap items-center justify-end gap-2 sm:gap-3 md:gap-4">
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-2 border-hh-primary bg-white text-base text-hh-primary hover:bg-hh-primary/10"
-              asChild
-            >
-              <Link href="/request-fundraiser">Request fundraiser</Link>
-            </Button>
-            <Button variant="outline" size="lg" className="text-base" asChild>
-              <Link href="/coach/login">Coach login</Link>
-            </Button>
-            <Button variant="secondary" size="lg" className="text-base" asChild>
-              <Link href="/how-it-works">How it works</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
+      <MarketingSiteHeader />
 
-      <main className="mx-auto max-w-5xl px-4 py-16 sm:py-24">
-        <h1 className="text-balance text-4xl font-bold tracking-tight text-hh-dark sm:text-5xl">
+      <main className="mx-auto max-w-5xl px-4 py-12 sm:px-4 sm:py-24">
+        <h1 className="text-balance text-3xl font-bold tracking-tight text-hh-dark sm:text-5xl">
           Built by Heart. Powered by Hustle.
         </h1>
         <p className="mt-4 max-w-3xl text-balance text-lg leading-relaxed text-slate-600 sm:text-xl">

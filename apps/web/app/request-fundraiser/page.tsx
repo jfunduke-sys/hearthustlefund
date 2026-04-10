@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { BRAND } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -163,20 +163,14 @@ export default function RequestFundraiserPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-x-hidden">
+      <MarketingSiteHeader />
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(192,57,43,0.12),transparent),linear-gradient(180deg,#f8fafc_0%,#e2e8f0_100%)]"
         aria-hidden
       />
-      <div className="relative mx-auto max-w-xl px-4 py-8 sm:px-6 sm:py-12">
-        <Link
-          href="/"
-          className="text-sm font-medium text-hh-primary hover:underline"
-        >
-          ← Back Home
-        </Link>
-
-        <h1 className="mt-8 text-center text-2xl font-extrabold tracking-tight text-hh-dark sm:mt-10 sm:text-3xl">
+      <div className="relative mx-auto max-w-xl px-4 py-6 sm:px-6 sm:py-10">
+        <h1 className="text-center text-2xl font-extrabold tracking-tight text-hh-dark sm:text-3xl">
           {BRAND.name}
         </h1>
 

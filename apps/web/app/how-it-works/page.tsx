@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { BRAND } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
 
@@ -67,21 +68,9 @@ const STEPS: {
 export default function HowItWorksPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <header className="border-b border-slate-200 bg-white/90">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link
-            href="/"
-            className="text-sm font-medium text-hh-primary hover:underline"
-          >
-            ← Home
-          </Link>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/request-fundraiser">Request fundraiser</Link>
-          </Button>
-        </div>
-      </header>
+      <MarketingSiteHeader />
 
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
         <p className="text-sm font-semibold uppercase tracking-wide text-hh-primary">
           End-to-end overview
         </p>
