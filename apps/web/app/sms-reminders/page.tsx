@@ -45,7 +45,13 @@ export default function SmsRemindersInfoPage() {
             <li>
               <strong>Website (limited testing / same account):</strong> The
               same account can be used on the web; optional SMS consent and
-              number follow the same rules where offered.
+              number follow the same rules where offered on the join form.
+            </li>
+            <li>
+              <strong>Coaches / leads:</strong> If the platform sends campaign
+              reminders to a coach number, consent is collected when that number
+              is provided in onboarding or account settings with the same
+              disclosures where applicable.
             </li>
           </ul>
         </section>
