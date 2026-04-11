@@ -95,26 +95,14 @@ export function FundraiserDetailClient({
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Participants (athletes)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{analytics.participantCount}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Gross raised</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">
-              ${analytics.grossRaised.toFixed(2)}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="max-w-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Participants (athletes)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-2xl font-bold">{analytics.participantCount}</p>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -165,46 +153,61 @@ export function FundraiserDetailClient({
 
       <Card className="border-hh-primary/20">
         <CardHeader>
-          <CardTitle>Revenue split (90% program / 10% platform)</CardTitle>
+          <CardTitle>Campaign revenue (90% / 10%)</CardTitle>
           <p className="text-sm font-normal text-slate-600">
-            Structural split of recorded gross donations. Stripe fees are summed
-            from known per-donation fees only (same basis as the closed
-            fundraisers table).
+            Four-line summary matching the SuperAdmin closed fundraisers table.
+            Stripe fees in net revenue are the sum of known{" "}
+            <span className="font-mono">stripe_fee_cents</span> on donations only.
           </p>
         </CardHeader>
         <CardContent>
-          <dl className="grid gap-4 sm:grid-cols-2">
+          <dl className="grid gap-5 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <dt className="text-sm font-medium text-slate-700">
+                Total gross of campaign
+              </dt>
+              <dd className="mt-1 text-2xl font-bold tabular-nums text-hh-dark">
+                ${analytics.grossRaised.toFixed(2)}
+              </dd>
+              <p className="mt-1 text-xs text-slate-500">
+                Sum of recorded donation amounts (see Payments below).
+              </p>
+            </div>
             <div>
-              <dt className="text-sm text-slate-600">Program cut (90% of gross)</dt>
-              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+              <dt className="text-sm font-medium text-slate-700">
+                Program cut (90% of gross)
+              </dt>
+              <dd className="mt-1 text-xl font-semibold tabular-nums text-hh-dark">
                 ${revenueSplit.programCut.toFixed(2)}
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-slate-600">H&amp;H cut (10% of gross)</dt>
-              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+              <dt className="text-sm font-medium text-slate-700">
+                H&amp;H cut (10% of gross)
+              </dt>
+              <dd className="mt-1 text-xl font-semibold tabular-nums text-hh-dark">
                 ${revenueSplit.hhCut.toFixed(2)}
               </dd>
             </div>
-            <div>
-              <dt className="text-sm text-slate-600">Stripe fees (known)</dt>
-              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
-                ${revenueSplit.stripeFeesDollars.toFixed(2)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-sm text-slate-600">Net H&amp;H (10% − Stripe)</dt>
-              <dd className="text-xl font-semibold tabular-nums text-emerald-800">
+            <div className="sm:col-span-2">
+              <dt className="text-sm font-medium text-slate-700">
+                Net revenue (H&amp;H&apos;s 10% cut minus Stripe fees)
+              </dt>
+              <dd className="mt-1 text-xl font-semibold tabular-nums text-emerald-800">
                 ${revenueSplit.netHhRevenue.toFixed(2)}
               </dd>
+              <p className="mt-1 text-xs text-slate-500">
+                Stripe fees deducted here: ${revenueSplit.stripeFeesDollars.toFixed(2)}{" "}
+                (known fees only).
+              </p>
             </div>
           </dl>
           {revenueSplit.donationsWithUnknownFee > 0 ? (
             <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
               {revenueSplit.donationsWithUnknownFee} donation
               {revenueSplit.donationsWithUnknownFee === 1 ? "" : "s"} with no
-              stored Stripe fee — fees and net H&amp;H are understated until
-              resolved (see Payments section below).
+              stored Stripe fee — net revenue is understated until resolved (see
+              Payments section below).
             </p>
           ) : null}
         </CardContent>
@@ -270,8 +273,8 @@ export function FundraiserDetailClient({
           <p className="mt-2 text-xs text-slate-500">
             This line is total gross less processing fees—not the 90% program /
             10% platform split. Use{" "}
-            <strong className="font-semibold text-slate-600">Net H&amp;H</strong>{" "}
-            in the revenue split card for platform share after Stripe.
+            <strong className="font-semibold text-slate-600">Net revenue</strong>{" "}
+            in the campaign revenue card for H&amp;H&apos;s 10% after Stripe.
           </p>
           {stripeBreakdown.effectiveFeePercentOfGross != null ? (
             <p className="text-slate-600">

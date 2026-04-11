@@ -526,11 +526,29 @@ export function SuperadminTabs({
                     <TableHead>Status</TableHead>
                     <TableHead>Closed</TableHead>
                     <TableHead>Participants</TableHead>
-                    <TableHead>Gross raised</TableHead>
-                    <TableHead className="text-right">Program cut (90%)</TableHead>
-                    <TableHead className="text-right">H&amp;H cut (10%)</TableHead>
-                    <TableHead className="text-right">
-                      Net H&amp;H (10% − Stripe)
+                    <TableHead className="text-right whitespace-normal leading-tight">
+                      <span className="block">Total gross</span>
+                      <span className="block text-[10px] font-normal text-slate-500">
+                        of campaign
+                      </span>
+                    </TableHead>
+                    <TableHead className="text-right whitespace-normal leading-tight">
+                      <span className="block">Program cut</span>
+                      <span className="block text-[10px] font-normal text-slate-500">
+                        90% of gross
+                      </span>
+                    </TableHead>
+                    <TableHead className="text-right whitespace-normal leading-tight">
+                      <span className="block">H&amp;H cut</span>
+                      <span className="block text-[10px] font-normal text-slate-500">
+                        10% of gross
+                      </span>
+                    </TableHead>
+                    <TableHead className="text-right whitespace-normal leading-tight">
+                      <span className="block">Net revenue</span>
+                      <span className="block text-[10px] font-normal text-slate-500">
+                        H&amp;H 10% − Stripe fees
+                      </span>
                     </TableHead>
                     <TableHead />
                   </TableRow>
