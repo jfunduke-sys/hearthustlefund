@@ -78,11 +78,15 @@ export async function fetchAthleteViaWebApi(
   }
 }
 
-/** Saves US mobile for Twilio campaign reminders (server stores user_metadata.sms_phone). */
+/** Saves or clears SMS reminder consent + optional US mobile (user_metadata). */
 export async function saveSmsPhoneViaWebApi(
   accessToken: string,
-  phone: string
-): Promise<{ ok: true; phone: string } | { ok: false; error: string }> {
+  payload:
+    | { smsRemindersOptIn: true; phone: string }
+    | { smsRemindersOptIn: false }
+): Promise<
+  { ok: true; phone?: string; optedOut?: boolean } | { ok: false; error: string }
+> {
   const base = getApiBase();
   try {
     const res = await fetch(`${base}/api/mobile/sms-phone`, {
@@ -91,17 +95,27 @@ export async function saveSmsPhoneViaWebApi(
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ phone }),
+      body: JSON.stringify(
+        payload.smsRemindersOptIn
+          ? { phone: payload.phone, smsRemindersOptIn: true }
+          : { smsRemindersOptIn: false }
+      ),
     });
     const json = (await res.json()) as {
       ok?: boolean;
       phone?: string;
       error?: string;
     };
-    if (!res.ok || !json.ok || !json.phone) {
+    if (!res.ok || !json.ok) {
       return { ok: false, error: json.error ?? `Request failed (${res.status})` };
     }
-    return { ok: true, phone: json.phone };
+    if (json.optedOut) {
+      return { ok: true, optedOut: true };
+    }
+    if (typeof json.phone === "string") {
+      return { ok: true, phone: json.phone };
+    }
+    return { ok: false, error: "Unexpected response." };
   } catch (e: unknown) {
     return {
       ok: false,

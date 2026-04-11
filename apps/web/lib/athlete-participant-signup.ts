@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SMS_REMINDER_CONSENT_VERSION } from "@heart-and-hustle/shared";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeUsToE164 } from "@/lib/sms-phone";
 
@@ -11,9 +12,9 @@ export const athleteSignupBodySchema = z
     teamName: z.string().trim().min(1).max(200),
     jerseyNumber: z.string().trim().max(20).nullable().optional(),
     /** Consent to automated fundraiser reminder SMS (Twilio). */
-    smsRemindersOptIn: z.boolean(),
+    smsRemindersOptIn: z.boolean().default(false),
     /** US mobile; required when smsRemindersOptIn is true. */
-    mobilePhone: z.string().optional().nullable(),
+    mobilePhone: z.string().optional().nullable().default(null),
   })
   .superRefine((data, ctx) => {
     if (!data.smsRemindersOptIn) return;
@@ -101,13 +102,20 @@ export async function registerAthleteParticipant(
     };
   }
 
+  const consentAt = new Date().toISOString();
   const { data: created, error: cuErr } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
     user_metadata: {
       sms_reminders_opt_in: smsRemindersOptIn,
-      ...(smsE164 ? { sms_phone: smsE164 } : {}),
+      ...(smsE164
+        ? {
+            sms_phone: smsE164,
+            sms_consent_at: consentAt,
+            sms_consent_version: SMS_REMINDER_CONSENT_VERSION,
+          }
+        : {}),
     },
   });
 

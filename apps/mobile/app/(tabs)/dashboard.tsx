@@ -27,6 +27,8 @@ import {
   getCampaignDayBanner,
   getCampaignWindowPhase,
   PLATFORM,
+  SMS_REMINDER_CONSENT_CHECKBOX_COPY,
+  SMS_REMINDER_PUBLIC_INFO_PATH,
 } from "@heart-and-hustle/shared";
 import { DonationConfetti } from "../../components/donation-confetti";
 import {
@@ -119,6 +121,16 @@ function formatReminderPhoneDisplay(digits: string): string {
   return `(${x.slice(0, 3)}) ${x.slice(3, 6)}-${x.slice(6)}`;
 }
 
+function openLegalUrl(path: "/terms" | "/privacy") {
+  const base = getApiBase().replace(/\/$/, "");
+  void Linking.openURL(`${base}${path}`);
+}
+
+function openSmsProgramPage() {
+  const base = getApiBase().replace(/\/$/, "");
+  void Linking.openURL(`${base}${SMS_REMINDER_PUBLIC_INFO_PATH}`);
+}
+
 function ProgressBarGradient({ pct }: { pct: number }) {
   const w = Math.min(100, Math.max(0, pct));
   return (
@@ -171,6 +183,8 @@ export default function DashboardScreen() {
   const [smsDeclinedAtSignup, setSmsDeclinedAtSignup] = useState(false);
   /** Session email, or username from metadata when email is missing. */
   const [accountIdentity, setAccountIdentity] = useState<string | null>(null);
+  /** Required before each Save that opts in to SMS reminders. */
+  const [smsConsentChecked, setSmsConsentChecked] = useState(false);
 
   const load = useCallback(async () => {
     if (!hasSupabaseConfig()) {
@@ -415,6 +429,17 @@ export default function DashboardScreen() {
       setSmsPhoneMsg("Set EXPO_PUBLIC_API_URL to your website URL to save.");
       return;
     }
+    const digits = normalizePhoneDigits(smsPhone);
+    if (digits.length !== 10) {
+      setSmsPhoneMsg("Enter a valid 10-digit US mobile number.");
+      return;
+    }
+    if (!smsConsentChecked) {
+      setSmsPhoneMsg(
+        "Check the agreement box to receive campaign reminder texts, or tap Cancel."
+      );
+      return;
+    }
     const { data: sess } = await supabase.auth.getSession();
     const tok = sess.session?.access_token;
     if (!tok) {
@@ -423,12 +448,44 @@ export default function DashboardScreen() {
     }
     setSmsPhoneBusy(true);
     try {
-      const res = await saveSmsPhoneViaWebApi(tok, smsPhone);
+      const res = await saveSmsPhoneViaWebApi(tok, {
+        smsRemindersOptIn: true,
+        phone: smsPhone,
+      });
       if (res.ok) {
         setSmsPhoneMsg("Saved.");
+        setSmsConsentChecked(false);
         await supabase.auth.refreshSession();
         await load();
         setSmsPhoneEditing(false);
+      } else {
+        setSmsPhoneMsg(res.error);
+      }
+    } finally {
+      setSmsPhoneBusy(false);
+    }
+  }
+
+  async function clearSmsReminders() {
+    setSmsPhoneMsg(null);
+    if (!hasSupabaseConfig()) return;
+    const { data: sess } = await supabase.auth.getSession();
+    const tok = sess.session?.access_token;
+    if (!tok) {
+      setSmsPhoneMsg("Not signed in.");
+      return;
+    }
+    setSmsPhoneBusy(true);
+    try {
+      const res = await saveSmsPhoneViaWebApi(tok, { smsRemindersOptIn: false });
+      if (res.ok) {
+        setSmsPhoneMsg("SMS reminders turned off.");
+        setSmsPhone("");
+        setSmsPhoneSavedSnapshot("");
+        setSmsPhoneEditing(false);
+        setSmsConsentChecked(false);
+        await supabase.auth.refreshSession();
+        await load();
       } else {
         setSmsPhoneMsg(res.error);
       }
@@ -920,6 +977,7 @@ export default function DashboardScreen() {
                     onPress={() => {
                       setSmsPhoneMsg(null);
                       setSmsPhone(smsPhoneSavedSnapshot);
+                      setSmsConsentChecked(false);
                       setSmsPhoneEditing(true);
                     }}
                     accessibilityRole="button"
@@ -928,6 +986,17 @@ export default function DashboardScreen() {
                     <Text style={styles.smsEditBtnText}>Edit</Text>
                   </Pressable>
                 </View>
+                <Pressable
+                  style={styles.smsTurnOffBtn}
+                  disabled={smsPhoneBusy}
+                  onPress={() => void clearSmsReminders()}
+                  accessibilityRole="button"
+                  accessibilityLabel="Turn off SMS reminders"
+                >
+                  <Text style={styles.smsTurnOffBtnText}>
+                    Turn off SMS reminders
+                  </Text>
+                </Pressable>
               );
             }
             return (
@@ -941,8 +1010,8 @@ export default function DashboardScreen() {
                 ) : null}
                 <Text style={styles.sectionHint}>
                   {hasSavedReminderPhone
-                    ? "Update your US mobile, or tap Cancel to keep the current number."
-                    : "Optional US mobile for campaign reminder texts (about every 3 days + last day). Msg & data rates may apply. Reply STOP to opt out, HELP for help."}
+                    ? "Update your number, check the agreement box, then Save."
+                    : "Optional US mobile for campaign reminders. Check the agreement box before Save."}
                 </Text>
                 <TextInput
                   style={styles.smsPhoneInput}
@@ -952,6 +1021,44 @@ export default function DashboardScreen() {
                   placeholder="10-digit mobile"
                   maxLength={14}
                 />
+                <Pressable
+                  style={styles.smsCheckRow}
+                  onPress={() => setSmsConsentChecked((v) => !v)}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: smsConsentChecked }}
+                >
+                  <View
+                    style={[
+                      styles.smsCheckBox,
+                      smsConsentChecked && styles.smsCheckBoxOn,
+                    ]}
+                  >
+                    {smsConsentChecked ? (
+                      <Text style={styles.smsCheckMark}>✓</Text>
+                    ) : null}
+                  </View>
+                  <Text style={styles.smsCheckLabel}>
+                    {SMS_REMINDER_CONSENT_CHECKBOX_COPY} See{" "}
+                    <Text
+                      style={styles.smsInlineLink}
+                      onPress={() => openLegalUrl("/terms")}
+                    >
+                      Terms
+                    </Text>
+                    ,{" "}
+                    <Text
+                      style={styles.smsInlineLink}
+                      onPress={() => openLegalUrl("/privacy")}
+                    >
+                      Privacy
+                    </Text>
+                    , and our{" "}
+                    <Text style={styles.smsInlineLink} onPress={openSmsProgramPage}>
+                      SMS program page
+                    </Text>
+                    .
+                  </Text>
+                </Pressable>
                 <View style={styles.smsActionsRow}>
                   <Pressable
                     style={[
@@ -974,6 +1081,7 @@ export default function DashboardScreen() {
                       onPress={() => {
                         setSmsPhone(smsPhoneSavedSnapshot);
                         setSmsPhoneEditing(false);
+                        setSmsConsentChecked(false);
                         setSmsPhoneMsg(null);
                       }}
                       accessibilityRole="button"
@@ -1126,6 +1234,56 @@ const styles = StyleSheet.create({
   smsCancelBtnText: { color: "#475569", fontWeight: "600", fontSize: 15 },
   smsPhoneSaveDisabled: { opacity: 0.65 },
   smsPhoneSaveText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  smsCheckRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    marginTop: 12,
+    paddingVertical: 4,
+  },
+  smsCheckBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#94a3b8",
+    marginTop: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  smsCheckBoxOn: {
+    borderColor: "#C0392B",
+    backgroundColor: "#fef2f2",
+  },
+  smsCheckMark: {
+    color: "#C0392B",
+    fontSize: 16,
+    fontWeight: "800",
+    lineHeight: 18,
+  },
+  smsCheckLabel: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 19,
+    color: "#334155",
+  },
+  smsInlineLink: {
+    color: "#C0392B",
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+  smsTurnOffBtn: {
+    marginTop: 10,
+    alignSelf: "flex-start",
+    paddingVertical: 6,
+  },
+  smsTurnOffBtnText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#64748b",
+    textDecorationLine: "underline",
+  },
   smsPhoneFeedback: {
     marginTop: 8,
     fontSize: 13,

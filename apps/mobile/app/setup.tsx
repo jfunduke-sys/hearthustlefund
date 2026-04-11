@@ -14,7 +14,11 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { NEW_PASSWORD_REQUIREMENT_COPY } from "@heart-and-hustle/shared";
+import {
+  NEW_PASSWORD_REQUIREMENT_COPY,
+  SMS_REMINDER_CONSENT_CHECKBOX_COPY,
+  SMS_REMINDER_PUBLIC_INFO_PATH,
+} from "@heart-and-hustle/shared";
 import { getApiBase, supabase } from "../lib/supabase";
 import { getPostAuthHrefForCurrentUser } from "../lib/post-auth-route";
 import { normalizePhoneDigits } from "../lib/phone";
@@ -32,6 +36,11 @@ function openTermsUrl() {
 function openPrivacyUrl() {
   const base = getApiBase().replace(/\/$/, "");
   void Linking.openURL(`${base}/privacy`);
+}
+
+function openSmsRemindersPage() {
+  const base = getApiBase().replace(/\/$/, "");
+  void Linking.openURL(`${base}${SMS_REMINDER_PUBLIC_INFO_PATH}`);
 }
 
 export default function SetupScreen() {
@@ -237,16 +246,17 @@ export default function SetupScreen() {
             ) : null}
           </View>
           <Text style={styles.checkLabel}>
-            I agree to receive automated fundraising reminder texts from Heart
-            &amp; Hustle at this number during the campaign (about every 3 days
-            and on the last day). Message and data rates may apply. Reply STOP to
-            opt out, HELP for help. See{" "}
+            {SMS_REMINDER_CONSENT_CHECKBOX_COPY} See{" "}
             <Text style={styles.inlineLink} onPress={openTermsUrl}>
               Terms
-            </Text>{" "}
-            and{" "}
+            </Text>
+            ,{" "}
             <Text style={styles.inlineLink} onPress={openPrivacyUrl}>
               Privacy
+            </Text>
+            , and our{" "}
+            <Text style={styles.inlineLink} onPress={openSmsRemindersPage}>
+              SMS program page
             </Text>
             .
           </Text>

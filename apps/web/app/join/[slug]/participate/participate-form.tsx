@@ -7,8 +7,10 @@ import { BRAND } from "@/lib/brand";
 import {
   NEW_PASSWORD_REQUIREMENT_COPY,
   PLATFORM,
+  SMS_REMINDER_CONSENT_CHECKBOX_COPY,
 } from "@heart-and-hustle/shared";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -33,6 +35,8 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [smsMobile, setSmsMobile] = useState("");
+  const [smsRemindersOptIn, setSmsRemindersOptIn] = useState(false);
   const [done, setDone] = useState<{
     donatePath: string;
     name: string;
@@ -49,6 +53,15 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
       setError(NEW_PASSWORD_REQUIREMENT_COPY);
       return;
     }
+    if (smsRemindersOptIn) {
+      const digits = smsMobile.replace(/\D/g, "");
+      if (digits.length < 10) {
+        setError(
+          "Enter a valid 10-digit US mobile for SMS reminders, or uncheck SMS."
+        );
+        return;
+      }
+    }
     setLoading(true);
     try {
       const supabase = createClient();
@@ -62,6 +75,8 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
           fullName: fullName.trim(),
           teamName: fundraiser.team_name,
           jerseyNumber: jersey.trim() || null,
+          smsRemindersOptIn,
+          mobilePhone: smsRemindersOptIn ? smsMobile.trim() : null,
         }),
       });
       const regJson = (await regRes.json()) as { error?: string };
@@ -225,6 +240,64 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
               autoComplete="new-password"
               required
             />
+          </div>
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+            <p className="text-sm font-medium text-hh-dark">
+              Optional: campaign SMS reminders
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="smsMobile">US mobile (if you want texts)</Label>
+              <Input
+                id="smsMobile"
+                name="hh-participant-sms-mobile"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
+                value={smsMobile}
+                onChange={(e) => setSmsMobile(e.target.value)}
+                placeholder="10-digit mobile"
+              />
+            </div>
+            <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-slate-700">
+              <Checkbox
+                checked={smsRemindersOptIn}
+                onCheckedChange={(v) =>
+                  setSmsRemindersOptIn(v === true)
+                }
+                className="mt-0.5"
+                aria-labelledby="sms-consent-label"
+              />
+              <span id="sms-consent-label">
+                {SMS_REMINDER_CONSENT_CHECKBOX_COPY}{" "}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-hh-primary underline"
+                >
+                  Terms
+                </Link>
+                ,{" "}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-hh-primary underline"
+                >
+                  Privacy
+                </Link>
+                ,{" "}
+                <Link
+                  href="/sms-reminders"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-hh-primary underline"
+                >
+                  SMS program page
+                </Link>
+                .
+              </span>
+            </label>
           </div>
           {error ? (
             <p className="text-sm text-red-600" role="alert">

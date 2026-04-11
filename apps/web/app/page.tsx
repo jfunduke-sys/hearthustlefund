@@ -140,6 +140,12 @@ export default function HomePage() {
           <Link href="/terms" className="underline underline-offset-2">
             Terms of service
           </Link>
+          <span className="mx-2 text-slate-300" aria-hidden>
+            ·
+          </span>
+          <Link href="/sms-reminders" className="underline underline-offset-2">
+            SMS reminders
+          </Link>
         </p>
       </main>
     </div>

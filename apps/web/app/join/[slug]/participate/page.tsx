@@ -35,6 +35,13 @@ export default async function JoinParticipatePage({
           <strong>{CAMPAIGN_SETUP_CODE.label}:</strong>{" "}
           {CAMPAIGN_SETUP_CODE.joinFlowReminder}
         </p>
+        <p className="mt-3 text-xs leading-relaxed text-slate-600">
+          Optional SMS consent is described on our{" "}
+          <Link href="/sms-reminders" className="font-semibold text-hh-primary underline">
+            SMS reminders
+          </Link>{" "}
+          page (same wording as the checkbox below).
+        </p>
         <div className="mt-6">
           <ParticipateForm fundraiser={fr} />
         </div>
