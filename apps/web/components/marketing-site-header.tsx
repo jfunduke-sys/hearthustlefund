@@ -41,20 +41,30 @@ export function MarketingSiteHeader({
     <>
       <Button
         variant="outline"
-        size="lg"
-        className="w-full border-2 border-hh-primary bg-white text-base text-hh-primary hover:bg-hh-primary/10 sm:w-auto"
+        size="default"
+        className="w-full border-2 border-hh-primary bg-white text-sm text-hh-primary hover:bg-hh-primary/10 sm:w-auto sm:text-base lg:px-3 lg:text-sm xl:px-4 xl:text-base"
         asChild
       >
         <Link href="/request-fundraiser" onClick={close}>
           Request fundraiser
         </Link>
       </Button>
-      <Button variant="outline" size="lg" className="w-full text-base sm:w-auto" asChild>
+      <Button
+        variant="outline"
+        size="default"
+        className="w-full text-sm sm:w-auto sm:text-base lg:px-3 lg:text-sm xl:px-4 xl:text-base"
+        asChild
+      >
         <Link href="/coach/login" onClick={close}>
           Coach login
         </Link>
       </Button>
-      <Button variant="secondary" size="lg" className="w-full text-base sm:w-auto" asChild>
+      <Button
+        variant="secondary"
+        size="default"
+        className="w-full text-sm sm:w-auto sm:text-base lg:px-3 lg:text-sm xl:px-4 xl:text-base"
+        asChild
+      >
         <Link href="/how-it-works" onClick={close}>
           How it works
         </Link>
@@ -112,20 +122,20 @@ export function MarketingSiteHeader({
         className
       )}
     >
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-3 sm:h-[5.75rem] sm:gap-4 sm:px-6 lg:h-[6.5rem]">
+      <div className="mx-auto flex h-14 max-w-5xl flex-nowrap items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6">
         <Link
           href="/"
-          className="flex min-h-0 min-w-0 shrink items-center py-1"
+          className="flex min-h-0 min-w-0 max-w-[58%] shrink items-center overflow-hidden py-1 sm:max-w-[55%] lg:max-w-[50%]"
           onClick={close}
         >
           <BrandLogo
             priority
-            className="h-9 w-auto max-w-[min(100%,12rem)] object-contain object-left sm:h-10 lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-none"
+            className="h-8 w-auto max-h-8 max-w-full object-contain object-left sm:h-9 sm:max-h-9 md:h-10 md:max-h-10 lg:h-10 lg:max-h-10"
           />
         </Link>
 
         <nav
-          className="hidden min-h-0 items-center justify-end gap-2 lg:flex lg:gap-3 xl:gap-4"
+          className="hidden shrink-0 items-center justify-end gap-2 lg:flex lg:gap-2 xl:gap-3"
           aria-label="Main"
         >
           {navLinks}
