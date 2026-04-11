@@ -22,7 +22,10 @@ import {
   generateStandaloneCode,
   rejectRequest,
 } from "@/app/actions/admin";
-import { computeFundraiserAnalytics } from "@/lib/admin-fundraiser-analytics";
+import {
+  computeFundraiserAnalytics,
+  computeRevenueSplitFromDonations,
+} from "@/lib/admin-fundraiser-analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -508,9 +511,10 @@ export function SuperadminTabs({
             <CardHeader>
               <CardTitle>Closed fundraisers</CardTitle>
               <p className="text-sm text-slate-600">
-                Historical campaigns. Analytics use donations, athlete roster,
-                and contact rows (texts logged in-app). Add legal / tax notes on
-                the fundraiser detail page.
+                Historical campaigns. Revenue columns use a 90% / 10% split of
+                gross donations; Stripe fees sum known stored fees per donation.
+                Donation counts, texts, conversion, and averages are on each
+                fundraiser&apos;s detail page.
               </p>
             </CardHeader>
             <CardContent className="space-y-4 overflow-x-auto">
@@ -523,11 +527,11 @@ export function SuperadminTabs({
                     <TableHead>Closed</TableHead>
                     <TableHead>Participants</TableHead>
                     <TableHead>Gross raised</TableHead>
-                    <TableHead>Donations</TableHead>
-                    <TableHead>Texts sent</TableHead>
-                    <TableHead>Conversion</TableHead>
-                    <TableHead>Avg donation</TableHead>
-                    <TableHead>Avg / athlete</TableHead>
+                    <TableHead className="text-right">Program cut (90%)</TableHead>
+                    <TableHead className="text-right">H&amp;H cut (10%)</TableHead>
+                    <TableHead className="text-right">
+                      Net H&amp;H (10% − Stripe)
+                    </TableHead>
                     <TableHead />
                   </TableRow>
                 </TableHeader>
@@ -535,7 +539,7 @@ export function SuperadminTabs({
                   {closedFundraisers.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={12}
+                        colSpan={10}
                         className="py-10 text-center text-slate-500"
                       >
                         No closed fundraisers yet.
@@ -548,6 +552,11 @@ export function SuperadminTabs({
                       athletes,
                       donations,
                       contacts
+                    );
+                    const pack = byFundraiser.get(f.id);
+                    const rev = computeRevenueSplitFromDonations(
+                      a.grossRaised,
+                      pack?.donations ?? []
                     );
                     return (
                       <TableRow key={f.id}>
@@ -563,18 +572,22 @@ export function SuperadminTabs({
                         </TableCell>
                         <TableCell>{a.participantCount}</TableCell>
                         <TableCell>${a.grossRaised.toFixed(2)}</TableCell>
-                        <TableCell>{a.donationCount}</TableCell>
-                        <TableCell>{a.textsSent}</TableCell>
-                        <TableCell>
-                          {a.conversionPercent != null
-                            ? `${a.conversionPercent.toFixed(1)}%`
-                            : "—"}
-                          <span className="block text-[10px] text-slate-500">
-                            donations ÷ texts
-                          </span>
+                        <TableCell className="text-right tabular-nums">
+                          ${rev.programCut.toFixed(2)}
                         </TableCell>
-                        <TableCell>${a.avgDonation.toFixed(2)}</TableCell>
-                        <TableCell>${a.avgRaisedPerAthlete.toFixed(2)}</TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          ${rev.hhCut.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          ${rev.netHhRevenue.toFixed(2)}
+                          {rev.donationsWithUnknownFee > 0 ? (
+                            <span className="mt-0.5 block text-[10px] font-normal text-amber-800">
+                              {rev.donationsWithUnknownFee} donation
+                              {rev.donationsWithUnknownFee === 1 ? "" : "s"} with
+                              unknown Stripe fee
+                            </span>
+                          ) : null}
+                        </TableCell>
                         <TableCell>
                           <Button size="sm" variant="outline" asChild>
                             <Link href={`/admin/fundraisers/${f.id}`}>
@@ -588,8 +601,9 @@ export function SuperadminTabs({
                 </TableBody>
               </Table>
               <p className="text-xs text-slate-500">
-                Avg donation, avg raised per athlete, and compliance notes are on
-                the detail page.
+                Stripe fees in the table are only from donations that have{" "}
+                <span className="font-mono">stripe_fee_cents</span> saved; open
+                Detail to refresh fees from Stripe when configured.
               </p>
             </CardContent>
           </Card>

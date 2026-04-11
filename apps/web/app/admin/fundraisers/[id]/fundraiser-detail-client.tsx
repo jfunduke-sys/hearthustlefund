@@ -13,7 +13,10 @@ import {
   formatKickoffSetupPreference,
   schoolRequestLeadDisplayName,
 } from "@heart-and-hustle/shared";
-import type { FundraiserAnalytics } from "@/lib/admin-fundraiser-analytics";
+import type {
+  FundraiserAnalytics,
+  RevenueSplitSnapshot,
+} from "@/lib/admin-fundraiser-analytics";
 import {
   setFundraiserStatus,
   updateFundraiserComplianceNotes,
@@ -27,6 +30,7 @@ type Props = {
   fundraiser: Fundraiser;
   coachEmail: string | null;
   analytics: FundraiserAnalytics;
+  revenueSplit: RevenueSplitSnapshot;
   stripeBreakdown: FundraiserStripeFinancialBreakdown;
   schoolRequest: SchoolRequest | null;
   complianceNotes: string | null;
@@ -36,6 +40,7 @@ export function FundraiserDetailClient({
   fundraiser,
   coachEmail,
   analytics,
+  revenueSplit,
   stripeBreakdown,
   schoolRequest,
   complianceNotes: initialNotes,
@@ -90,7 +95,7 @@ export function FundraiserDetailClient({
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Participants (athletes)</CardTitle>
@@ -109,55 +114,101 @@ export function FundraiserDetailClient({
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Donations (count)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{analytics.donationCount}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Avg donation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">
-              ${analytics.avgDonation.toFixed(2)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Avg raised / athlete</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">
-              ${analytics.avgRaisedPerAthlete.toFixed(2)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Texts sent (logged)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{analytics.textsSent}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Conversion (donations ÷ texts)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">
-              {analytics.conversionPercent != null
-                ? `${analytics.conversionPercent.toFixed(1)}%`
-                : "—"}
-            </p>
-          </CardContent>
-        </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Engagement &amp; donation activity</CardTitle>
+          <p className="text-sm font-normal text-slate-600">
+            Same metrics as the SuperAdmin closed-fundraiser list (now shown only
+            here per campaign). Conversion uses donations ÷ texts sent when texts
+            are logged.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <dl className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <dt className="text-sm text-slate-600">Donations (count)</dt>
+              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+                {analytics.donationCount}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-slate-600">Texts sent (logged)</dt>
+              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+                {analytics.textsSent}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-slate-600">Conversion (donations ÷ texts)</dt>
+              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+                {analytics.conversionPercent != null
+                  ? `${analytics.conversionPercent.toFixed(1)}%`
+                  : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-slate-600">Avg donation</dt>
+              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+                ${analytics.avgDonation.toFixed(2)}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-sm text-slate-600">Avg raised / athlete</dt>
+              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+                ${analytics.avgRaisedPerAthlete.toFixed(2)}
+              </dd>
+            </div>
+          </dl>
+        </CardContent>
+      </Card>
+
+      <Card className="border-hh-primary/20">
+        <CardHeader>
+          <CardTitle>Revenue split (90% program / 10% platform)</CardTitle>
+          <p className="text-sm font-normal text-slate-600">
+            Structural split of recorded gross donations. Stripe fees are summed
+            from known per-donation fees only (same basis as the closed
+            fundraisers table).
+          </p>
+        </CardHeader>
+        <CardContent>
+          <dl className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <dt className="text-sm text-slate-600">Program cut (90% of gross)</dt>
+              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+                ${revenueSplit.programCut.toFixed(2)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-slate-600">H&amp;H cut (10% of gross)</dt>
+              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+                ${revenueSplit.hhCut.toFixed(2)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-slate-600">Stripe fees (known)</dt>
+              <dd className="text-xl font-semibold tabular-nums text-hh-dark">
+                ${revenueSplit.stripeFeesDollars.toFixed(2)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm text-slate-600">Net H&amp;H (10% − Stripe)</dt>
+              <dd className="text-xl font-semibold tabular-nums text-emerald-800">
+                ${revenueSplit.netHhRevenue.toFixed(2)}
+              </dd>
+            </div>
+          </dl>
+          {revenueSplit.donationsWithUnknownFee > 0 ? (
+            <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              {revenueSplit.donationsWithUnknownFee} donation
+              {revenueSplit.donationsWithUnknownFee === 1 ? "" : "s"} with no
+              stored Stripe fee — fees and net H&amp;H are understated until
+              resolved (see Payments section below).
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card className="border-hh-primary/20">
         <CardHeader>
@@ -209,13 +260,19 @@ export function FundraiserDetailClient({
               <dt className="text-slate-600">
                 {stripeBreakdown.unresolvedCount > 0
                   ? "Net (after known fees only)"
-                  : "Net after Stripe fees"}
+                  : "Gross minus Stripe fees (full amount)"}
               </dt>
               <dd className="text-lg font-semibold text-emerald-800">
                 ${stripeBreakdown.netAfterStripeFeesDollars.toFixed(2)}
               </dd>
             </div>
           </dl>
+          <p className="mt-2 text-xs text-slate-500">
+            This line is total gross less processing fees—not the 90% program /
+            10% platform split. Use{" "}
+            <strong className="font-semibold text-slate-600">Net H&amp;H</strong>{" "}
+            in the revenue split card for platform share after Stripe.
+          </p>
           {stripeBreakdown.effectiveFeePercentOfGross != null ? (
             <p className="text-slate-600">
               Effective Stripe fee rate (of gross):{" "}

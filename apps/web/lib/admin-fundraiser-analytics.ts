@@ -1,5 +1,46 @@
 import type { Athlete, AthleteContact, Donation } from "@heart-and-hustle/shared";
 
+/** 90/10 split vs gross; Stripe fees from stored `stripe_fee_cents` only. */
+export type RevenueSplitSnapshot = {
+  programCut: number;
+  hhCut: number;
+  stripeFeesDollars: number;
+  /** Heart & Hustle platform share after Stripe processing fees. */
+  netHhRevenue: number;
+  /** Donations missing a stored Stripe fee (fees understated until resolved). */
+  donationsWithUnknownFee: number;
+};
+
+/**
+ * Program 90% / H&H 10% of gross; Stripe fees summed from known
+ * `stripe_fee_cents` on donation rows (same basis as SuperAdmin closed table).
+ */
+export function computeRevenueSplitFromDonations(
+  gross: number,
+  donations: Donation[]
+): RevenueSplitSnapshot {
+  let unknown = 0;
+  let feeCents = 0;
+  for (const d of donations) {
+    const c = d.stripe_fee_cents;
+    if (c != null && c >= 0) {
+      feeCents += c;
+    } else {
+      unknown += 1;
+    }
+  }
+  const stripeFeesDollars = feeCents / 100;
+  const programCut = gross * 0.9;
+  const hhCut = gross * 0.1;
+  return {
+    programCut,
+    hhCut,
+    stripeFeesDollars,
+    netHhRevenue: hhCut - stripeFeesDollars,
+    donationsWithUnknownFee: unknown,
+  };
+}
+
 export type FundraiserAnalytics = {
   participantCount: number;
   grossRaised: number;
