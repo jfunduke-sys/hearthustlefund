@@ -122,15 +122,15 @@ export function MarketingSiteHeader({
         className
       )}
     >
-      <div className="mx-auto flex h-16 max-w-5xl flex-nowrap items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6 lg:items-stretch lg:gap-4 lg:px-6 lg:py-2 lg:h-28 xl:h-[7.5rem] xl:py-2.5">
+      <div className="mx-auto flex h-[4.5rem] max-w-5xl flex-nowrap items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6 lg:items-stretch lg:gap-4 lg:px-6 lg:py-2 lg:h-28 xl:h-[7.5rem] xl:py-2.5">
         <Link
           href="/"
-          className="flex min-h-0 min-w-0 max-w-[58%] shrink items-center overflow-hidden py-0.5 sm:max-w-[55%] sm:py-1 lg:h-full lg:min-h-0 lg:max-w-[min(92%,42rem)] lg:items-center lg:overflow-visible lg:py-0"
+          className="flex min-h-0 min-w-0 max-w-[58%] shrink items-center overflow-hidden py-0 sm:max-w-[55%] sm:py-0.5 md:py-1 lg:h-full lg:min-h-0 lg:max-w-[min(92%,42rem)] lg:items-center lg:overflow-visible lg:py-0"
           onClick={close}
         >
           <BrandLogo
             priority
-            className="h-11 w-auto max-h-11 max-w-full object-contain object-left sm:h-12 sm:max-h-12 md:h-[3.25rem] md:max-h-[3.25rem] lg:h-full lg:max-h-full lg:w-auto lg:min-w-0 lg:max-w-full"
+            className="h-[3.25rem] w-auto max-h-[3.25rem] max-w-full object-contain object-left sm:h-14 sm:max-h-14 md:h-[3.75rem] md:max-h-[3.75rem] lg:h-full lg:max-h-full lg:w-auto lg:min-w-0 lg:max-w-full"
           />
         </Link>
 
