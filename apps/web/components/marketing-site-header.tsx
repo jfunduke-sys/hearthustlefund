@@ -122,20 +122,20 @@ export function MarketingSiteHeader({
         className
       )}
     >
-      <div className="mx-auto flex h-14 max-w-5xl flex-nowrap items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6 lg:h-[6.5rem] lg:gap-4 lg:px-6 xl:h-[7rem]">
+      <div className="mx-auto flex h-14 max-w-5xl flex-nowrap items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6 lg:items-stretch lg:gap-4 lg:px-6 lg:py-2 lg:h-28 xl:h-[7.5rem] xl:py-2.5">
         <Link
           href="/"
-          className="flex min-h-0 min-w-0 max-w-[58%] shrink items-center overflow-hidden py-1 sm:max-w-[55%] lg:max-w-[min(75%,22rem)] lg:overflow-visible xl:max-w-[min(78%,26rem)]"
+          className="flex min-h-0 min-w-0 max-w-[58%] shrink items-center overflow-hidden py-1 sm:max-w-[55%] lg:h-full lg:min-h-0 lg:max-w-[min(92%,42rem)] lg:items-center lg:overflow-visible lg:py-0"
           onClick={close}
         >
           <BrandLogo
             priority
-            className="h-8 w-auto max-h-8 max-w-full object-contain object-left sm:h-9 sm:max-h-9 md:h-10 md:max-h-10 lg:h-[3.25rem] lg:max-h-[3.25rem] xl:h-[3.75rem] xl:max-h-[3.75rem]"
+            className="h-8 w-auto max-h-8 max-w-full object-contain object-left sm:h-9 sm:max-h-9 md:h-10 md:max-h-10 lg:h-full lg:max-h-full lg:w-auto lg:min-w-0 lg:max-w-full"
           />
         </Link>
 
         <nav
-          className="hidden shrink-0 items-center justify-end gap-2 lg:flex lg:gap-2 xl:gap-3"
+          className="hidden shrink-0 items-center justify-end gap-2 self-center lg:flex lg:gap-2 xl:gap-3"
           aria-label="Main"
         >
           {navLinks}
@@ -143,7 +143,7 @@ export function MarketingSiteHeader({
 
         <button
           type="button"
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border-2 border-slate-200 bg-white text-hh-dark shadow-sm transition hover:border-hh-primary hover:bg-slate-50 lg:hidden"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center self-center rounded-lg border-2 border-slate-200 bg-white text-hh-dark shadow-sm transition hover:border-hh-primary hover:bg-slate-50 lg:hidden"
           aria-expanded={menuOpen}
           aria-controls="marketing-site-menu"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
