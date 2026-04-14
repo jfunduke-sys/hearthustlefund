@@ -122,15 +122,15 @@ export function MarketingSiteHeader({
         className
       )}
     >
-      <div className="mx-auto flex h-14 max-w-5xl flex-nowrap items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-5xl flex-nowrap items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6 lg:h-[6.5rem] lg:gap-4 lg:px-6 xl:h-[7rem]">
         <Link
           href="/"
-          className="flex min-h-0 min-w-0 max-w-[58%] shrink items-center overflow-hidden py-1 sm:max-w-[55%] lg:max-w-[50%]"
+          className="flex min-h-0 min-w-0 max-w-[58%] shrink items-center overflow-hidden py-1 sm:max-w-[55%] lg:max-w-[min(75%,22rem)] lg:overflow-visible xl:max-w-[min(78%,26rem)]"
           onClick={close}
         >
           <BrandLogo
             priority
-            className="h-8 w-auto max-h-8 max-w-full object-contain object-left sm:h-9 sm:max-h-9 md:h-10 md:max-h-10 lg:h-10 lg:max-h-10"
+            className="h-8 w-auto max-h-8 max-w-full object-contain object-left sm:h-9 sm:max-h-9 md:h-10 md:max-h-10 lg:h-[3.25rem] lg:max-h-[3.25rem] xl:h-[3.75rem] xl:max-h-[3.75rem]"
           />
         </Link>
 
