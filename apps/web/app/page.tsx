@@ -13,8 +13,8 @@ export default function HomePage() {
           Built by Heart. Powered by Hustle.
         </h1>
         <p className="mt-4 max-w-3xl text-balance text-lg leading-relaxed text-slate-600 sm:text-xl">
-          Safe fundraising for youth and high school teams, clubs, and
-          activities.
+          Safe fundraising for youth organizations, nonprofit groups, and
+          school teams, clubs, and activities.
         </p>
         <ul className="mt-8 max-w-2xl space-y-3 text-base text-slate-700 sm:text-lg">
           <li className="flex gap-3">
