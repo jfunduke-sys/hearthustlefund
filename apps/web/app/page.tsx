@@ -12,7 +12,7 @@ export default function HomePage() {
         <h1 className="text-balance text-3xl font-bold tracking-tight text-hh-dark sm:text-5xl">
           Built by Heart. Powered by Hustle.
         </h1>
-        <p className="mt-4 max-w-3xl text-balance text-lg leading-relaxed text-slate-600 sm:text-xl">
+        <p className="mt-4 max-w-3xl text-balance text-lg font-semibold leading-relaxed text-slate-800 sm:text-xl lg:max-w-none lg:text-nowrap">
           Safe fundraising for youth organizations, nonprofit groups, and
           school teams, clubs, and activities.
         </p>
