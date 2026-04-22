@@ -1,5 +1,9 @@
 # App Store checklist — Heart & Hustle Fundraising
 
+**First time launching?** Follow the ordered guide: **[MOBILE_STORE_LAUNCH_WALKTHROUGH.md](./MOBILE_STORE_LAUNCH_WALKTHROUGH.md)** (step-by-step from Expo login through both stores).
+
+---
+
 ## App icons
 
 - **iOS**: App Store requires 1024×1024 marketing icon; Xcode asset catalog sizes (20pt–1024pt @2x/@3x as applicable).
