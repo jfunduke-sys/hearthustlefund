@@ -401,19 +401,38 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
     const link = donateUrl(athlete.unique_link_token);
     const now = new Date().toISOString();
 
-    const insertRows = picked
-      .map((c) => {
-        const phone_normalized = normalizePhoneDigits(c.phone);
-        if (!isPlausiblePhoneDigits(phone_normalized)) return null;
-        return {
-          athlete_id: athlete.id,
-          contact_name: c.name,
-          phone_number: c.phone,
-          phone_normalized,
-          texted_at: now,
-        };
-      })
-      .filter((r): r is NonNullable<typeof r> => r != null);
+    type ContactUpsertRow = {
+      athlete_id: string;
+      contact_name: string;
+      phone_number: string;
+      phone_normalized: string;
+      texted_at: string;
+    };
+
+    const mapped = picked.map((c) => {
+      const phone_normalized = normalizePhoneDigits(c.phone);
+      if (!isPlausiblePhoneDigits(phone_normalized)) return null;
+      return {
+        athlete_id: athlete.id,
+        contact_name: c.name,
+        phone_number: c.phone,
+        phone_normalized,
+        texted_at: now,
+      } satisfies ContactUpsertRow;
+    });
+
+    const validRows = mapped.filter(
+      (r): r is ContactUpsertRow => r != null
+    );
+    const invalidPickCount = picked.length - validRows.length;
+
+    /** One DB row per (athlete, normalized phone); duplicates in the picker collapse here. */
+    const byNormalized = new Map<string, ContactUpsertRow>();
+    for (const r of validRows) {
+      if (!byNormalized.has(r.phone_normalized)) byNormalized.set(r.phone_normalized, r);
+    }
+    const insertRows = Array.from(byNormalized.values());
+    const duplicateNormalizedCount = validRows.length - insertRows.length;
 
     if (insertRows.length === 0) {
       setStatus("Selected contacts need a valid phone (at least 10 digits).");
@@ -439,13 +458,28 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         schoolName: school,
         donateUrl: link,
       });
-      /** One recipient per composer — private threads, not a group text (OS opens Messages for each). */
-      for (const c of picked) {
-        await SMS.sendSMSAsync([c.phone], body);
+      /** Match DB: one composer per unique normalized number (not per picker row). */
+      for (const row of insertRows) {
+        await SMS.sendSMSAsync([row.phone_number], body);
       }
-      setStatus(
-        "Done — separate private texts for each person. (Tap Send in Messages for each one when prompted.)"
-      );
+      const parts = [
+        "Done — separate private texts for each person. (Tap Send in Messages for each one when prompted.)",
+      ];
+      if (invalidPickCount > 0) {
+        parts.push(
+          invalidPickCount === 1
+            ? "1 pick was skipped (phone did not look valid)."
+            : `${invalidPickCount} picks were skipped (phones did not look valid).`
+        );
+      }
+      if (duplicateNormalizedCount > 0) {
+        parts.push(
+          duplicateNormalizedCount === 1
+            ? "1 pick was the same number as another — one logged text."
+            : `${duplicateNormalizedCount} picks were the same number as another — one logged text per unique number.`
+        );
+      }
+      setStatus(parts.join(" "));
       setSelected({});
     } catch (e: unknown) {
       setStatus(e instanceof Error ? e.message : "Failed");
