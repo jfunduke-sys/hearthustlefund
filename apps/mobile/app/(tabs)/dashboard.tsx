@@ -965,38 +965,40 @@ export default function DashboardScreen() {
             const hasSavedReminderPhone = smsPhoneSavedSnapshot.length === 10;
             if (hasSavedReminderPhone && !smsPhoneEditing) {
               return (
-                <View style={styles.smsSavedRow}>
-                  <View style={styles.smsSavedTextBlock}>
-                    <Text style={styles.smsSavedLabel}>Phone</Text>
-                    <Text style={styles.smsSavedNumber}>
-                      {formatReminderPhoneDisplay(smsPhoneSavedSnapshot)}
-                    </Text>
+                <>
+                  <View style={styles.smsSavedRow}>
+                    <View style={styles.smsSavedTextBlock}>
+                      <Text style={styles.smsSavedLabel}>Phone</Text>
+                      <Text style={styles.smsSavedNumber}>
+                        {formatReminderPhoneDisplay(smsPhoneSavedSnapshot)}
+                      </Text>
+                    </View>
+                    <Pressable
+                      style={styles.smsEditBtn}
+                      onPress={() => {
+                        setSmsPhoneMsg(null);
+                        setSmsPhone(smsPhoneSavedSnapshot);
+                        setSmsConsentChecked(false);
+                        setSmsPhoneEditing(true);
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel="Edit phone number"
+                    >
+                      <Text style={styles.smsEditBtnText}>Edit</Text>
+                    </Pressable>
                   </View>
                   <Pressable
-                    style={styles.smsEditBtn}
-                    onPress={() => {
-                      setSmsPhoneMsg(null);
-                      setSmsPhone(smsPhoneSavedSnapshot);
-                      setSmsConsentChecked(false);
-                      setSmsPhoneEditing(true);
-                    }}
+                    style={styles.smsTurnOffBtn}
+                    disabled={smsPhoneBusy}
+                    onPress={() => void clearSmsReminders()}
                     accessibilityRole="button"
-                    accessibilityLabel="Edit phone number"
+                    accessibilityLabel="Turn off SMS reminders"
                   >
-                    <Text style={styles.smsEditBtnText}>Edit</Text>
+                    <Text style={styles.smsTurnOffBtnText}>
+                      Turn off SMS reminders
+                    </Text>
                   </Pressable>
-                </View>
-                <Pressable
-                  style={styles.smsTurnOffBtn}
-                  disabled={smsPhoneBusy}
-                  onPress={() => void clearSmsReminders()}
-                  accessibilityRole="button"
-                  accessibilityLabel="Turn off SMS reminders"
-                >
-                  <Text style={styles.smsTurnOffBtnText}>
-                    Turn off SMS reminders
-                  </Text>
-                </Pressable>
+                </>
               );
             }
             return (
