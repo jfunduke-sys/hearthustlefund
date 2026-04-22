@@ -100,21 +100,42 @@ export default function SetupScreen() {
     try {
       const base = getApiBase();
       const loginEmail = email.trim().toLowerCase();
-      const res = await fetch(`${base}/api/public/athlete-signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fundraiserId,
-          email: loginEmail,
-          password,
-          fullName: fullName.trim(),
-          teamName: teamName ?? "",
-          jerseyNumber: jersey.trim() || null,
-          smsRemindersOptIn,
-          mobilePhone: smsRemindersOptIn ? mobilePhone.trim() : null,
-        }),
-      });
-      const payload = (await res.json()) as { error?: string };
+
+      let res: Response;
+      try {
+        res = await fetch(`${base}/api/public/athlete-signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fundraiserId,
+            email: loginEmail,
+            password,
+            fullName: fullName.trim(),
+            teamName: teamName ?? "",
+            jerseyNumber: jersey.trim() || null,
+            smsRemindersOptIn,
+            mobilePhone: smsRemindersOptIn ? mobilePhone.trim() : null,
+          }),
+        });
+      } catch (fetchErr) {
+        const msg =
+          fetchErr instanceof Error ? fetchErr.message.toLowerCase() : "";
+        const looksNetwork =
+          msg.includes("network") ||
+          msg.includes("internet") ||
+          msg.includes("failed to fetch") ||
+          msg.includes("not available") ||
+          msg.includes("unreachable");
+        throw new Error(
+          looksNetwork
+            ? "Couldn't reach the server. Check Wi‑Fi or cellular data. If you already tapped Create once, your account may still exist—go back, open the Sign in tab, and try this email and password before creating again."
+            : "Could not reach the server. Try again in a moment."
+        );
+      }
+
+      const payload = (await res.json().catch(() => ({}))) as {
+        error?: string;
+      };
       if (!res.ok) {
         throw new Error(payload.error || "Could not create your account.");
       }
@@ -128,10 +149,23 @@ export default function SetupScreen() {
           email: loginEmail,
           password,
         });
-      if (signErr) throw signErr;
+      if (signErr) {
+        const sm = signErr.message.toLowerCase();
+        const looksNetwork =
+          sm.includes("network") ||
+          sm.includes("fetch") ||
+          sm.includes("internet") ||
+          sm.includes("not available") ||
+          sm.includes("unreachable");
+        throw new Error(
+          looksNetwork
+            ? "Your account may be ready, but we couldn't finish signing in (connection issue). Go back, open the Sign in tab, and use this same email and password—do not create the account again."
+            : `Couldn't sign you in (${signErr.message}). Try the Sign in tab with this email and password.`
+        );
+      }
       if (!signInData.session) {
         throw new Error(
-          "Session did not start. Try signing in from the home screen."
+          "Session did not start. Open the Sign in tab and use this email and password."
         );
       }
 

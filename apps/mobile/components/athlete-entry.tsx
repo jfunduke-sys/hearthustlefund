@@ -325,7 +325,7 @@ export default function AthleteEntry({
                             ? styles.logoLarge
                             : styles.logo
                         }
-                        resizeMode="cover"
+                        resizeMode="contain"
                       />
                     ))}
                   </View>

@@ -147,6 +147,31 @@ This guide is for **Heart & Hustle** (`apps/mobile`), built with **Expo** and sh
 
 **Done when:** The App ID exists in the portal.
 
+**Next:** Step 5b (do this before Step 6 or TestFlight will crash on launch).
+
+---
+
+### Step 5b — EAS environment variables (`EXPO_PUBLIC_*`)
+
+**Goal:** Production builds embed the same public config as your local `apps/mobile/.env`. Without these, Supabase’s client used to **throw on startup** and the app crashed immediately in TestFlight.
+
+**Substeps:**
+
+1. On **[expo.dev](https://expo.dev)** open your project → **Environment variables** (or use the CLI from `apps/mobile`).
+2. For the **`production`** (and optionally **`preview`**) environment, add **plain text** variables (names must match exactly):
+   - `EXPO_PUBLIC_SUPABASE_URL` — same value as in `.env`
+   - `EXPO_PUBLIC_SUPABASE_ANON_KEY` — same value as in `.env`
+   - `EXPO_PUBLIC_API_URL` — your live site, e.g. `https://your-domain.up.railway.app` (no trailing slash)
+3. CLI alternative (run from `apps/mobile`; use your real values):
+   ```bash
+   eas env:create production --name EXPO_PUBLIC_SUPABASE_URL --value 'https://YOUR.supabase.co' --visibility plaintext
+   eas env:create production --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value 'YOUR_ANON_KEY' --visibility plaintext
+   eas env:create production --name EXPO_PUBLIC_API_URL --value 'https://YOUR-RAILWAY-URL' --visibility plaintext
+   ```
+4. Run a **new** `eas build` so the bundle picks up the variables.
+
+**Done when:** `eas build` logs list those variables for the production environment (or Expo UI shows them under **production**).
+
 **Next:** Step 6.
 
 ---

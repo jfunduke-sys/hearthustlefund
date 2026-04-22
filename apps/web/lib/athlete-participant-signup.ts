@@ -129,7 +129,7 @@ export async function registerAthleteParticipant(
       return {
         ok: false,
         error:
-          "This email already has an account. Sign in from the home screen, then use Team join to open this campaign.",
+          "This email already has an account. If you saw a connection error right after creating it, the account may still have been created—open the Sign in tab on the first screen and use this email and password. Otherwise sign in, then use Team join to open this campaign.",
         status: 409,
       };
     }
