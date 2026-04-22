@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { normalizePhoneDigits } from "@/lib/phone";
 import { DonateShareRow } from "./donate-share-row";
 
 const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -163,6 +164,15 @@ export default function DonateForm({
       setError("Enter your name or choose anonymous.");
       return;
     }
+    const phoneDigits = normalizePhoneDigits(donorPhone);
+    const phoneTen =
+      phoneDigits.length === 11 && phoneDigits.startsWith("1")
+        ? phoneDigits.slice(1)
+        : phoneDigits;
+    if (phoneTen.length !== 10) {
+      setError("Enter a valid 10-digit U.S. mobile number.");
+      return;
+    }
     if (!stripePromise) {
       setError("Stripe is not configured (missing publishable key).");
       return;
@@ -177,7 +187,7 @@ export default function DonateForm({
           amountDollars: dollars,
           donor_name: anonymous ? null : donorName.trim(),
           donor_email: donorEmail.trim() || null,
-          donor_phone: donorPhone.trim() || null,
+          donor_phone: donorPhone.trim(),
           anonymous,
           athlete_id: athlete.id,
           fundraiser_id: fundraiser.id,
@@ -493,17 +503,21 @@ export default function DonateForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dphone">Phone (optional)</Label>
+                <Label htmlFor="dphone">Mobile phone</Label>
                 <Input
                   id="dphone"
                   type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="(555) 123-4567"
                   value={donorPhone}
                   onChange={(e) => setDonorPhone(e.target.value)}
                   className="max-w-md"
                 />
-                <p className="text-xs text-slate-500">
-                  If it matches a contact the athlete texted, we may mark them as
-                  donated for reminder lists.
+                <p className="text-xs leading-relaxed text-slate-600">
+                  We use this only to match your gift to this fundraiser and stop
+                  reminder texts after you donate. We never sell your number or use
+                  it for marketing.
                 </p>
               </div>
             </div>
