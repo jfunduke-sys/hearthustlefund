@@ -26,6 +26,7 @@ import {
   formatDisplayDateTime,
   getCampaignDayBanner,
   getCampaignWindowPhase,
+  phonesLikelySameUsNanp,
   PLATFORM,
   SMS_REMINDER_CONSENT_CHECKBOX_COPY,
   SMS_REMINDER_PUBLIC_INFO_PATH,
@@ -54,6 +55,7 @@ type DonationRow = {
   id: string;
   amount: number;
   donor_name: string | null;
+  donor_phone: string | null;
   anonymous: boolean;
   created_at: string;
 };
@@ -340,7 +342,7 @@ export default function DashboardScreen() {
 
     const { data: donationsData } = await supabase
       .from("donations")
-      .select("id, amount, donor_name, anonymous, created_at")
+      .select("id, amount, donor_name, donor_phone, anonymous, created_at")
       .eq("athlete_id", athlete.id)
       .order("created_at", { ascending: false });
 
@@ -352,9 +354,19 @@ export default function DashboardScreen() {
       .not("texted_at", "is", null);
 
     const allDonations = (donationsData ?? []) as DonationRow[];
-    const reminderContacts = (reminderData ?? []) as ReminderContact[];
+    const reminderRaw = (reminderData ?? []) as ReminderContact[];
+    /** Hide contacts who already donated (covers missing `donated` flag when checkout had no phone). */
+    const reminderContacts = reminderRaw.filter(
+      (r) =>
+        !allDonations.some(
+          (d) =>
+            typeof d.donor_phone === "string" &&
+            d.donor_phone.trim().length > 0 &&
+            phonesLikelySameUsNanp(d.donor_phone, r.phone_number)
+        )
+    );
     const sel: Record<string, boolean> = {};
-    for (const r of reminderContacts) sel[r.id] = true;
+    for (const r of reminderContacts) sel[r.id] = false;
     setReminderSelected(sel);
 
     setData({

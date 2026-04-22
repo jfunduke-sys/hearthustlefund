@@ -1,8 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 
-export const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
-export const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "";
+/** Trimmed — trailing spaces/newlines from EAS paste break TLS host validation. */
+export const supabaseUrl = (process.env.EXPO_PUBLIC_SUPABASE_URL ?? "").trim();
+export const supabaseAnonKey = (
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? ""
+).trim();
 
 /** False in dev if .env is missing — RLS queries will fail silently otherwise. */
 export function hasSupabaseConfig(): boolean {
@@ -40,9 +43,8 @@ export const supabase = createClient(
 );
 
 export function getApiBase() {
-  return (
-    process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:3000"
-  );
+  const raw = (process.env.EXPO_PUBLIC_API_URL ?? "").trim();
+  return raw.replace(/\/$/, "") || "http://localhost:3000";
 }
 
 export function donateUrl(token: string) {

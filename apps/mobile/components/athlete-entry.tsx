@@ -207,7 +207,19 @@ export default function AthleteEntry({
       }
       router.replace(await getPostAuthHrefForCurrentUser());
     } catch (e: unknown) {
-      setSignError(e instanceof Error ? e.message : "Sign in failed");
+      const msg = e instanceof Error ? e.message : "Sign in failed";
+      const low = msg.toLowerCase();
+      const looksNetwork =
+        low.includes("network") ||
+        low.includes("fetch") ||
+        low.includes("internet") ||
+        low.includes("not available") ||
+        low.includes("unreachable");
+      setSignError(
+        looksNetwork
+          ? "Couldn't reach the account service (not your Railway site). Try cellular or different Wi‑Fi. If it persists, check Expo → Environment variables → production: EXPO_PUBLIC_SUPABASE_URL must be your https://…supabase.co URL with no spaces, then create a new TestFlight build."
+          : msg
+      );
     } finally {
       setLoading(false);
     }

@@ -20,3 +20,12 @@ export function phoneNormalizedMatchCandidates(raw: string): string[] {
   }
   return Array.from(set);
 }
+
+/** True when two NANP-style strings refer to the same US number (10 vs 11 digits, formatting ignored). */
+export function phonesLikelySameUsNanp(a: string, b: string): boolean {
+  const ca = phoneNormalizedMatchCandidates(a);
+  const cb = phoneNormalizedMatchCandidates(b);
+  if (ca.length === 0 || cb.length === 0) return false;
+  const setB = new Set(cb);
+  return ca.some((x) => setB.has(x));
+}

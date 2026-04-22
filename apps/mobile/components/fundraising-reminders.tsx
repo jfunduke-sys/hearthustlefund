@@ -18,6 +18,7 @@ import {
   buildReminderSms,
   campaignOutreachBlockedMessage,
   getCampaignWindowPhase,
+  phonesLikelySameUsNanp,
 } from "@heart-and-hustle/shared";
 
 type Row = {
@@ -84,16 +85,32 @@ export default function FundraisingRemindersScreen({
       end: e,
     });
 
-    const { data } = await supabase
+    const { data: contactsRaw } = await supabase
       .from("athlete_contacts")
       .select("id, contact_name, phone_number")
       .eq("athlete_id", athlete.id)
       .eq("donated", false)
       .not("texted_at", "is", null);
 
-    setRows((data ?? []) as Row[]);
+    const { data: dons } = await supabase
+      .from("donations")
+      .select("donor_phone")
+      .eq("athlete_id", athlete.id);
+
+    const raw = (contactsRaw ?? []) as Row[];
+    const filtered = raw.filter(
+      (r) =>
+        !(dons ?? []).some(
+          (d) =>
+            typeof d.donor_phone === "string" &&
+            d.donor_phone.trim().length > 0 &&
+            phonesLikelySameUsNanp(d.donor_phone, r.phone_number)
+        )
+    );
+
+    setRows(filtered);
     const sel: Record<string, boolean> = {};
-    for (const r of data ?? []) sel[r.id] = true;
+    for (const r of filtered) sel[r.id] = false;
     setSelected(sel);
     setLoading(false);
   }, [variant]);
