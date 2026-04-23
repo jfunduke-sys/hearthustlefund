@@ -61,11 +61,11 @@ export default function PrivacyPage() {
           campaign accounting. Contact{" "}
           <a
             className="text-hh-primary underline"
-            href="mailto:privacy@heartandhustle.com"
+            href="mailto:privacy@hearthustlefund.com"
           >
-            privacy@heartandhustle.com
+            privacy@hearthustlefund.com
           </a>{" "}
-          (placeholder) for deletion requests where applicable.
+          for deletion requests where applicable.
         </p>
       </section>
     </div>

@@ -127,11 +127,18 @@ export default function TermsPage() {
           Questions about these terms:{" "}
           <a
             className="text-hh-primary underline"
-            href="mailto:privacy@heartandhustle.com"
+            href="mailto:support@hearthustlefund.com"
           >
-            privacy@heartandhustle.com
-          </a>{" "}
-          (or the contact address we publish on the site).
+            support@hearthustlefund.com
+          </a>
+          . Privacy-related requests:{" "}
+          <a
+            className="text-hh-primary underline"
+            href="mailto:privacy@hearthustlefund.com"
+          >
+            privacy@hearthustlefund.com
+          </a>
+          .
         </p>
       </section>
     </div>

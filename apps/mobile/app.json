@@ -33,7 +33,13 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Heart & Hustle lets you pick people from your Contacts to send them a private fundraising text with your donation link—for example, choosing a saved parent or neighbor so Messages opens with their number and a draft you send yourself. Only contacts you explicitly select are used for your campaign."
+        }
+      ]
     ],
     "extra": {
       "router": {},
