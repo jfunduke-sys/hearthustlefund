@@ -21,7 +21,7 @@
     },
     "android": {
       "softwareKeyboardLayoutMode": "resize",
-      "package": "com.heartandhustle.app",
+      "package": "com.hearthustlefund.app",
       "adaptiveIcon": {
         "backgroundColor": "#1A1A2E",
         "foregroundImage": "./assets/icon.png",
