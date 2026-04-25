@@ -99,6 +99,94 @@ type Props = {
   contacts: AthleteContact[];
 };
 
+type CodeModalPayload = {
+  code: string;
+  coachEmail: string;
+  schoolName?: string | null;
+  activityName?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+};
+
+function buildCoachLaunchEmail(payload: CodeModalPayload) {
+  const appName = "Heart & Hustle";
+  const appStoreUrl =
+    process.env.NEXT_PUBLIC_IOS_APP_STORE_URL?.trim() ||
+    "[iPhone App Store link]";
+  const playStoreUrl =
+    process.env.NEXT_PUBLIC_ANDROID_PLAY_STORE_URL?.trim() ||
+    "[Android Google Play link]";
+  const webBase =
+    process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "") ||
+    "[your live website URL]";
+  const coachLoginUrl = `${webBase}/coach/login`;
+  const dashboardUrl = `${webBase}/coach/dashboard`;
+  const schoolLine = payload.schoolName?.trim()
+    ? `School: ${payload.schoolName.trim()}\n`
+    : "";
+  const activityLine = payload.activityName?.trim()
+    ? `Program/Activity: ${payload.activityName.trim()}\n`
+    : "";
+  const dateLine =
+    payload.startDate && payload.endDate
+      ? `Fundraiser dates: ${formatDisplayDate(payload.startDate)} to ${formatDisplayDate(payload.endDate)}\n`
+      : "";
+
+  return `Subject: ${appName} fundraiser approval + your setup code
+
+Hi Coach,
+
+Your fundraiser request has been approved.
+
+${schoolLine}${activityLine}${dateLine}Your one-time ${appName} setup code: ${payload.code}
+Code is locked to this coach email: ${payload.coachEmail}
+
+Step-by-step setup
+1) Desktop setup (first login with code)
+   • Go to: ${coachLoginUrl}
+   • Select "Start with my code"
+   • Enter this same email (${payload.coachEmail}) + the setup code above
+   • Create your password (you'll use email + password on return visits)
+
+2) Complete fundraiser setup on desktop
+   • Confirm team/school details, goals, and campaign dates
+   • Save and activate so your participant join code is generated
+   • Open Coach Dashboard after setup: ${dashboardUrl}
+
+3) Share participant instructions from Coach Dashboard
+   • In dashboard, use "Invite message for participants" and tap "Copy full message"
+   • Send that message to your participants (text/email/team app)
+   • It includes app download links + the participant join code
+
+4) Set yourself up as a participant too
+   • In Coach Dashboard, add yourself as a participant if needed
+   • In the app, log in with the same coach email + password (do not use the join code for coach login)
+   • Turn ON "Show my name on the team participant list" if you want your name visible
+   • Copy/share your personal donation link from the app dashboard
+
+5) Participant flow (what your team does)
+   • Participants download the app and join with your team code
+   • They create accounts, get personal donation links, and use Send Messages for outreach
+   • Reminder texts and outreach metrics are tracked in dashboard when messages are sent from the app tools
+
+6) During campaign
+   • Use desktop Coach Dashboard for totals, roster, and exports
+   • Use app for participant texting/reminders and personal link sharing
+
+7) Fundraiser close + payment
+   • At campaign end, review totals and donation records
+   • Closeout/payment follows your standard payout process and documentation
+   • Keep exported records for accounting/compliance reporting
+
+Quick links
+• Coach login (desktop): ${coachLoginUrl}
+• Coach dashboard (desktop): ${dashboardUrl}
+• iPhone app: ${appStoreUrl}
+• Android app: ${playStoreUrl}
+
+Reply to this email if you want us to walk through setup with you live.`;
+}
+
 export function SuperadminTabs({
   requests,
   requestsFetchError,
@@ -110,7 +198,7 @@ export function SuperadminTabs({
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [codeModal, setCodeModal] = useState<string | null>(null);
+  const [codeModal, setCodeModal] = useState<CodeModalPayload | null>(null);
   const [rejectOpen, setRejectOpen] = useState<SchoolRequest | null>(null);
   const [rejectNotes, setRejectNotes] = useState("");
   const [standaloneOpen, setStandaloneOpen] = useState(false);
@@ -275,7 +363,14 @@ export function SuperadminTabs({
                             onClick={() =>
                               startTransition(async () => {
                                 const res = await approveAndGenerateCode(r.id);
-                                setCodeModal(res.code);
+                                setCodeModal({
+                                  code: res.code,
+                                  coachEmail: r.admin_email,
+                                  schoolName: r.school_name,
+                                  activityName: r.sport_club_activity,
+                                  startDate: r.fundraiser_start_date,
+                                  endDate: r.fundraiser_end_date,
+                                });
                                 router.refresh();
                               })
                             }
@@ -633,20 +728,39 @@ export function SuperadminTabs({
           <DialogHeader>
             <DialogTitle>Fundraiser code generated</DialogTitle>
             <DialogDescription>
-              Email this code to the fundraiser lead. They open{" "}
-              <strong>Coach login</strong> on your site →{" "}
-              <strong>Start with my code</strong>, enter{" "}
-              <strong>this same email</strong> and the code, create a password,
-              then finish campaign setup. They use that email + password on return
-              visits.
+              Copy the full coach launch email below, paste into your message,
+              and send it to the assigned coach.
             </DialogDescription>
           </DialogHeader>
           <p className="rounded-md bg-slate-100 p-4 text-center font-mono text-lg">
-            {codeModal}
+            {codeModal?.code}
           </p>
+          <p className="text-xs text-slate-600">
+            Assigned coach email:{" "}
+            <span className="font-medium text-slate-800">
+              {codeModal?.coachEmail ?? "—"}
+            </span>
+          </p>
+          <Textarea
+            readOnly
+            value={codeModal ? buildCoachLaunchEmail(codeModal) : ""}
+            rows={16}
+            className="text-xs leading-relaxed"
+          />
           <DialogFooter>
-            <Button onClick={() => codeModal && copyCode(codeModal)}>
-              Copy to clipboard
+            <Button
+              variant="outline"
+              onClick={() => codeModal && copyCode(codeModal.code)}
+            >
+              Copy code only
+            </Button>
+            <Button
+              onClick={() =>
+                codeModal &&
+                void navigator.clipboard.writeText(buildCoachLaunchEmail(codeModal))
+              }
+            >
+              Copy full coach email
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -685,9 +799,13 @@ export function SuperadminTabs({
               onClick={() =>
                 startTransition(async () => {
                   const res = await generateStandaloneCode(standaloneEmail);
+                  const assigned = standaloneEmail.trim().toLowerCase();
                   setStandaloneOpen(false);
                   setStandaloneEmail("");
-                  setCodeModal(res.code);
+                  setCodeModal({
+                    code: res.code,
+                    coachEmail: assigned,
+                  });
                   router.refresh();
                 })
               }

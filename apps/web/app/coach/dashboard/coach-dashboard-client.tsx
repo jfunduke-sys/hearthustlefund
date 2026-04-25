@@ -209,7 +209,7 @@ export default function CoachDashboardClient({
 
   const joinCode = fundraiser.join_code ?? "";
 
-  const athleteInviteMessage = useMemo(() => {
+  const participantInviteMessage = useMemo(() => {
     const ios =
       process.env.NEXT_PUBLIC_IOS_APP_STORE_URL?.trim() ||
       "[iPhone: paste your App Store link when the app is published]";
@@ -217,7 +217,7 @@ export default function CoachDashboardClient({
       process.env.NEXT_PUBLIC_ANDROID_PLAY_STORE_URL?.trim() ||
       "[Android: paste your Google Play link when the app is published]";
     const codeLine = joinCode || "[team code from dashboard]";
-    return `Hi team — we're using ${PLATFORM.shortName} for our fundraiser. Everyone joins in the mobile app (not the website).
+    return `Hi team — we're using ${PLATFORM.shortName} for our fundraiser. All participants join in the mobile app (not the website).
 
 1) Download the app:
    • iPhone: ${ios}
@@ -229,14 +229,14 @@ export default function CoachDashboardClient({
 
 3) Create your account with your email and a password you'll remember.
 
-4) First time texting: go to Send Messages, allow contacts when asked, pick people to message, then save and send. Your personal donation link is included in the message.
+4) First time texting: go to Send Messages, allow contacts when asked, pick people to message, then Save & send. Your personal donation link is included in each message.
 
 More tips will show inside the app once you're in. Thanks!`;
   }, [joinCode]);
 
   async function copyAthleteInvite() {
-    if (!athleteInviteMessage.trim()) return;
-    await navigator.clipboard.writeText(athleteInviteMessage);
+    if (!participantInviteMessage.trim()) return;
+    await navigator.clipboard.writeText(participantInviteMessage);
     setInviteCopied(true);
     window.setTimeout(() => setInviteCopied(false), 2500);
   }
@@ -615,10 +615,10 @@ More tips will show inside the app once you're in. Thanks!`;
               </div>
             </div>
 
-            <details className="group rounded-xl border border-dashed border-slate-300/90 bg-slate-50/50 [&_summary::-webkit-details-marker]:hidden">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-left transition-colors hover:bg-slate-100/80 sm:px-4 sm:py-3">
+            <details className="group rounded-xl border border-slate-300/90 bg-slate-50/50 shadow-sm [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-t-xl border-b border-slate-300/70 bg-gradient-to-r from-hh-primary/12 via-rose-100/80 to-amber-100/70 px-3 py-2.5 text-left transition-colors hover:from-hh-primary/18 hover:to-amber-100 sm:px-4 sm:py-3">
                 <span className="text-xs font-extrabold uppercase leading-tight tracking-wide text-hh-dark sm:text-[13px]">
-                  Invite message for athletes — tap to view or copy
+                  Invite message for participants — tap to view or copy
                 </span>
                 <span className="shrink-0 text-slate-500 transition-transform group-open:rotate-180">
                   ▼
@@ -628,9 +628,9 @@ More tips will show inside the app once you're in. Thanks!`;
                 <pre
                   className="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-white px-3 py-3 text-left text-xs leading-relaxed text-slate-700"
                   tabIndex={0}
-                  aria-label="Instructions to send to athletes"
+                  aria-label="Instructions to send to participants"
                 >
-                  {athleteInviteMessage}
+                  {participantInviteMessage}
                 </pre>
                 <Button
                   type="button"
