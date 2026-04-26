@@ -27,6 +27,8 @@ create table if not exists public.school_requests (
   paperwork_returned boolean default false,
   status text default 'pending',
   notes text,
+  fundraiser_terms_version text,
+  fundraiser_terms_acknowledged_at timestamptz,
   created_at timestamptz default now()
 );
 

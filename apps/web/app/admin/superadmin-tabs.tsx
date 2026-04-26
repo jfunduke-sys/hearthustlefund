@@ -909,6 +909,29 @@ export function SuperadminTabs({
                 <dt className="font-semibold text-slate-600">Submitted</dt>
                 <dd>{formatDisplayDateTime(viewOpen.created_at)}</dd>
               </div>
+              <div>
+                <dt className="font-semibold text-slate-600">
+                  Standard fundraiser terms (intake)
+                </dt>
+                <dd>
+                  {viewOpen.fundraiser_terms_acknowledged_at &&
+                  viewOpen.fundraiser_terms_version ? (
+                    <>
+                      Agreed to version{" "}
+                      <span className="font-mono text-xs">
+                        {viewOpen.fundraiser_terms_version}
+                      </span>{" "}
+                      at{" "}
+                      {formatDisplayDateTime(
+                        viewOpen.fundraiser_terms_acknowledged_at
+                      )}{" "}
+                      (your local time).
+                    </>
+                  ) : (
+                    "— (not recorded; request predates this field)"
+                  )}
+                </dd>
+              </div>
               <div className="flex gap-4 border-t border-slate-200 pt-3 text-xs text-slate-600">
                 <span>
                   Paperwork sent: {viewOpen.paperwork_sent ? "Yes" : "No"}

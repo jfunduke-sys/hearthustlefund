@@ -35,6 +35,13 @@ export interface SchoolRequest {
   fundraiser_start_date?: string | null;
   fundraiser_end_date?: string | null;
   kickoff_setup_preference?: KickoffSetupPreference | null;
+  /**
+   * Standard fundraiser terms on the intake form — version string (e.g. "1")
+   * when the submitter agreed; see `fundraiser_terms_acknowledged_at`.
+   */
+  fundraiser_terms_version?: string | null;
+  /** When the submitter agreed to the standard fundraiser terms (ISO timestamp). */
+  fundraiser_terms_acknowledged_at?: string | null;
   created_at: string;
 }
 

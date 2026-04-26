@@ -10,6 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  FUNDRAISER_INTAKE_TERMS_BULLETS,
+  FUNDRAISER_INTAKE_TERMS_CHECKBOX_INTRO,
+  FUNDRAISER_INTAKE_TERMS_VERSION,
+} from "@/lib/fundraiser-intake-terms";
 
 function trimOrEmpty(v: FormDataEntryValue | null | undefined) {
   return String(v ?? "").trim();
@@ -98,6 +103,7 @@ export default function RequestFundraiserPage() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ack, setAck] = useState(false);
+  const [termsAck, setTermsAck] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -106,6 +112,10 @@ export default function RequestFundraiserPage() {
       setError(
         "Please confirm the verification and paperwork acknowledgment below."
       );
+      return;
+    }
+    if (!termsAck) {
+      setError("Please read and agree to the standard fundraiser terms below.");
       return;
     }
     const form = e.currentTarget;
@@ -150,6 +160,8 @@ export default function RequestFundraiserPage() {
       kickoff_setup_preference: trimOrEmpty(fd.get("kickoff_setup_preference")),
       notes: notesRaw || null,
       status: "pending",
+      fundraiser_terms_version: FUNDRAISER_INTAKE_TERMS_VERSION,
+      fundraiser_terms_acknowledged_at: new Date().toISOString(),
     });
 
     setLoading(false);
@@ -160,6 +172,7 @@ export default function RequestFundraiserPage() {
     setDone(true);
     form.reset();
     setAck(false);
+    setTermsAck(false);
   }
 
   return (
@@ -469,6 +482,36 @@ export default function RequestFundraiserPage() {
                     including a W-9 and signed fundraising agreement — prior to
                     launching my campaign.
                   </Label>
+                </div>
+                <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/90 p-4">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="terms-ack"
+                      checked={termsAck}
+                      onCheckedChange={(v: boolean | "indeterminate") =>
+                        setTermsAck(v === true)
+                      }
+                      className="mt-1"
+                    />
+                    <Label
+                      htmlFor="terms-ack"
+                      className="text-sm font-normal leading-relaxed sm:text-[15px]"
+                    >
+                      {FUNDRAISER_INTAKE_TERMS_CHECKBOX_INTRO}
+                    </Label>
+                  </div>
+                  <details className="group rounded-lg border border-slate-200/90 bg-white/80 p-3 text-sm text-slate-700">
+                    <summary className="cursor-pointer text-sm font-semibold text-hh-primary underline-offset-2 hover:underline group-open:mb-2">
+                      View full standard fundraiser terms
+                    </summary>
+                    <ul className="ml-1 list-outside list-disc space-y-2 pl-5 text-slate-700">
+                      {FUNDRAISER_INTAKE_TERMS_BULLETS.map((line) => (
+                        <li key={line} className="leading-relaxed">
+                          {line}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
                 </div>
                 {error ? (
                   <p className="text-sm text-red-600" role="alert">
