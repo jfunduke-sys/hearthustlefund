@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
 /** Bump when the document body text changes (SuperAdmin + public /terms). */
-export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "5" as const;
+export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "6" as const;
 
 type Props = {
   pfrReg: string;
@@ -456,44 +456,6 @@ export function FundraisingServicesAgreementBody({
           and signatures (including a W-9 and this Agreement as applicable)
           required by Company.
         </p>
-        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/90 p-4 text-slate-800 print:border-black print:bg-white">
-          <p className="font-medium text-hh-dark">Print / sign (reference)</p>
-          <ul className="mt-3 list-none space-y-3 p-0">
-            <li>
-              <span className="text-slate-600">Organization Name:</span>{" "}
-              <span className="inline-block min-w-[12rem] border-b border-slate-300 print:border-black">
-                &nbsp;
-              </span>
-            </li>
-            <li>
-              <span className="text-slate-600">
-                Organization Representative Name &amp; Title:
-              </span>{" "}
-              <span className="inline-block min-w-[10rem] border-b border-slate-300 print:border-black">
-                &nbsp;
-              </span>
-            </li>
-            <li>
-              <span className="text-slate-600">Signature:</span>{" "}
-              <span className="inline-block min-w-[16rem] border-b border-slate-300 print:border-black">
-                &nbsp;
-              </span>
-            </li>
-            <li>
-              <span className="text-slate-600">Date:</span>{" "}
-              <span className="inline-block min-w-[8rem] border-b border-slate-300 print:border-black">
-                &nbsp;
-              </span>
-            </li>
-          </ul>
-          <p className="mt-6 font-semibold text-hh-dark">Heart and Hustle Fundraising LLC</p>
-          <p className="mt-2 text-slate-600">
-            Authorized Representative:{" "}
-            <span className="inline-block min-w-[14rem] border-b border-slate-300 print:border-black">
-              &nbsp;
-            </span>
-          </p>
-        </div>
       </section>
     </section>
   );
