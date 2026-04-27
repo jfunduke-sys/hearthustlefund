@@ -1,17 +1,22 @@
+import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
-/** Bump when the document body text changes (show in SuperAdmin for audit). */
-export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "3" as const;
+/** Bump when the document body text changes (SuperAdmin + public /terms). */
+export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "4" as const;
 
 type Props = {
   pfrReg: string;
+  /** When set (e.g. "/privacy"), Section 9 links to the public Privacy policy. */
+  privacyPolicyHref?: string;
 };
 
 /**
- * Full Fundraising Services Agreement text (for SuperAdmin: print, copy, attach to email).
- * Not exposed on the public site.
+ * Full Fundraising Services Agreement — used on public /terms and in SuperAdmin (print/copy).
  */
-export function FundraisingServicesAgreementBody({ pfrReg }: Props) {
+export function FundraisingServicesAgreementBody({
+  pfrReg,
+  privacyPolicyHref,
+}: Props) {
   return (
     <section className="space-y-6 text-sm leading-relaxed text-slate-800 print:text-black">
       <p>
@@ -251,9 +256,19 @@ export function FundraisingServicesAgreementBody({ pfrReg }: Props) {
           Company shares personal data with service providers (for example, payment
           processors and hosting or authentication services) only as needed to
           operate the platform and as described in the publicly posted{" "}
-          <strong>Privacy policy</strong> for {BRAND.name}. That policy and this
-          Section are written to be consistent. Company retains only data
-          necessary to meet legal and financial obligations.
+          {privacyPolicyHref ? (
+            <Link
+              href={privacyPolicyHref}
+              className="font-semibold text-hh-primary underline underline-offset-2"
+            >
+              Privacy policy
+            </Link>
+          ) : (
+            <strong>Privacy policy</strong>
+          )}{" "}
+          for {BRAND.name}. That policy and this Section are written to be
+          consistent. Company retains only data necessary to meet legal and
+          financial obligations.
         </p>
       </section>
 
@@ -261,7 +276,10 @@ export function FundraisingServicesAgreementBody({ pfrReg }: Props) {
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
           10. LIMITATION OF LIABILITY
         </h3>
-        <p className="mt-2">To the fullest extent permitted by law, Company shall not be liable for:</p>
+        <p className="mt-2">
+          To the fullest extent permitted by law, Company shall not be liable
+          for:
+        </p>
         <ul className="mt-1 list-outside list-disc pl-5">
           <li>Participant conduct or misuse of the platform</li>
           <li>Altered or unauthorized communications</li>
@@ -339,8 +357,8 @@ export function FundraisingServicesAgreementBody({ pfrReg }: Props) {
           payment of money when funds are available) due to events beyond that
           party&apos;s reasonable control, including natural disasters, fire, flood,
           epidemic or pandemic, war, terrorism, civil unrest, acts of government
-          or regulatory authority, labor disputes, power or telecommunications or
-          internet failures not caused by the party, or other similar cause,
+          or regulatory authority, labor disputes, power, telecommunications, or
+          internet failures not caused by the party, or other similar causes,
           provided the affected party uses commercially reasonable efforts to
           resume performance. If such a condition continues for more than
           thirty (30) days, either party may terminate the program relationship

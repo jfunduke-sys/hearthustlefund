@@ -16,13 +16,14 @@ export default function PrivacyPage() {
         </Link>
       </p>
       <p className="mt-2 text-xs text-slate-500">
-        Approved schools and programs sign a <strong>Fundraising Services
-        Agreement</strong> (not published on this site) that includes data-use
-        terms for the program. This public privacy policy and that agreement
-        are written to be <strong>consistent</strong> on how personal data is
-        handled: we do not sell personal data; we use and share it only to run
-        the platform, process payments, and meet legal and tax requirements, as
-        further described below.
+        The <strong>Fundraising Services Agreement</strong> is published as our{" "}
+        <Link href="/terms" className="text-hh-primary underline">
+          Terms of service
+        </Link>{" "}
+        and includes program data-use terms (Section 9). This{" "}
+        <strong>Privacy policy</strong> is the dedicated page for what we
+        collect and how we use personal data; it is written to be{" "}
+        <strong>consistent</strong> with that agreement.
       </p>
 
       <section className="mt-8 space-y-4 text-sm leading-relaxed">
@@ -40,9 +41,11 @@ export default function PrivacyPage() {
           participant data for third-party marketing or advertising. We share
           data only with service providers needed to run the platform (for
           example, payment processing and hosting/auth), and as required for
-          legal, regulatory, and tax compliance—matching the obligations in the
-          Fundraising Services Agreement (Section 9) for approved program
-          organizations.
+          legal, regulatory, and tax compliance—matching Section 9 of our{" "}
+          <Link href="/terms" className="text-hh-primary underline">
+            Terms of service
+          </Link>{" "}
+          (Fundraising Services Agreement) for approved program organizations.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Payments (Stripe)</h2>
@@ -53,8 +56,11 @@ export default function PrivacyPage() {
           an email may receive a <strong>payment receipt from Stripe</strong>;
           that receipt shows that a payment was processed. It is{" "}
           <strong>not</strong>, by itself, a charitable tax acknowledgment;
-          that is the same position stated in the program agreement
-          (Section 8) for organizations. Eligible 501(c)(3) or other exempt
+          that is the same position stated in our{" "}
+          <Link href="/terms" className="text-hh-primary underline">
+            Terms of service
+          </Link>{" "}
+          (Section 8). Eligible 501(c)(3) or other exempt
           organizations that receive funds are responsible for any donor
           acknowledgments required by law.
         </p>
@@ -77,8 +83,11 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold text-hh-dark">Retention</h2>
         <p>
           We retain records as needed to operate the Service, meet legal and
-          financial obligations, and resolve disputes, consistent with the
-          Fundraising Services Agreement for approved organizations. Contact{" "}
+          financial obligations, and resolve disputes, consistent with our{" "}
+          <Link href="/terms" className="text-hh-primary underline">
+            Terms of service
+          </Link>{" "}
+          for approved organizations. Contact{" "}
           <a
             className="text-hh-primary underline"
             href="mailto:privacy@hearthustlefund.com"

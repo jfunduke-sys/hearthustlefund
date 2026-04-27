@@ -82,9 +82,9 @@ export default function SmsRemindersInfoPage() {
             >
               Privacy policy
             </Link>
-            . For approved school programs, messaging responsibilities also match
-            the Fundraising Services Agreement (provided to the organization for
-            signature, not on this public page). Message frequency is typically
+            . For approved school programs, messaging responsibilities are also
+            described in our Terms of service (Fundraising Services Agreement).
+            Message frequency is typically
             about <strong>every three days</strong>{" "}
             during an active campaign, plus the <strong>last campaign day</strong>.
             <strong> Message and data rates may apply</strong> according to your

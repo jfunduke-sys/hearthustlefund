@@ -40,11 +40,12 @@ export function FundraisingServicesAgreementAdminPanel() {
   return (
     <Card>
       <CardHeader className="print:hidden">
-        <CardTitle>Fundraising Services Agreement (internal)</CardTitle>
+        <CardTitle>Fundraising Services Agreement</CardTitle>
         <p className="text-sm text-slate-600">
-          This is the program contract for <strong>approved</strong> schools and
-          organizations. It is <strong>not</strong> on the public website. Use
-          print, copy, or a PDF print-to-file to email or sign outside the app.
+          Same text as the public{" "}
+          <strong>Terms of service</strong> page. Use print, copy, or
+          print-to-PDF to email or collect wet signatures; DocuSign or similar can
+          be added later if you want to reduce paper handling.
         </p>
         <p className="text-xs text-slate-500">
           Document version:{" "}
@@ -82,9 +83,9 @@ export function FundraisingServicesAgreementAdminPanel() {
           </p>
           <FundraisingServicesAgreementBody pfrReg={pfrReg} />
           <p className="mt-6 border-t border-slate-200 pt-3 text-xs text-slate-500 print:text-black">
-            Confidential. For approved program organizations only. The public
-            website publishes general Terms and Privacy, written to be consistent
-            with this agreement.
+            Internal working copy. The live agreement is also published as Terms
+            of service; the{" "}
+            <strong>Privacy policy</strong> remains a separate public page.
           </p>
         </div>
       </CardContent>

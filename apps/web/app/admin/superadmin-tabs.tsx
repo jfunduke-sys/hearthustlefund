@@ -299,10 +299,11 @@ export function SuperadminTabs({
                 <strong className="font-semibold">Reminder:</strong> Before you
                 approve a request, confirm you have a{" "}
                 <strong className="font-semibold">W-9</strong> on file from the
-                school or district (tax ID for payments). The full{" "}
-                <strong>Fundraising Services Agreement</strong> (print, copy, or
-                attach to email) is on the <strong>Program agreement</strong>{" "}
-                tab—private, not on the public site.
+                school or district (tax ID for payments). The{" "}
+                <strong>Fundraising Services Agreement</strong> is published as
+                Terms of service on the website; use the{" "}
+                <strong>Program agreement</strong> tab here to print, copy, or
+                export for wet signatures (DocuSign later if you prefer).
               </div>
             </CardHeader>
             <CardContent className="overflow-x-auto">
@@ -920,48 +921,41 @@ export function SuperadminTabs({
               </div>
               <div>
                 <dt className="font-semibold text-slate-600">
-                  Fundraising Services Agreement (intake)
+                  Intake acknowledgments (legacy)
                 </dt>
-                <dd>
+                <dd className="space-y-1 text-slate-800">
                   {viewOpen.fsa_intake_acknowledged_at &&
                   viewOpen.fsa_intake_version ? (
-                    <>
-                      Main program contract acknowledged (doc version{" "}
+                    <p>
+                      FSA intake checkbox: doc v{" "}
                       <span className="font-mono text-xs">
                         {viewOpen.fsa_intake_version}
-                      </span>
-                      ) at{" "}
+                      </span>{" "}
+                      at{" "}
                       {formatDisplayDateTime(
                         viewOpen.fsa_intake_acknowledged_at
-                      )}{" "}
-                      (your local time).
-                    </>
-                  ) : (
-                    "— (not recorded; request predates this field)"
-                  )}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-semibold text-slate-600">
-                  Key commercial terms summary (intake)
-                </dt>
-                <dd>
+                      )}
+                      .
+                    </p>
+                  ) : null}
                   {viewOpen.fundraiser_terms_acknowledged_at &&
                   viewOpen.fundraiser_terms_version ? (
-                    <>
-                      Agreed to version{" "}
+                    <p>
+                      Summary terms checkbox: v{" "}
                       <span className="font-mono text-xs">
                         {viewOpen.fundraiser_terms_version}
                       </span>{" "}
                       at{" "}
                       {formatDisplayDateTime(
                         viewOpen.fundraiser_terms_acknowledged_at
-                      )}{" "}
-                      (your local time).
-                    </>
-                  ) : (
-                    "— (not recorded; request predates this field)"
-                  )}
+                      )}
+                      .
+                    </p>
+                  ) : null}
+                  {!viewOpen.fsa_intake_acknowledged_at &&
+                  !viewOpen.fundraiser_terms_acknowledged_at
+                    ? "— (none; current intake uses a single paperwork acknowledgment only)"
+                    : null}
                 </dd>
               </div>
               <div className="flex gap-4 border-t border-slate-200 pt-3 text-xs text-slate-600">
