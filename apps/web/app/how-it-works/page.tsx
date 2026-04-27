@@ -55,13 +55,14 @@ const STEPS: {
     title: "Campaign closes",
     summary: "When the scheduled end date passes, fundraising for that campaign is complete.",
     detail:
-      "Final totals are available in the coach dashboard. The program share is determined according to your stated allocation (for example, ninety percent to the school athletic program, with platform fees covering processing).",
+      "Final totals are available in the coach dashboard. Under the Terms of service (Fundraising Services Agreement), 90% of funds raised is allocated to the organization and 10% is retained by Heart & Hustle as its service fee; card processing is the Company’s responsibility from its 10% share and does not reduce the program’s 90%.",
   },
   {
     title: "Payout to your program",
-    summary: "Heart & Hustle settles the program’s share and delivers it in person.",
+    summary:
+      "Heart & Hustle initiates disbursement of the program’s share after Stripe-cleared funds are available.",
     detail:
-      "After reconciliation, Heart & Hustle provides the school or program’s portion by check. A Heart & Hustle representative coordinates delivery so your booster club or athletic department receives funds directly—no guesswork on when or how the school gets paid.",
+      "Subject to a W-9 and executed agreement on file, Company initiates disbursement of the organization’s share within three (3) business days after applicable funds have cleared through Stripe’s payment processing (settled and available for payout), in the manner described in the Terms of service — including bank timing, verification, and chargeback holds. See Terms of service (Section 7) for the full payout terms.",
   },
 ];
 

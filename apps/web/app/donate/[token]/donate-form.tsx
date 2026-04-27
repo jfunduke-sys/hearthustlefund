@@ -546,7 +546,14 @@ export default function DonateForm({
             <p className="mt-3 max-w-md text-center text-xs leading-relaxed text-slate-500 sm:text-left">
               Tax deductibility depends on the receiving organization&apos;s
               status. Heart &amp; Hustle provides payment receipts through
-              Stripe. Consult your tax advisor.
+              Stripe. Consult your tax advisor. See also{" "}
+              <Link
+                href="/terms"
+                className="text-hh-primary underline underline-offset-2"
+              >
+                Terms of service
+              </Link>{" "}
+              (Section 8).
             </p>
           </form>
         </section>

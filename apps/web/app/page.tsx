@@ -50,7 +50,12 @@ export default function HomePage() {
               <strong className="font-semibold text-hh-dark">
                 Quick payouts
               </strong>{" "}
-              — funds typically reach your program within 2–3 business days.
+              — after donations clear through Stripe, funds typically reach your
+              program within about 2–3 business days (aligned with our{" "}
+              <Link href="/terms" className="text-hh-primary underline">
+                Terms of service
+              </Link>
+              ).
             </span>
           </li>
           <li className="flex gap-3">
@@ -69,10 +74,19 @@ export default function HomePage() {
           className="mt-4 max-w-2xl text-sm italic leading-relaxed text-slate-500 sm:text-[15px]"
           role="note"
         >
-          <span className="sr-only">Regarding the 90% figure: </span>* We keep
-          10% to run a safe, compliant platform — payment processing, state
-          fundraising registration, surety bonding, and operational costs. No
-          hidden fees. No data selling. Just transparent fundraising.
+          <span className="sr-only">Regarding the 90% figure: </span>*{" "}
+          <strong>90%</strong> of funds raised is allocated to your program;{" "}
+          <strong>10%</strong> is retained by Heart &amp; Hustle Fundraising as
+          its service fee. <strong>Card and payment processing fees</strong> are
+          the Company&apos;s responsibility and are paid from that{" "}
+          <strong>10%</strong> share—your program&apos;s <strong>90%</strong> is{" "}
+          <strong>not</strong> reduced by those fees (see{" "}
+          <Link href="/terms" className="text-hh-primary underline">
+            Terms of service
+          </Link>
+          ). Illinois registration, compliance, and operations are covered from
+          the Company&apos;s share. We do not sell personal data. Full terms in
+          the same agreement.
         </p>
         <section className="mt-12 max-w-3xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-xl font-bold tracking-tight text-hh-dark sm:text-2xl">
@@ -89,8 +103,14 @@ export default function HomePage() {
             <li>
               <p className="font-semibold text-hh-dark">More for your program</p>
               <p className="mt-1 text-sm leading-snug text-slate-600">
-                A high share of each donation is structured to flow back to your
-                program—transparent processing, not layers of middlemen.
+                <strong>90%</strong> of funds raised goes to your program,{" "}
+                <strong>10%</strong> to Heart &amp; Hustle as the service fee—with
+                processing costs borne by the Company from its share, not taken
+                from the program 90% (
+                <Link href="/terms" className="text-hh-primary underline">
+                  Terms of service
+                </Link>
+                ).
               </p>
             </li>
             <li>
@@ -111,8 +131,13 @@ export default function HomePage() {
             <li>
               <p className="font-semibold text-hh-dark">Quick payouts</p>
               <p className="mt-1 text-sm leading-snug text-slate-600">
-                Funds typically reach your program within 2–3 business days after
-                processing—so you&apos;re not waiting on long settlement windows.
+                We initiate disbursement within three business days after
+                applicable donations have cleared through Stripe; you often see
+                funds in about 2–3 business days after that clearance—see{" "}
+                <Link href="/terms" className="text-hh-primary underline">
+                  Terms of service
+                </Link>{" "}
+                (Section 7).
               </p>
             </li>
             <li>

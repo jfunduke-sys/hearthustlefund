@@ -176,7 +176,8 @@ Step-by-step setup
 
 7) Fundraiser close + payment
    • At campaign end, review totals and donation records
-   • Closeout/payment follows your standard payout process and documentation
+   • Disbursement timing and method follow the Terms of service (Fundraising Services Agreement), Section 7: Company initiates the organization’s share within three business days after applicable funds have cleared through Stripe, subject to W-9/agreement on file and the caveats in that section
+   • Full terms: ${webBase}/terms
    • Keep exported records for accounting/compliance reporting
 
 Quick links
