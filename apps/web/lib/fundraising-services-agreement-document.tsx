@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
 /** Bump when the document body text changes (SuperAdmin + public /terms). */
-export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "4" as const;
+export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "5" as const;
 
 type Props = {
   pfrReg: string;
@@ -189,8 +189,19 @@ export function FundraisingServicesAgreementBody({
           7. PAYMENTS &amp; USE OF FUNDS
         </h3>
         <p className="mt-2">
-          Funds will be distributed to Organization according to Company&apos;s
-          payout schedule. Organization is solely responsible for:
+          Following the close of a campaign (or other agreed payout trigger),
+          Company will initiate disbursement of Organization&apos;s share of net
+          proceeds within <strong>three (3) business days</strong> after all
+          applicable donation amounts have <strong>cleared</strong> through
+          Stripe&apos;s payment processing (i.e., settled and available for payout
+          under Stripe&apos;s rules and timelines). Bank settlement, weekends,
+          holidays, account verification, chargebacks, or other events outside
+          Company&apos;s control may affect when funds are received by
+          Organization, but Company will use commercially reasonable efforts to
+          meet the foregoing initiation standard.
+        </p>
+        <p className="mt-2">
+          Organization is solely responsible for:
         </p>
         <ul className="mt-1 list-outside list-disc pl-5">
           <li>Allocation and use of funds</li>
