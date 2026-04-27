@@ -49,6 +49,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { FundraisingServicesAgreementAdminPanel } from "@/components/fundraising-services-agreement-admin-panel";
 
 function requestBadge(status: string) {
   switch (status) {
@@ -272,12 +273,17 @@ export function SuperadminTabs({
   return (
     <>
       <Tabs defaultValue="open-requests" className="w-full">
-        <TabsList className="flex h-auto min-h-10 flex-wrap gap-1">
+        <TabsList className="flex h-auto min-h-10 flex-wrap gap-1 print:hidden">
+          <TabsTrigger value="program-agreement">Program agreement</TabsTrigger>
           <TabsTrigger value="open-requests">Open requests</TabsTrigger>
           <TabsTrigger value="approved">Approved fundraisers</TabsTrigger>
           <TabsTrigger value="active">Active fundraisers</TabsTrigger>
           <TabsTrigger value="closed">Closed fundraisers</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="program-agreement" className="mt-6">
+          <FundraisingServicesAgreementAdminPanel />
+        </TabsContent>
 
         <TabsContent value="open-requests" className="mt-6">
           <Card>
@@ -293,7 +299,10 @@ export function SuperadminTabs({
                 <strong className="font-semibold">Reminder:</strong> Before you
                 approve a request, confirm you have a{" "}
                 <strong className="font-semibold">W-9</strong> on file from the
-                school or district (tax ID for payments).
+                school or district (tax ID for payments). The full{" "}
+                <strong>Fundraising Services Agreement</strong> (print, copy, or
+                attach to email) is on the <strong>Program agreement</strong>{" "}
+                tab—private, not on the public site.
               </div>
             </CardHeader>
             <CardContent className="overflow-x-auto">
@@ -911,7 +920,30 @@ export function SuperadminTabs({
               </div>
               <div>
                 <dt className="font-semibold text-slate-600">
-                  Standard fundraiser terms (intake)
+                  Fundraising Services Agreement (intake)
+                </dt>
+                <dd>
+                  {viewOpen.fsa_intake_acknowledged_at &&
+                  viewOpen.fsa_intake_version ? (
+                    <>
+                      Main program contract acknowledged (doc version{" "}
+                      <span className="font-mono text-xs">
+                        {viewOpen.fsa_intake_version}
+                      </span>
+                      ) at{" "}
+                      {formatDisplayDateTime(
+                        viewOpen.fsa_intake_acknowledged_at
+                      )}{" "}
+                      (your local time).
+                    </>
+                  ) : (
+                    "— (not recorded; request predates this field)"
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">
+                  Key commercial terms summary (intake)
                 </dt>
                 <dd>
                   {viewOpen.fundraiser_terms_acknowledged_at &&

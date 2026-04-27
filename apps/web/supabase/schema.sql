@@ -29,6 +29,8 @@ create table if not exists public.school_requests (
   notes text,
   fundraiser_terms_version text,
   fundraiser_terms_acknowledged_at timestamptz,
+  fsa_intake_version text,
+  fsa_intake_acknowledged_at timestamptz,
   created_at timestamptz default now()
 );
 

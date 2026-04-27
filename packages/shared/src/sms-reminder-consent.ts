@@ -6,7 +6,8 @@ import { PLATFORM } from "./platform";
 export const SMS_REMINDER_CONSENT_VERSION = "2026-04";
 
 /**
- * Checkbox / legal disclosure body (no HTML). Pair with links to /terms and /privacy in UI.
+ * Checkbox / legal disclosure body (no HTML). Pair with links to /terms, /privacy,
+ * and the SMS program page in UI; the full program agreement is not a public URL.
  */
 export const SMS_REMINDER_CONSENT_CHECKBOX_COPY =
   `I agree to receive automated fundraising reminder texts from ${PLATFORM.shortName} at this number during an active fundraiser (about every three days and on the last campaign day). Message and data rates may apply. Reply STOP to opt out, HELP for help.`;

@@ -42,6 +42,13 @@ export interface SchoolRequest {
   fundraiser_terms_version?: string | null;
   /** When the submitter agreed to the standard fundraiser terms (ISO timestamp). */
   fundraiser_terms_acknowledged_at?: string | null;
+  /**
+   * Fundraising Services Agreement (main program contract) — doc version, e.g. "3".
+   * @see fsa_intake_acknowledged_at
+   */
+  fsa_intake_version?: string | null;
+  /** When the submitter acknowledged the FSA on intake (ISO timestamp). */
+  fsa_intake_acknowledged_at?: string | null;
   created_at: string;
 }
 

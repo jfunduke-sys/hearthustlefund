@@ -292,7 +292,9 @@ export default function SetupScreen() {
             <Text style={styles.inlineLink} onPress={openSmsRemindersPage}>
               SMS program page
             </Text>
-            .
+            . For approved school programs, messaging also follows the
+            Fundraising Services Agreement (provided to your organization for
+            signature, not on the public site).
           </Text>
         </Pressable>
 

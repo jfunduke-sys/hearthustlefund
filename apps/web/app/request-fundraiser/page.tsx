@@ -15,6 +15,7 @@ import {
   FUNDRAISER_INTAKE_TERMS_CHECKBOX_INTRO,
   FUNDRAISER_INTAKE_TERMS_VERSION,
 } from "@/lib/fundraiser-intake-terms";
+import { FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION } from "@/lib/fundraising-services-agreement-document";
 
 function trimOrEmpty(v: FormDataEntryValue | null | undefined) {
   return String(v ?? "").trim();
@@ -103,6 +104,7 @@ export default function RequestFundraiserPage() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ack, setAck] = useState(false);
+  const [fsaAck, setFsaAck] = useState(false);
   const [termsAck, setTermsAck] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -114,8 +116,16 @@ export default function RequestFundraiserPage() {
       );
       return;
     }
+    if (!fsaAck) {
+      setError(
+        "Please confirm the Fundraising Services Agreement (main program contract) below."
+      );
+      return;
+    }
     if (!termsAck) {
-      setError("Please read and agree to the standard fundraiser terms below.");
+      setError(
+        "Please read and agree to the summary of key commercial terms below."
+      );
       return;
     }
     const form = e.currentTarget;
@@ -160,6 +170,8 @@ export default function RequestFundraiserPage() {
       kickoff_setup_preference: trimOrEmpty(fd.get("kickoff_setup_preference")),
       notes: notesRaw || null,
       status: "pending",
+      fsa_intake_version: FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION,
+      fsa_intake_acknowledged_at: new Date().toISOString(),
       fundraiser_terms_version: FUNDRAISER_INTAKE_TERMS_VERSION,
       fundraiser_terms_acknowledged_at: new Date().toISOString(),
     });
@@ -172,6 +184,7 @@ export default function RequestFundraiserPage() {
     setDone(true);
     form.reset();
     setAck(false);
+    setFsaAck(false);
     setTermsAck(false);
   }
 
@@ -483,6 +496,34 @@ export default function RequestFundraiserPage() {
                     launching my campaign.
                   </Label>
                 </div>
+                <div className="flex items-start gap-3 rounded-xl border-2 border-hh-primary/25 bg-gradient-to-r from-hh-primary/8 via-rose-50/90 to-amber-50/70 p-4">
+                  <Checkbox
+                    id="fsa-ack"
+                    checked={fsaAck}
+                    onCheckedChange={(v: boolean | "indeterminate") =>
+                      setFsaAck(v === true)
+                    }
+                    className="mt-1"
+                  />
+                  <Label
+                    htmlFor="fsa-ack"
+                    className="text-sm font-normal leading-relaxed sm:text-[15px]"
+                  >
+                    <span className="font-semibold text-hh-dark">
+                      Fundraising Services Agreement (main program contract).
+                    </span>{" "}
+                    I understand this agreement is the primary contract between
+                    our organization and Heart &amp; Hustle Fundraising for the
+                    program, that an authorized organization representative will
+                    sign it (together with a W-9) before we receive payouts, and
+                    that we will keep a fully executed copy for our records. Heart
+                    &amp; Hustle provides the current version for signature when
+                    our program is approved; it is not published on the public
+                    website. I have reviewed the substance of that agreement
+                    through Heart &amp; Hustle (for example, the copy made
+                    available to me or described by our representative).
+                  </Label>
+                </div>
                 <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/90 p-4">
                   <div className="flex items-start gap-3">
                     <Checkbox
@@ -502,7 +543,7 @@ export default function RequestFundraiserPage() {
                   </div>
                   <details className="group rounded-lg border border-slate-200/90 bg-white/80 p-3 text-sm text-slate-700">
                     <summary className="cursor-pointer text-sm font-semibold text-hh-primary underline-offset-2 hover:underline group-open:mb-2">
-                      View full standard fundraiser terms
+                      View summary of key commercial terms
                     </summary>
                     <ul className="ml-1 list-outside list-disc space-y-2 pl-5 text-slate-700">
                       {FUNDRAISER_INTAKE_TERMS_BULLETS.map((line) => (

@@ -10,9 +10,20 @@ export default function TermsPage() {
       <h1 className="mt-6 text-3xl font-bold text-hh-dark">Terms of service</h1>
       <p className="mt-2 text-sm text-slate-500">{BRAND.name}</p>
       <p className="mt-4 text-xs text-slate-500">
-        Last updated: April 8, 2026. These terms are a plain-language summary of
-        how we expect the platform to be used. For legal questions, consult
-        counsel.
+        Last updated: April 25, 2026. These terms are a plain-language summary
+        of how we expect the platform to be used.{" "}
+        <strong>Heart and Hustle Fundraising LLC</strong> (also referred to as
+        {BRAND.name}) operates the Service. The full{" "}
+        <strong>Fundraising Services Agreement</strong> for approved schools and
+        organizations (revenue share, eligibility, and other program terms) is
+        <strong> not posted publicly</strong> — it is provided for signature
+        (with a W-9 and any other required paperwork) when a program is
+        approved. The sections below, together with our{" "}
+        <Link href="/privacy" className="text-hh-primary underline">
+          Privacy policy
+        </Link>
+        , are written to reflect the same material commitments you will see in
+        that program agreement. For legal questions, consult counsel.
       </p>
 
       <section className="mt-8 space-y-4 text-sm leading-relaxed">
@@ -33,7 +44,10 @@ export default function TermsPage() {
           run fundraising campaigns: participant links, donations processed
           through third-party payment providers, and optional messaging
           features. We may change or discontinue features with reasonable notice
-          where practicable.
+          where practicable. We are a registered{" "}
+          <strong>Professional Fund Raiser</strong> with the Illinois
+          Attorney General&apos;s Office and conduct activities in line with the
+          Illinois Solicitation for Charity Act (225 ILCS 460).
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Accounts &amp; eligibility</h2>
@@ -49,10 +63,33 @@ export default function TermsPage() {
         <h2 className="text-lg font-semibold text-hh-dark">Donations</h2>
         <p>
           Donations are voluntary. Payment processing is handled by our payment
-          partner (e.g. Stripe) under its terms and privacy practices. Platform
-          and processing fees may apply as disclosed at checkout or in campaign
-          materials. Refunds and chargebacks are handled according to applicable
-          policies, payment network rules, and program instructions.
+          partner, <strong>Stripe, Inc.</strong>, under its terms and privacy
+          practices. We do <strong>not</strong> store full card numbers on our
+          systems.
+        </p>
+        <p>
+          <strong>Company is not a charity.</strong> Heart and Hustle
+          Fundraising LLC is a registered Professional Fund Raiser; it is{" "}
+          <strong>not</strong> a tax-exempt charitable organization under
+          section 501(c)(3) or otherwise. <strong>Tax deductibility</strong> of
+          any payment depends on the receiving organization&apos;s status and the
+          donor&apos;s own tax situation; we do not provide tax, legal, or
+          financial advice. Donors and organizations should consult a qualified
+          professional. A Stripe or card receipt confirms that a{" "}
+          <strong>payment was processed</strong> and, by itself, is{" "}
+          <strong>not</strong> a charitable contribution acknowledgment or a
+          representation of deductibility, consistent with the program agreement
+          for organizations that run paid-out campaigns.
+        </p>
+        <p>
+          For <strong>participating organizations</strong> with paid-out
+          program campaigns, <strong>net</strong> raised funds are shared{" "}
+          <strong>90% to the organization and 10% to Company</strong> as its
+          service fee. <strong>Payment processing and card fees</strong> are{" "}
+          <strong>Company&apos;s</strong> responsibility and are{" "}
+          <strong>not deducted from the organization&apos;s 90% share</strong>.
+          Refunds and chargebacks are handled according to applicable payment
+          rules and program instructions.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">SMS &amp; communications</h2>
@@ -65,7 +102,9 @@ export default function TermsPage() {
           marketing texts where applicable by following instructions in the
           message; for transactional messages, contact support or adjust
           settings in the app where available. Carriers are not liable for delayed
-          or undelivered messages.
+          or undelivered messages. Organizations are responsible for participant
+          communications, including modified messages, as in the program
+          agreement.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Acceptable use</h2>
@@ -104,7 +143,11 @@ export default function TermsPage() {
           from your use of the Service. Our aggregate liability for claims
           relating to the Service is limited to the greater of (a) amounts you
           paid us in fees for the Service in the twelve months before the claim
-          or (b) one hundred U.S. dollars.
+          or (b) one hundred U.S. dollars. <strong>Participating
+          organizations</strong> are also subject to the stricter, platform-scoped
+          limitation of liability in the Fundraising Services Agreement
+          (executed when the program is approved) where it governs the program
+          relationship.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Indemnity</h2>
@@ -112,7 +155,11 @@ export default function TermsPage() {
           You agree to defend and indemnify us against claims arising from your
           misuse of the Service, your campaign content, or your violation of
           these terms or applicable law, except to the extent caused by our gross
-          negligence or willful misconduct.
+          negligence or willful misconduct. <strong>Participating
+          organizations</strong> have additional indemnification and
+          hold-harmless obligations in the Fundraising Services Agreement
+          provided for signature with the program, where that agreement
+          applies.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Changes</h2>
@@ -120,6 +167,25 @@ export default function TermsPage() {
           We may update these terms. We will post the revised date at the top of
           this page. Continued use after changes constitutes acceptance of the
           updated terms.
+        </p>
+
+        <h2 className="text-lg font-semibold text-hh-dark">
+          Participating organizations
+        </h2>
+        <p>
+          If your school or program is <strong>approved</strong> to run a
+          paid-out campaign, you will receive a <strong>Fundraising Services
+          Agreement</strong> (not published here) to sign, together with a W-9
+          and any other required documents. That agreement governs, among other
+          things, <strong>eligibility tiers</strong>, the <strong>90/10
+          split</strong>, that <strong>sponsor-set dates and goals</strong> (we
+          do not run your campaign for you), <strong>participant
+          communications and templates</strong>, <strong>payments and use of
+          funds</strong>, <strong>tax representations</strong>, and <strong>data
+          use</strong> (aligned with this page and the Privacy policy). If
+          anything in these public terms and the written program agreement
+          conflict for a program relationship, the <strong>signed program
+          agreement</strong> controls.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Contact</h2>

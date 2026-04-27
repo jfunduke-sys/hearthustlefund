@@ -53,8 +53,8 @@ export default function AdminDashboard({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-slate-50 print:bg-white">
+      <header className="border-b border-slate-200 bg-white print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4">
           <div>
             <p className="text-sm font-medium text-hh-primary">SuperAdmin</p>
@@ -74,7 +74,7 @@ export default function AdminDashboard({
       <main className="mx-auto max-w-7xl space-y-8 px-4 py-8">
         {requestsFetchError ? (
           <div
-            className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"
+            className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 print:hidden"
             role="alert"
           >
             <p className="font-semibold">Could not load school requests</p>
@@ -86,7 +86,7 @@ export default function AdminDashboard({
             </p>
           </div>
         ) : null}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 print:hidden">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">

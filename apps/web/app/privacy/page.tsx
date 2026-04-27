@@ -9,11 +9,20 @@ export default function PrivacyPage() {
       </Link>
       <h1 className="mt-6 text-3xl font-bold text-hh-dark">Privacy policy</h1>
       <p className="mt-2 text-sm text-slate-500">
-        {BRAND.name}
+        {BRAND.name} — operated by <strong>Heart and Hustle Fundraising LLC</strong>
         <span className="text-slate-400"> · </span>
         <Link href="/terms" className="text-hh-primary hover:underline">
           Terms of service
         </Link>
+      </p>
+      <p className="mt-2 text-xs text-slate-500">
+        Approved schools and programs sign a <strong>Fundraising Services
+        Agreement</strong> (not published on this site) that includes data-use
+        terms for the program. This public privacy policy and that agreement
+        are written to be <strong>consistent</strong> on how personal data is
+        handled: we do not sell personal data; we use and share it only to run
+        the platform, process payments, and meet legal and tax requirements, as
+        further described below.
       </p>
 
       <section className="mt-8 space-y-4 text-sm leading-relaxed">
@@ -27,17 +36,27 @@ export default function PrivacyPage() {
 
         <h2 className="text-lg font-semibold text-hh-dark">What we do not do</h2>
         <p>
-          We do not sell personal data. We do not use donor or athlete data for
-          advertising. We do not share contact lists with third parties beyond
-          what is required to operate payments (Stripe) and hosting/auth
-          (Supabase) under their terms.
+          We do <strong>not</strong> sell personal data. We do not use donor or
+          participant data for third-party marketing or advertising. We share
+          data only with service providers needed to run the platform (for
+          example, payment processing and hosting/auth), and as required for
+          legal, regulatory, and tax compliance—matching the obligations in the
+          Fundraising Services Agreement (Section 9) for approved program
+          organizations.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Payments (Stripe)</h2>
         <p>
-          Card and payment details are handled by Stripe under PCI-compliant
-          flows. We store donation amounts and optional donor fields needed for
-          receipts and campaign reporting—not full card numbers.
+          Card and payment details are handled by Stripe, Inc. under
+          PCI-compliant flows. We store donation amounts and optional donor
+          fields needed for reporting—not full card numbers. Donors who provide
+          an email may receive a <strong>payment receipt from Stripe</strong>;
+          that receipt shows that a payment was processed. It is{" "}
+          <strong>not</strong>, by itself, a charitable tax acknowledgment;
+          that is the same position stated in the program agreement
+          (Section 8) for organizations. Eligible 501(c)(3) or other exempt
+          organizations that receive funds are responsible for any donor
+          acknowledgments required by law.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Device contacts</h2>
@@ -57,8 +76,9 @@ export default function PrivacyPage() {
 
         <h2 className="text-lg font-semibold text-hh-dark">Retention</h2>
         <p>
-          We retain records as needed for compliance, dispute resolution, and
-          campaign accounting. Contact{" "}
+          We retain records as needed to operate the Service, meet legal and
+          financial obligations, and resolve disputes, consistent with the
+          Fundraising Services Agreement for approved organizations. Contact{" "}
           <a
             className="text-hh-primary underline"
             href="mailto:privacy@hearthustlefund.com"
