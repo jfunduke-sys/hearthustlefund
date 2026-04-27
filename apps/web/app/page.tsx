@@ -51,11 +51,7 @@ export default function HomePage() {
                 Quick payouts
               </strong>{" "}
               — after donations clear through Stripe, funds typically reach your
-              program within about 2–3 business days (aligned with our{" "}
-              <Link href="/terms" className="text-hh-primary underline">
-                Terms of service
-              </Link>
-              ).
+              program within about 2–3 business days.
             </span>
           </li>
           <li className="flex gap-3">
@@ -80,13 +76,10 @@ export default function HomePage() {
           its service fee. <strong>Card and payment processing fees</strong> are
           the Company&apos;s responsibility and are paid from that{" "}
           <strong>10%</strong> share—your program&apos;s <strong>90%</strong> is{" "}
-          <strong>not</strong> reduced by those fees (see{" "}
-          <Link href="/terms" className="text-hh-primary underline">
-            Terms of service
-          </Link>
-          ). Illinois registration, compliance, and operations are covered from
-          the Company&apos;s share. We do not sell personal data. Full terms in
-          the same agreement.
+          <strong>not</strong> reduced by those fees. Illinois registration,
+          compliance, and operations are covered from the Company&apos;s share. We
+          do not sell personal data. Full legal terms are linked at the bottom of
+          this page.
         </p>
         <section className="mt-12 max-w-3xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-xl font-bold tracking-tight text-hh-dark sm:text-2xl">
@@ -106,11 +99,7 @@ export default function HomePage() {
                 <strong>90%</strong> of funds raised goes to your program,{" "}
                 <strong>10%</strong> to Heart &amp; Hustle as the service fee—with
                 processing costs borne by the Company from its share, not taken
-                from the program 90% (
-                <Link href="/terms" className="text-hh-primary underline">
-                  Terms of service
-                </Link>
-                ).
+                from the program 90%.
               </p>
             </li>
             <li>
@@ -133,11 +122,8 @@ export default function HomePage() {
               <p className="mt-1 text-sm leading-snug text-slate-600">
                 We initiate disbursement within three business days after
                 applicable donations have cleared through Stripe; you often see
-                funds in about 2–3 business days after that clearance—see{" "}
-                <Link href="/terms" className="text-hh-primary underline">
-                  Terms of service
-                </Link>{" "}
-                (Section 7).
+                funds in about 2–3 business days after that clearance (payout
+                timing is described in Section 7 of our terms of service).
               </p>
             </li>
             <li>
