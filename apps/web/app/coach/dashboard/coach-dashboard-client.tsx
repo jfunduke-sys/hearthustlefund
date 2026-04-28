@@ -269,6 +269,7 @@ export default function CoachDashboardClient({
   }
 
   const joinCode = fundraiser.join_code ?? "";
+  const accountIdentity = coachEmail || coachUsername || "—";
 
   const participantInviteMessage = useMemo(() => {
     const ios =
@@ -369,16 +370,10 @@ More tips will show inside the app once you're in. Thanks!`;
               <p className="text-xs font-semibold uppercase tracking-wide text-white/75">
                 Account
               </p>
-              <div className="mt-2 grid gap-2 text-sm md:grid-cols-2">
-                <p>
-                  <span className="text-white/75">Email:</span>{" "}
-                  <span className="font-semibold">{coachEmail ?? "—"}</span>
-                </p>
-                <p>
-                  <span className="text-white/75">Username:</span>{" "}
-                  <span className="font-semibold">{coachUsername || "—"}</span>
-                </p>
-              </div>
+              <p className="mt-2 text-sm">
+                <span className="text-white/75">Email/Username:</span>{" "}
+                <span className="font-semibold">{accountIdentity}</span>
+              </p>
               <form className="mt-4 grid gap-3 md:grid-cols-3" onSubmit={updateCoachPassword}>
                 <input
                   type="password"
