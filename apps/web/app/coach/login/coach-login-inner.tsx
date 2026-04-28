@@ -419,15 +419,6 @@ export default function CoachLoginInner() {
             </TabsContent>
           </Tabs>
 
-          <p className="mt-6 border-t border-slate-200 pt-4 text-center text-sm text-slate-600">
-            Prefer to register manually?{" "}
-            <Link
-              href="/coach/register"
-              className="font-medium text-hh-primary hover:underline"
-            >
-              Create an account
-            </Link>
-          </p>
           <p className="mt-2 text-center text-sm">
             <Link href="/" className="text-slate-500 hover:underline">
               Back to home
