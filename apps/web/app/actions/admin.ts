@@ -132,6 +132,33 @@ export async function setFundraiserStatus(
     })
     .eq("id", fundraiserId);
   if (error) throw new Error(error.message);
+
+  if (status === "completed" || status === "cancelled") {
+    // Campaign-scoped participant access: unlink participant auth identities
+    // when closeout is finalized by SuperAdmin.
+    const { error: unlinkErr } = await admin
+      .from("athletes")
+      .update({ user_id: null })
+      .eq("fundraiser_id", fundraiserId);
+    if (unlinkErr) throw new Error(unlinkErr.message);
+
+    // Minimize retained outreach data post-closeout while preserving financial
+    // and compliance records.
+    const { data: athleteRows, error: athleteErr } = await admin
+      .from("athletes")
+      .select("id")
+      .eq("fundraiser_id", fundraiserId);
+    if (athleteErr) throw new Error(athleteErr.message);
+    const athleteIds = (athleteRows ?? []).map((r) => r.id as string);
+    if (athleteIds.length > 0) {
+      const { error: contactErr } = await admin
+        .from("athlete_contacts")
+        .delete()
+        .in("athlete_id", athleteIds);
+      if (contactErr) throw new Error(contactErr.message);
+    }
+  }
+
   revalidatePath("/admin");
   revalidatePath(`/admin/fundraisers/${fundraiserId}`);
 }

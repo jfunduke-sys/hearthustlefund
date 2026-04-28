@@ -277,6 +277,14 @@ export default function CoachLoginInner() {
                     required
                   />
                 </div>
+                <p className="-mt-1 text-right text-sm">
+                  <Link
+                    href="/coach/forgot-password"
+                    className="text-hh-primary hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </p>
                 {signInError ? (
                   <p className="text-sm text-red-600" role="alert">
                     {signInError}

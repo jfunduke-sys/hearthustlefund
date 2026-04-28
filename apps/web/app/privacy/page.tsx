@@ -73,6 +73,18 @@ export default function PrivacyPage() {
           your entire address book.
         </p>
 
+        <h2 className="text-lg font-semibold text-hh-dark">
+          Participant access lifecycle
+        </h2>
+        <p>
+          Participant app access is campaign-specific. Participant accounts may
+          remain available during an active campaign and any closeout period.
+          When SuperAdmin finalizes closeout for a fundraiser (completed or
+          cancelled), participant campaign access is removed for that fundraiser.
+          Coaches maintain persistent portal accounts and can recover access via
+          secure password-reset flow.
+        </p>
+
         <h2 className="text-lg font-semibold text-hh-dark">Donor anonymity</h2>
         <p>
           Donors may give anonymously where the product supports it; anonymous
@@ -82,19 +94,19 @@ export default function PrivacyPage() {
 
         <h2 className="text-lg font-semibold text-hh-dark">Retention</h2>
         <p>
-          We retain records as needed to operate the Service, meet legal and
-          financial obligations, and resolve disputes, consistent with our{" "}
-          <Link href="/terms" className="text-hh-primary underline">
-            Terms of service
-          </Link>{" "}
-          for approved organizations. Contact{" "}
+          We retain information according to data-minimization principles and our
+          legal obligations. Outreach/contact list data is minimized after
+          fundraiser closeout, while records needed for payment operations, tax,
+          accounting, compliance, fraud prevention, and dispute resolution are
+          retained for required periods under applicable law and contract terms.
+          Contact{" "}
           <a
             className="text-hh-primary underline"
             href="mailto:privacy@hearthustlefund.com"
           >
             privacy@hearthustlefund.com
           </a>{" "}
-          for deletion requests where applicable.
+          for privacy or deletion requests where applicable.
         </p>
       </section>
     </div>

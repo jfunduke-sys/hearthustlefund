@@ -391,8 +391,10 @@ export function FundraiserDetailClient({
         <CardHeader>
           <CardTitle>Fundraiser status</CardTitle>
           <p className="text-sm font-normal text-slate-600">
-            Mark completed when the campaign ends successfully, or cancelled if it
-            did not run. Reactivate only if you need to correct a mistake.
+            Use closeout when payout and reconciliation are complete. Closeout
+            (completed/cancelled) removes participant campaign app access for this
+            fundraiser while retaining required legal and financial records.
+            Reactivate only if you need to correct a mistake.
           </p>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
@@ -417,7 +419,7 @@ export function FundraiserDetailClient({
               })
             }
           >
-            Mark completed
+            Closeout: Completed
           </Button>
           <Button
             variant="secondary"
@@ -429,7 +431,7 @@ export function FundraiserDetailClient({
               })
             }
           >
-            Mark cancelled
+            Closeout: Cancelled
           </Button>
         </CardContent>
       </Card>
