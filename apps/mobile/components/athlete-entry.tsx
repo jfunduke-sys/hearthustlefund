@@ -26,6 +26,8 @@ import {
   normalizeTeamJoinCode,
 } from "@heart-and-hustle/shared";
 
+const APP_LOGO = require("../assets/heart-logo.png");
+
 type Fr = {
   id: string;
   school_name: string;
@@ -260,7 +262,7 @@ export default function AthleteEntry({
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
       >
-        <Text style={styles.heart}>❤️‍🔥</Text>
+        <Image source={APP_LOGO} style={styles.appLogo} resizeMode="contain" />
         <Text style={styles.title}>Heart & Hustle</Text>
         <Text style={styles.sub}>Fundraising for your team</Text>
 
@@ -436,7 +438,12 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
     flexGrow: 1,
   },
-  heart: { fontSize: 40, textAlign: "center", marginBottom: 8 },
+  appLogo: {
+    width: 56,
+    height: 56,
+    alignSelf: "center",
+    marginBottom: 8,
+  },
   title: {
     fontSize: 28,
     fontWeight: "800",
