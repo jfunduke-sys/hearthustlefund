@@ -7,7 +7,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
-  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Swipeable } from "react-native-gesture-handler";
@@ -142,8 +141,6 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   const [pickingContact, setPickingContact] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
-  /** iOS 18+: user chose “selected contacts only” for this app — OS may expose just a few. */
-  const [contactsAccessNote, setContactsAccessNote] = useState<string | null>(null);
   const [coachNeedsParticipant, setCoachNeedsParticipant] = useState(false);
   const [messagingMeta, setMessagingMeta] = useState<{
     phase: CampaignWindowPhase;
@@ -203,21 +200,9 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
 
       const { status } = await Contacts.requestPermissionsAsync();
       if (status !== "granted") {
-        setContactsAccessNote(null);
         setStatus("Contacts permission is required to send texts.");
         setLoading(false);
         return;
-      }
-
-      const perm = await Contacts.getPermissionsAsync();
-      if (perm.accessPrivileges === "limited") {
-        setContactsAccessNote(
-          Platform.OS === "ios"
-            ? "iOS is only sharing the contacts you picked for Expo Go — not your full address book. To change that: Settings → Privacy & Security → Contacts → Expo Go (full access or add contacts)."
-            : "This app can only see contacts you allowed. Grant full Contacts access for Expo Go in system settings if the list looks too short."
-        );
-      } else {
-        setContactsAccessNote(null);
       }
 
       const data = await fetchAllDeviceContacts();
@@ -513,9 +498,6 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
           )}
         </Text>
       ) : null}
-      {contactsAccessNote ? (
-        <Text style={styles.accessBanner}>{contactsAccessNote}</Text>
-      ) : null}
       <Pressable
         style={[styles.addMoreBtn, pickingContact && styles.addMoreBtnDisabled]}
         onPress={() => void openContactPicker()}
@@ -542,9 +524,9 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       </View>
       <Text style={styles.count}>{selectedCount} contacts selected</Text>
       <Text style={styles.countHint}>
-        Swipe left to hide someone from this screen only (they stay in your Contacts
-        app). Send to contacts opens a private text per person (not a group chat).
-        Your phone will open Messages once per contact — tap Send each time.
+        Swipe left to remove a contact from this list. Send to Contacts sends a
+        private text per person (not a group chat). Your phone will open
+        Messages once per contact — tap Send each time.
       </Text>
       {status ? <Text style={styles.status}>{status}</Text> : null}
       <FlatList
@@ -615,7 +597,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         {sending ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.btnText}>Send to contacts</Text>
+          <Text style={styles.btnText}>Send to Contacts</Text>
         )}
       </Pressable>
     </View>
@@ -645,17 +627,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  accessBanner: {
-    backgroundColor: "#e0f2fe",
-    borderWidth: 1,
-    borderColor: "#7dd3fc",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 8,
-    color: "#0c4a6e",
-    fontSize: 13,
-    lineHeight: 18,
-  },
   addMoreBtn: {
     borderWidth: 2,
     borderColor: "#C0392B",
@@ -680,7 +651,7 @@ const styles = StyleSheet.create({
   count: { marginVertical: 6, color: "#64748b" },
   countHint: {
     fontSize: 12,
-    color: "#94a3b8",
+    color: "#475569",
     lineHeight: 17,
     marginBottom: 4,
   },

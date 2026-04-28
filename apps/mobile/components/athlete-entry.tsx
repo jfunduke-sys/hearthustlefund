@@ -17,8 +17,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getApiBase, supabase } from "../lib/supabase";
 import { getPostAuthHrefForCurrentUser } from "../lib/post-auth-route";
 import {
-  CAMPAIGN_SETUP_CODE,
-  TEAM_JOIN,
   TEAM_JOIN_CHARSET,
   TEAM_JOIN_CODE_LENGTH,
   isLegacyNumericJoinCode,
@@ -274,7 +272,7 @@ export default function AthleteEntry({
             <Text
               style={[styles.segText, tab === "join" && styles.segTextActive]}
             >
-              Enter team code
+              Enter Team Code
             </Text>
           </Pressable>
           <Pressable
@@ -284,7 +282,7 @@ export default function AthleteEntry({
             <Text
               style={[styles.segText, tab === "signin" && styles.segTextActive]}
             >
-              Sign in
+              Sign In
             </Text>
           </Pressable>
         </View>
@@ -293,11 +291,13 @@ export default function AthleteEntry({
           <View style={styles.panel}>
             {!fundraiser ? (
               <>
-                <Text style={styles.hint}>{TEAM_JOIN.description}</Text>
-                <Text style={styles.hintMuted}>
-                  {CAMPAIGN_SETUP_CODE.joinFlowReminder}
+                <Text style={styles.hint}>
+                  Your coach/sponsor shares a 7-character team code. Open the
+                  Heart &amp; Hustle app, enter the code, then create your email
+                  and password to get your personal donation link and texting
+                  tools. Passwords must be at least 8 characters.
                 </Text>
-                <Text style={styles.label}>Team code</Text>
+                <Text style={styles.label}>Team Code</Text>
                 <TextInput
                   value={code}
                   onChangeText={onChangeCode}
@@ -306,10 +306,6 @@ export default function AthleteEntry({
                   placeholder={Array(TEAM_JOIN_CODE_LENGTH).fill("•").join("")}
                   style={styles.codeInput}
                 />
-                <Text style={styles.codeHint}>
-                  {TEAM_JOIN_CODE_LENGTH} characters (letters & numbers). Older
-                  teams may still use a 6-digit code. {TEAM_JOIN.inputFormatHint}
-                </Text>
                 <Pressable
                   style={styles.btnDark}
                   onPress={() => void lookup()}
@@ -360,14 +356,14 @@ export default function AthleteEntry({
                     })
                   }
                 >
-                  <Text style={styles.btnText}>Create account</Text>
+                  <Text style={styles.btnText}>Create Account</Text>
                 </Pressable>
                 <Pressable
                   style={styles.linkBtn}
                   onPress={clearTeamChoice}
                   hitSlop={12}
                 >
-                  <Text style={styles.linkBtnText}>Use a different team code</Text>
+                  <Text style={styles.linkBtnText}>Use a Different Team Code</Text>
                 </Pressable>
               </View>
             )}
@@ -376,7 +372,7 @@ export default function AthleteEntry({
           <View style={styles.panel}>
             <Text style={styles.hint}>
               Welcome back. Sign in with the email and password you created when
-              you joined your team.
+              you joined your fundraising campaign.
             </Text>
             <Text style={styles.label}>Email</Text>
             <TextInput
@@ -420,7 +416,7 @@ export default function AthleteEntry({
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.btnText}>Sign in</Text>
+                <Text style={styles.btnText}>Sign In</Text>
               )}
             </Pressable>
           </View>
@@ -475,12 +471,6 @@ const styles = StyleSheet.create({
   segTextActive: { color: "#1A1A2E" },
   panel: { marginTop: 4 },
   hint: { fontSize: 14, color: "#475569", lineHeight: 21, marginBottom: 10 },
-  hintMuted: {
-    fontSize: 11,
-    color: "#94a3b8",
-    lineHeight: 16,
-    marginBottom: 16,
-  },
   label: { fontSize: 14, fontWeight: "600", color: "#1A1A2E", marginBottom: 6 },
   codeInput: {
     borderWidth: 2,
@@ -494,7 +484,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     color: "#1A1A2E",
   },
-  codeHint: { fontSize: 11, color: "#94a3b8", marginTop: 6 },
   input: {
     borderWidth: 1,
     borderColor: "#cbd5e1",

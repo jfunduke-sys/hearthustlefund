@@ -598,7 +598,7 @@ export default function DashboardScreen() {
           <Text style={styles.helpText}>{profileHelp}</Text>
         ) : null}
         <Pressable style={styles.btn} onPress={() => router.replace("/")}>
-          <Text style={styles.btnText}>Enter team code</Text>
+          <Text style={styles.btnText}>Enter Team Code</Text>
         </Pressable>
       </View>
     );
@@ -725,7 +725,7 @@ export default function DashboardScreen() {
         ) : null}
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Your progress</Text>
+          <Text style={styles.cardTitle}>Your Progress</Text>
           <Text style={styles.stat}>
             ${data.raisedSelf.toFixed(2)}
             {effectiveGoal != null
@@ -738,14 +738,14 @@ export default function DashboardScreen() {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Team total</Text>
+          <Text style={styles.cardTitle}>Team Total</Text>
           <Text style={styles.stat}>
             ${data.raisedTeam.toFixed(2)} / ${teamGoal.toFixed(2)}
           </Text>
           <ProgressBarGradient pct={teamPct} />
         </View>
 
-        <Text style={styles.section}>Your donations</Text>
+        <Text style={styles.section}>Your Donations</Text>
         {data.allDonations.length === 0 ? (
           <Text style={styles.muted}>No donations yet — share your link!</Text>
         ) : (
@@ -764,11 +764,11 @@ export default function DashboardScreen() {
           ))
         )}
 
-        <Text style={[styles.section, { marginTop: 20 }]}>Reminder texts</Text>
+        <Text style={[styles.section, { marginTop: 20 }]}>Reminder Texts</Text>
         <Text style={styles.sectionHint}>
-          People you already texted who have not donated yet — tap the checkmark
-          to include them, then send a follow-up. Swipe left on a row to remove
-          someone from this list.
+          People you already texted who have not donated yet — select them by
+          tapping their contact (✓), then send a follow-up text. Swipe left on
+          any contact to remove them from the list.
         </Text>
         {data.reminderContacts.length === 0 ? (
           <Text style={styles.muted}>
@@ -866,7 +866,7 @@ export default function DashboardScreen() {
           accessibilityRole="button"
           accessibilityLabel="Copy personal donation link"
         >
-          <Text style={styles.donateLinkTitle}>Your donation link</Text>
+          <Text style={styles.donateLinkTitle}>Your Donation Link</Text>
           <Text style={styles.donateLinkUrl} selectable>
             {personalDonateUrl}
           </Text>
@@ -1032,7 +1032,7 @@ export default function DashboardScreen() {
                   value={smsPhone}
                   onChangeText={setSmsPhone}
                   keyboardType="phone-pad"
-                  placeholder="10-digit mobile"
+                  placeholder="Mobile Number"
                   maxLength={14}
                 />
                 <Pressable
@@ -1086,7 +1086,7 @@ export default function DashboardScreen() {
                     {smsPhoneBusy ? (
                       <ActivityIndicator color="#fff" />
                     ) : (
-                      <Text style={styles.smsPhoneSaveText}>Save number</Text>
+                      <Text style={styles.smsPhoneSaveText}>Save Number</Text>
                     )}
                   </Pressable>
                   {hasSavedReminderPhone ? (
@@ -1379,7 +1379,7 @@ const styles = StyleSheet.create({
   },
   sectionHint: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#475569",
     marginBottom: 10,
     lineHeight: 18,
   },

@@ -17,9 +17,9 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="index" options={{ title: "Heart & Hustle" }} />
-        <Stack.Screen name="join" options={{ title: "Join fundraiser" }} />
-        <Stack.Screen name="setup" options={{ title: "Your profile" }} />
-        <Stack.Screen name="login" options={{ title: "Sign in" }} />
+        <Stack.Screen name="join" options={{ title: "Join Fundraiser" }} />
+        <Stack.Screen name="setup" options={{ title: "Your Profile" }} />
+        <Stack.Screen name="login" options={{ title: "Sign In" }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(coach)" options={{ headerShown: false }} />
       </Stack>
