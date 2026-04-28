@@ -225,6 +225,11 @@ export default function AthleteEntry({
     }
   }
 
+  function openForgotPassword() {
+    const base = getApiBase().replace(/\/$/, "");
+    void Linking.openURL(`${base}/forgot-password`);
+  }
+
   function onChangeCode(t: string) {
     setFundraiser(null);
     setError(null);
@@ -409,6 +414,13 @@ export default function AthleteEntry({
             />
             {signError ? <Text style={styles.err}>{signError}</Text> : null}
             <Pressable
+              onPress={openForgotPassword}
+              hitSlop={10}
+              style={styles.forgotWrap}
+            >
+              <Text style={styles.forgotText}>Forgot Password?</Text>
+            </Pressable>
+            <Pressable
               style={styles.btnDark}
               onPress={() => void onSignIn()}
               disabled={loading}
@@ -509,6 +521,13 @@ const styles = StyleSheet.create({
   },
   btnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
   err: { color: "#b91c1c", marginTop: 12, fontSize: 14 },
+  forgotWrap: { marginTop: 10, alignSelf: "flex-end" },
+  forgotText: {
+    color: "#C0392B",
+    fontSize: 13,
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
   card: {
     marginTop: 4,
     padding: 16,

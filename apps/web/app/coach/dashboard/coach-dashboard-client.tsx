@@ -32,6 +32,8 @@ import {
 type Props = {
   fundraiser: Fundraiser;
   coachAthlete: Athlete | null;
+  coachEmail: string | null;
+  coachUsername: string | null;
   athletes: Athlete[];
   donations: Donation[];
   textsByAthlete: Record<string, number>;
@@ -131,6 +133,8 @@ function CommandStat({
 export default function CoachDashboardClient({
   fundraiser,
   coachAthlete,
+  coachEmail,
+  coachUsername,
   athletes,
   donations,
   textsByAthlete,
@@ -146,6 +150,12 @@ export default function CoachDashboardClient({
   const [donorAboutStatus, setDonorAboutStatus] = useState<string | null>(null);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [joinCodeCopied, setJoinCodeCopied] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [accountMsg, setAccountMsg] = useState<string | null>(null);
+  const [accountBusy, setAccountBusy] = useState(false);
 
   useEffect(() => {
     setDonorPageAbout(fundraiser.donor_page_about ?? "");
@@ -205,6 +215,57 @@ export default function CoachDashboardClient({
     await supabase.auth.signOut();
     router.replace("/");
     router.refresh();
+  }
+
+  async function updateCoachPassword(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setAccountMsg(null);
+    if (!coachEmail?.trim()) {
+      setAccountMsg("Account email is missing. Contact support.");
+      return;
+    }
+    if (!currentPassword) {
+      setAccountMsg("Enter your current password.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setAccountMsg("New password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setAccountMsg("New password and confirmation do not match.");
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setAccountMsg("Use a different password than your current one.");
+      return;
+    }
+
+    setAccountBusy(true);
+    try {
+      const supabase = createClient();
+      const { error: reauthErr } = await supabase.auth.signInWithPassword({
+        email: coachEmail.trim(),
+        password: currentPassword,
+      });
+      if (reauthErr) {
+        setAccountMsg("Current password is incorrect.");
+        return;
+      }
+      const { error: updateErr } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (updateErr) {
+        setAccountMsg(updateErr.message);
+        return;
+      }
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setAccountMsg("Password updated successfully.");
+    } finally {
+      setAccountBusy(false);
+    }
   }
 
   const joinCode = fundraiser.join_code ?? "";
@@ -267,6 +328,16 @@ More tips will show inside the app once you're in. Thanks!`;
             <Button
               variant="secondary"
               className="border-white/20 bg-white/10 text-white hover:bg-white/20"
+              onClick={() => {
+                setAccountOpen((v) => !v);
+                setAccountMsg(null);
+              }}
+            >
+              My Account Info
+            </Button>
+            <Button
+              variant="secondary"
+              className="border-white/20 bg-white/10 text-white hover:bg-white/20"
               asChild
             >
               <Link href="/coach/new-fundraiser">New fundraiser</Link>
@@ -292,6 +363,69 @@ More tips will show inside the app once you're in. Thanks!`;
             </Button>
           </div>
         </div>
+        {accountOpen ? (
+          <div className="mx-auto max-w-6xl px-4 pb-5">
+            <div className="rounded-xl border border-white/20 bg-white/10 p-4 text-white backdrop-blur">
+              <p className="text-xs font-semibold uppercase tracking-wide text-white/75">
+                Account
+              </p>
+              <div className="mt-2 grid gap-2 text-sm md:grid-cols-2">
+                <p>
+                  <span className="text-white/75">Email:</span>{" "}
+                  <span className="font-semibold">{coachEmail ?? "—"}</span>
+                </p>
+                <p>
+                  <span className="text-white/75">Username:</span>{" "}
+                  <span className="font-semibold">{coachUsername || "—"}</span>
+                </p>
+              </div>
+              <form className="mt-4 grid gap-3 md:grid-cols-3" onSubmit={updateCoachPassword}>
+                <input
+                  type="password"
+                  placeholder="Current Password"
+                  className="h-10 rounded-md border border-white/25 bg-white/95 px-3 text-sm text-slate-900 placeholder:text-slate-500"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  className="h-10 rounded-md border border-white/25 bg-white/95 px-3 text-sm text-slate-900 placeholder:text-slate-500"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm New Password"
+                  className="h-10 rounded-md border border-white/25 bg-white/95 px-3 text-sm text-slate-900 placeholder:text-slate-500"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  required
+                />
+                <div className="md:col-span-3 flex flex-wrap gap-2">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="bg-hh-primary text-white hover:bg-hh-primary/90"
+                    disabled={accountBusy}
+                  >
+                    {accountBusy ? "Updating…" : "Update Password"}
+                  </Button>
+                </div>
+              </form>
+              {accountMsg ? (
+                <p className="mt-3 text-sm text-white/90">{accountMsg}</p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </header>
 
       <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">

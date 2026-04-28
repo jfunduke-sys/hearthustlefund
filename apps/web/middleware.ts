@@ -57,7 +57,9 @@ export async function middleware(request: NextRequest) {
   const coachPublic =
     path.startsWith("/coach/login") ||
     path.startsWith("/coach/register") ||
-    path.startsWith("/coach/app-bridge");
+    path.startsWith("/coach/app-bridge") ||
+    path.startsWith("/coach/forgot-password") ||
+    path.startsWith("/coach/reset-password");
 
   if (path.startsWith("/coach") && !coachPublic) {
     if (!user) {

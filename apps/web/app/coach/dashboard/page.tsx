@@ -124,6 +124,14 @@ export default async function CoachDashboardPage() {
     <CoachDashboardClient
       fundraiser={active}
       coachAthlete={coachAthlete}
+      coachEmail={user.email ?? null}
+      coachUsername={
+        typeof user.user_metadata?.username === "string"
+          ? user.user_metadata.username
+          : typeof user.user_metadata?.preferred_username === "string"
+            ? user.user_metadata.preferred_username
+            : null
+      }
       athletes={athleteList}
       donations={donationList}
       textsByAthlete={Object.fromEntries(textsByAthlete)}
