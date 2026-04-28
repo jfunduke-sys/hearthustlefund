@@ -70,15 +70,11 @@ export default function HomePage() {
           className="mt-4 max-w-2xl text-sm italic leading-relaxed text-slate-500 sm:text-[15px]"
           role="note"
         >
-          <span className="sr-only">Regarding the 90% figure: </span>*{" "}
-          <strong>90%</strong> of funds raised is allocated to your program;{" "}
-          <strong>10%</strong> is retained by Heart &amp; Hustle Fundraising as
-          its service fee. <strong>Card and payment processing fees</strong> are
-          the Company&apos;s responsibility and are paid from that{" "}
-          <strong>10%</strong> share—your program&apos;s <strong>90%</strong> is{" "}
-          <strong>not</strong> reduced by those fees. Illinois registration,
-          compliance, and operations are covered from the Company&apos;s share. We
-          do not sell personal data. Full legal terms are linked at the bottom of
+          <span className="sr-only">Regarding the 90% figure: </span>* We keep{" "}
+          <strong>10%</strong> to run a safe, compliant platform—payment processing,
+          Illinois registration, bonding, and day-to-day operations.{" "}
+          <strong>90%</strong> stays with your program. No hidden fees. We don&apos;t
+          sell donor or participant data. Legal terms are linked at the bottom of
           this page.
         </p>
         <section className="mt-12 max-w-3xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
@@ -96,10 +92,10 @@ export default function HomePage() {
             <li>
               <p className="font-semibold text-hh-dark">More for your program</p>
               <p className="mt-1 text-sm leading-snug text-slate-600">
-                <strong>90%</strong> of funds raised goes to your program,{" "}
-                <strong>10%</strong> to Heart &amp; Hustle as the service fee—with
-                processing costs borne by the Company from its share, not taken
-                from the program 90%.
+                <strong>90%</strong> of donations go to your program; our{" "}
+                <strong>10%</strong> share keeps the platform running—secure
+                checkout, Illinois compliance, and support—without layering hidden
+                fees on your team&apos;s slice.
               </p>
             </li>
             <li>
