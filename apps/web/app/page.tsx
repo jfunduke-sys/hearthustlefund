@@ -74,8 +74,7 @@ export default function HomePage() {
           <strong>10%</strong> to run a safe, compliant platform—payment processing,
           Illinois registration, bonding, and day-to-day operations.{" "}
           <strong>90%</strong> stays with your program. No hidden fees. We don&apos;t
-          sell donor or participant data. Legal terms are linked at the bottom of
-          this page.
+          sell donor or participant data.
         </p>
         <section className="mt-12 max-w-3xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-xl font-bold tracking-tight text-hh-dark sm:text-2xl">
