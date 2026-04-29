@@ -343,7 +343,7 @@ export default function RequestFundraiserPage() {
                         </span>
                         <span className="mt-0.5 block text-slate-600">
                           Schedule someone from our team to help set up and
-                          launch with your athletes on-site.
+                          launch with your participants on-site.
                         </span>
                       </span>
                     </label>
