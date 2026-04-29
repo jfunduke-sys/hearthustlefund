@@ -60,7 +60,7 @@ export function formatKickoffSetupPreference(
     return "In-person kickoff with a Heart & Hustle rep (on-site setup & launch)";
   }
   if (p === "self_run") {
-    return "We'll handle our own kickoff (no HH rep on-site)";
+    return "We'll handle our own launch (staff-led; HH remote support as needed)";
   }
   return "—";
 }

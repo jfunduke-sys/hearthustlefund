@@ -356,11 +356,11 @@ export default function RequestFundraiserPage() {
                       />
                       <span className="text-sm leading-snug text-slate-800">
                         <span className="font-semibold text-hh-dark">
-                          We&apos;ll Handle Our Own Kickoff
+                          We&apos;ll Handle Our Own Launch
                         </span>
                         <span className="mt-0.5 block text-slate-600">
-                          Your staff runs the launch; no Heart &amp; Hustle team
-                          member needed on-site.
+                          Your staff launches and runs the fundraiser. Heart &amp;
+                          Hustle provides remote guidance and support as needed.
                         </span>
                       </span>
                     </label>
