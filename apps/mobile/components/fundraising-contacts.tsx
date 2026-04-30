@@ -533,10 +533,18 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
       ) : null}
       <Text style={styles.instructionsTitle}>Quick start</Text>
       <View style={styles.instructionsList}>
-        <Text style={styles.instructionItem}>• Choose contacts from your phone.</Text>
-        <Text style={styles.instructionItem}>• Select at least 10 people to text first.</Text>
-        <Text style={styles.instructionItem}>• Tap Send to Contacts, then tap Send in Messages for each draft.</Text>
-        <Text style={styles.instructionItem}>• Swipe left on any contact to remove them from this list.</Text>
+        <Text style={styles.instructionItem}>
+          1. Click Choose from contacts and select at least 10 contacts to text first.
+        </Text>
+        <Text style={styles.instructionItem}>
+          2. Click Select All to select all the contacts then click Send to Contacts. You can also select them individually by tapping them.
+        </Text>
+        <Text style={styles.instructionItem}>
+          3. Tap your Send button for each message.
+        </Text>
+        <Text style={styles.instructionItem}>
+          4. Swipe left on any contact below to remove them from this list.
+        </Text>
       </View>
       <View style={[styles.successNudge, tenGoalReached && styles.successNudgeDone]}>
         <Text style={styles.successNudgeTitle}>
