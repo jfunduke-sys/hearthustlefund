@@ -4,6 +4,7 @@ import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { BRAND } from "@/lib/brand";
 import { PLATFORM } from "@heart-and-hustle/shared";
 import {
+  SMS_REMINDER_A2P_MESSAGE_FLOW_TEMPLATE,
   SMS_REMINDER_CONSENT_CHECKBOX_COPY,
   SMS_REMINDER_CONSENT_VERSION,
 } from "@heart-and-hustle/shared";
@@ -15,6 +16,17 @@ export const metadata: Metadata = {
 };
 
 export default function SmsRemindersInfoPage() {
+  const resolvedBase =
+    process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "") ||
+    "YOUR_PRODUCTION_WEBSITE";
+  const a2pMessageFlow =
+    SMS_REMINDER_A2P_MESSAGE_FLOW_TEMPLATE.replace(
+      /BASE_URL/g,
+      resolvedBase.endsWith("/")
+        ? resolvedBase.slice(0, -1)
+        : resolvedBase
+    );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <MarketingSiteHeader />
@@ -31,6 +43,26 @@ export default function SmsRemindersInfoPage() {
           participants follow up with supporters. We do not buy phone lists or
           send unrelated marketing.
         </p>
+
+        <section className="mt-10 rounded-xl border border-amber-200 bg-amber-50/90 p-5 text-slate-900 shadow-sm">
+          <h2 className="text-lg font-semibold text-hh-dark">
+            Carrier registration (A2P) — complete message flow
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-slate-800">
+            Registration systems (e.g. Twilio 10DLC) ask for every opt-in path and
+            disclosures in one narrative. Paste the block below into the{" "}
+            <strong>Message flow</strong> / <strong>Call to action</strong>{" "}
+            field. Replace <strong>YOUR_PRODUCTION_WEBSITE</strong> with your live
+            site root if your deploy does not set{" "}
+            <code className="rounded bg-white px-1 text-xs">
+              NEXT_PUBLIC_APP_URL
+            </code>
+            .
+          </p>
+          <pre className="mt-4 max-h-[28rem] overflow-auto whitespace-pre-wrap rounded-lg border border-amber-200/80 bg-white p-4 text-xs leading-relaxed text-slate-900 sm:text-sm">
+            {a2pMessageFlow}
+          </pre>
+        </section>
 
         <section className="mt-10 space-y-4 text-slate-800">
           <h2 className="text-lg font-semibold text-hh-dark">How you opt in</h2>

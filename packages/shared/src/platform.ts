@@ -52,7 +52,10 @@ function firstNameFromFullName(fullName: string): string {
 export function buildInitialFundraisingSms(p: FundraisingSmsParams) {
   const athleteFirst = firstNameFromFullName(p.athleteFullName);
 
-  return `Hey, it's ${athleteFirst}! I'm participating in a fundraiser for ${p.teamName} at ${p.schoolName} through ${PLATFORM.displayName}. Every donation goes directly to our program — here's my personal link: ${p.donateUrl} Thanks for considering it.`;
+  return `Hey, it's ${athleteFirst}! I'm participating in a fundraiser for ${p.teamName} at ${p.schoolName} through ${PLATFORM.displayName}. Every donation goes directly to our program — here's my personal link:
+${p.donateUrl}
+
+Thanks for considering it.`;
 }
 
 export type ReminderSmsParams = {
