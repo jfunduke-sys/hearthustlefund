@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
 /** Bump when the document body text changes (SuperAdmin + public /terms). */
-export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "6" as const;
+export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "7" as const;
 
 type Props = {
   pfrReg: string;
@@ -280,6 +280,18 @@ export function FundraisingServicesAgreementBody({
           for {BRAND.name}. That policy and this Section are written to be
           consistent. Company retains only data necessary to meet legal and
           financial obligations.
+        </p>
+        <p className="mt-2">
+          Optional fundraiser reminder SMS to participants—consent, frequency,
+          opt-out (STOP), and related disclosures—is described on our publicly
+          posted{" "}
+          <Link
+            href="/sms-reminders"
+            className="font-semibold text-hh-primary underline underline-offset-2"
+          >
+            SMS reminders
+          </Link>{" "}
+          page.
         </p>
       </section>
 

@@ -41,6 +41,10 @@ export default function TermsPage() {
         <Link href="/privacy" className="text-hh-primary underline">
           Privacy policy
         </Link>
+        . Participant SMS disclosures (opt-in, frequency, STOP/HELP):{" "}
+        <Link href="/sms-reminders" className="text-hh-primary underline">
+          SMS reminders
+        </Link>
         .
       </p>
 

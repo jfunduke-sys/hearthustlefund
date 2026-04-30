@@ -73,6 +73,21 @@ export default function PrivacyPage() {
           your entire address book.
         </p>
 
+        <h2 className="text-lg font-semibold text-hh-dark">SMS reminders</h2>
+        <p>
+          We may send <strong>optional</strong> short fundraiser reminder texts
+          only when a user has opted in with the consent shown on our{" "}
+          <Link
+            href="/sms-reminders"
+            className="text-hh-primary underline"
+          >
+            SMS program disclosures
+          </Link>{" "}
+          page. We do not buy phone lists or use SMS for unrelated marketing.
+          That page also explains message frequency and how to opt out (STOP,
+          HELP, and app settings).
+        </p>
+
         <h2 className="text-lg font-semibold text-hh-dark">
           Participant access lifecycle
         </h2>
