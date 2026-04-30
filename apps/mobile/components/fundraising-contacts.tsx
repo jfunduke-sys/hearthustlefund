@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  useWindowDimensions,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Swipeable } from "react-native-gesture-handler";
@@ -26,6 +27,7 @@ import {
   campaignOutreachBlockedMessage,
   getCampaignWindowPhase,
 } from "@heart-and-hustle/shared";
+import { DonationConfetti } from "./donation-confetti";
 
 type ContactRow = {
   id: string;
@@ -134,6 +136,7 @@ export type FundraisingContactsVariant = "athlete" | "coach";
 type Props = { variant?: FundraisingContactsVariant };
 
 export default function FundraisingContactsScreen({ variant = "athlete" }: Props) {
+  const { width } = useWindowDimensions();
   const [rows, setRows] = useState<ContactRow[]>([]);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
@@ -150,6 +153,8 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   /** Clears checkmarks when the user switches to a different athlete / fundraiser. */
   const prevAthleteIdRef = useRef<string | null>(null);
   const currentAthleteIdRef = useRef<string | null>(null);
+  const [showTenGoalConfetti, setShowTenGoalConfetti] = useState(false);
+  const prevSelectedCountRef = useRef(0);
 
   const loadContacts = useCallback(async () => {
     setLoading(true);
@@ -328,6 +333,22 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
   }, []);
 
   const selectedCount = Object.values(selected).filter(Boolean).length;
+  const tenGoalReached = selectedCount >= 10;
+
+  useEffect(() => {
+    const wasBelow = prevSelectedCountRef.current < 10;
+    if (wasBelow && tenGoalReached) {
+      setShowTenGoalConfetti(true);
+      setStatus("Awesome work — you hit 10+ contacts! You’re set up for a strong start.");
+    }
+    prevSelectedCountRef.current = selectedCount;
+  }, [selectedCount, tenGoalReached]);
+
+  useEffect(() => {
+    if (!showTenGoalConfetti) return;
+    const t = setTimeout(() => setShowTenGoalConfetti(false), 3500);
+    return () => clearTimeout(t);
+  }, [showTenGoalConfetti]);
 
   async function saveAndSend() {
     setStatus(null);
@@ -483,6 +504,18 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
 
   return (
     <View style={styles.container}>
+      {showTenGoalConfetti ? (
+        <View style={styles.confettiLayer} pointerEvents="none">
+          <DonationConfetti
+            count={52}
+            origin={{ x: width - 24, y: 10 }}
+            explosionSpeed={460}
+            fallSpeed={3200}
+            fadeOut
+            colors={["#C0392B", "#e74c3c", "#F39C12", "#fcd34d", "#1A1A2E", "#94a3b8"]}
+          />
+        </View>
+      ) : null}
       {variant === "coach" && coachNeedsParticipant ? (
         <Text style={styles.coachBanner}>
           Add yourself as a participant on your campaign from the Dashboard tab.
@@ -498,6 +531,22 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
           )}
         </Text>
       ) : null}
+      <Text style={styles.instructionsTitle}>Quick start</Text>
+      <View style={styles.instructionsList}>
+        <Text style={styles.instructionItem}>• Choose contacts from your phone.</Text>
+        <Text style={styles.instructionItem}>• Select at least 10 people to text first.</Text>
+        <Text style={styles.instructionItem}>• Tap Send to Contacts, then tap Send in Messages for each draft.</Text>
+        <Text style={styles.instructionItem}>• Swipe left on any contact to remove them from this list.</Text>
+      </View>
+      <View style={[styles.successNudge, tenGoalReached && styles.successNudgeDone]}>
+        <Text style={styles.successNudgeTitle}>
+          Success Reminder
+          {tenGoalReached ? ` (${selectedCount}/10+)` : ` (${selectedCount}/10)`}
+        </Text>
+        <Text style={styles.successNudgeText}>
+          Participants who send their fundraiser to at least 10 contacts usually raise the most money! Take 2 minutes today to select at least 10 people and send your text messages.
+        </Text>
+      </View>
       <Pressable
         style={[styles.addMoreBtn, pickingContact && styles.addMoreBtnDisabled]}
         onPress={() => void openContactPicker()}
@@ -509,11 +558,6 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
           <Text style={styles.addMoreBtnText}>Choose from contacts</Text>
         )}
       </Pressable>
-      <Text style={styles.listIntro}>
-        Tap <Text style={styles.listIntroStrong}>Choose from contacts</Text> to pick
-        people from your Contacts app, or select rows below (from numbers shared with
-        this app). No one is added to the fundraiser until you check them and send.
-      </Text>
       <View style={styles.toolbar}>
         <Pressable onPress={selectAll}>
           <Text style={styles.link}>Select all</Text>
@@ -606,6 +650,7 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 12, paddingBottom: 12 },
+  confettiLayer: { ...StyleSheet.absoluteFillObject, zIndex: 30, elevation: 8 },
   center: { flex: 1, justifyContent: "center" },
   windowBanner: {
     backgroundColor: "#fef3c7",
@@ -641,13 +686,52 @@ const styles = StyleSheet.create({
   addMoreBtnText: { color: "#C0392B", fontWeight: "700", fontSize: 15 },
   toolbar: { flexDirection: "row", justifyContent: "space-between" },
   link: { color: "#C0392B", fontWeight: "600" },
-  listIntro: {
+  instructionsTitle: {
     fontSize: 13,
-    color: "#475569",
-    lineHeight: 18,
-    marginBottom: 8,
+    fontWeight: "800",
+    color: "#1A1A2E",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+    marginTop: 4,
+    marginBottom: 4,
   },
-  listIntroStrong: { fontWeight: "800", color: "#1A1A2E" },
+  instructionsList: {
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    padding: 10,
+    marginBottom: 10,
+  },
+  instructionItem: {
+    color: "#334155",
+    fontSize: 12,
+    lineHeight: 17,
+    marginBottom: 2,
+  },
+  successNudge: {
+    borderWidth: 1,
+    borderColor: "#fcd34d",
+    borderRadius: 10,
+    backgroundColor: "#fffbeb",
+    padding: 10,
+    marginBottom: 10,
+  },
+  successNudgeDone: {
+    borderColor: "#86efac",
+    backgroundColor: "#ecfdf5",
+  },
+  successNudgeTitle: {
+    color: "#92400e",
+    fontWeight: "800",
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  successNudgeText: {
+    color: "#334155",
+    fontSize: 12,
+    lineHeight: 17,
+  },
   count: { marginVertical: 6, color: "#64748b" },
   countHint: {
     fontSize: 12,
