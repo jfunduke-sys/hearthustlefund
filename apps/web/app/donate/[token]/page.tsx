@@ -1,11 +1,57 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isSiteIndexable } from "@/lib/site-config";
 import DonateForm from "./donate-form";
 import type { Athlete, Fundraiser } from "@heart-and-hustle/shared";
 import {
   getCampaignDayBanner,
   getCampaignWindowPhase,
 } from "@heart-and-hustle/shared";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { token: string };
+}): Promise<Metadata> {
+  const admin = createAdminClient();
+  const { data: athlete } = await admin
+    .from("athletes")
+    .select("full_name, fundraiser_id")
+    .eq("unique_link_token", params.token)
+    .maybeSingle();
+
+  if (!athlete) {
+    return { title: "Donate" };
+  }
+
+  const { data: fundraiser } = await admin
+    .from("fundraisers")
+    .select("team_name, school_name, status")
+    .eq("id", athlete.fundraiser_id)
+    .single();
+
+  if (!fundraiser || fundraiser.status !== "active") {
+    return { title: "Donate" };
+  }
+
+  const name = (athlete as { full_name: string }).full_name;
+  const team = String(fundraiser.team_name);
+  const school = String(fundraiser.school_name);
+  const title = `Donate to ${name}`;
+  const description = `Support ${name} — ${team} at ${school}. Secure donation through Heart & Hustle Fundraising.`;
+  const path = `/donate/${encodeURIComponent(params.token)}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    robots: isSiteIndexable()
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
+    openGraph: { title, description, type: "website" },
+  };
+}
 
 export default async function DonatePage({
   params,

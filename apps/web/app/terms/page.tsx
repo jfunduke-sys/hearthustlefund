@@ -10,9 +10,10 @@ const pfrReg =
   process.env.NEXT_PUBLIC_IL_PFR_REGISTRATION_NUMBER?.trim() || "[YOUR NUMBER]";
 
 export const metadata: Metadata = {
-  title: `Terms of service — ${BRAND.name}`,
+  title: "Terms of service",
   description:
     "Heart and Hustle Fundraising LLC — Fundraising Services Agreement (terms of service).",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

@@ -1,7 +1,26 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { BRAND } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
+
+const homeDescription =
+  "Built for youth organizations and school teams — simple donations, 90% to your program, zero data selling. Heart & Hustle Fundraising.";
+
+export const metadata: Metadata = {
+  title: { absolute: BRAND.name },
+  description: homeDescription,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: BRAND.name,
+    description: homeDescription,
+    url: "/",
+  },
+  twitter: {
+    title: BRAND.name,
+    description: homeDescription,
+  },
+};
 
 export default function HomePage() {
   return (

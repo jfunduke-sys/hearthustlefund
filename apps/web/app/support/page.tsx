@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteHeader } from "@/components/marketing-site-header";
-import { BRAND } from "@/lib/brand";
 
 const SUPPORT_EMAIL =
   process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@hearthustlefund.com";
 
 export const metadata: Metadata = {
-  title: `Support — ${BRAND.name}`,
+  title: "Support",
   description:
     "Contact Heart & Hustle Fundraising for help with the app, campaigns, and accounts. Privacy, terms, and SMS program information.",
+  alternates: { canonical: "/support" },
 };
 
 export default function SupportPage() {

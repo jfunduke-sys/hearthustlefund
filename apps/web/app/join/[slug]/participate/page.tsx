@@ -1,9 +1,26 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BRAND } from "@/lib/brand";
 import { CAMPAIGN_SETUP_CODE, PLATFORM } from "@heart-and-hustle/shared";
 import ParticipateForm from "./participate-form";
 import { loadFundraiserJoinPreview } from "@/lib/fundraiser-join-lookup";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const fr = await loadFundraiserJoinPreview(params.slug);
+  if (!fr) {
+    return { title: "Join team (testing)", robots: { index: false, follow: false } };
+  }
+  return {
+    title: `Web signup (testing) — ${fr.team_name}`,
+    description: `Internal testing only — ${fr.school_name} ${fr.team_name}. Athletes use the ${BRAND.name} app with the team code.`,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function JoinParticipatePage({
   params,

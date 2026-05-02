@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,6 +9,30 @@ import type { Fundraiser } from "@heart-and-hustle/shared";
 import { loadActiveFundraiserByJoinSegment } from "@/lib/fundraiser-join-lookup";
 import { ensureFundraiserJoinCode } from "@/lib/join-code";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isSiteIndexable } from "@/lib/site-config";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const fr = await loadActiveFundraiserByJoinSegment(params.slug);
+  if (!fr) {
+    return { title: "Team join" };
+  }
+  const title = `${fr.school_name} · ${fr.team_name}`;
+  const description = `Team join code and instructions for ${fr.team_name} (${fr.school_name}) on ${BRAND.name}.`;
+  const path = `/join/${encodeURIComponent(params.slug)}`;
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    robots: isSiteIndexable()
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
+    openGraph: { title, description },
+  };
+}
 
 export default async function JoinTeamLandingPage({
   params,

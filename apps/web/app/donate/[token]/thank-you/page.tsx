@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -10,6 +11,20 @@ type Props = {
   params: { token: string };
   searchParams: { session_id?: string };
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { token: string };
+}): Promise<Metadata> {
+  return {
+    title: "Thank you",
+    robots: { index: false, follow: false },
+    alternates: {
+      canonical: `/donate/${encodeURIComponent(params.token)}/thank-you`,
+    },
+  };
+}
 
 export default async function ThankYouPage({ params, searchParams }: Props) {
   const sessionId = searchParams.session_id;

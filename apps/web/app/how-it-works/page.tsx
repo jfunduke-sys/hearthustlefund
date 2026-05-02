@@ -5,9 +5,10 @@ import { BRAND } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: `How it works — ${BRAND.name}`,
+  title: "How it works",
   description:
     "From school request through campaign launch, donations, and program payout — the Heart & Hustle Fundraising flow.",
+  alternates: { canonical: "/how-it-works" },
 };
 
 const STEPS: {

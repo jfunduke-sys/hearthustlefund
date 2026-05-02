@@ -9,9 +9,10 @@ import {
 } from "@heart-and-hustle/shared";
 
 export const metadata: Metadata = {
-  title: `SMS reminders — ${BRAND.name}`,
+  title: "SMS reminders",
   description:
     "How Heart & Hustle Fundraising obtains consent for optional campaign reminder texts, opt-out, and policies.",
+  alternates: { canonical: "/sms-reminders" },
 };
 
 export default function SmsRemindersInfoPage() {

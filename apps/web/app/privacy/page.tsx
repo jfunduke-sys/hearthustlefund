@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+
+export const metadata: Metadata = {
+  title: "Privacy policy",
+  description:
+    "What Heart & Hustle Fundraising collects and how we use personal data — consistent with our Terms of service (Fundraising Services Agreement).",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPage() {
   return (

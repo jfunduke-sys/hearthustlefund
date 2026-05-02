@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import type { Viewport } from "next";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-};
-
-export default function CoachSegmentLayout({
+export default function ForgotPasswordLayout({
   children,
 }: {
   children: ReactNode;
