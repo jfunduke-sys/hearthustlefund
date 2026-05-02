@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
 /** Bump when the document body text changes (SuperAdmin + public /terms). */
-export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "8" as const;
+export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "9" as const;
 
 type Props = {
   pfrReg: string;
@@ -150,7 +150,7 @@ export function FundraisingServicesAgreementBody({
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          5. ORGANIZATION RESPONSIBILITIES
+          5. ORGANIZATION RESPONSIBILITIES &amp; COMPLIANCE
         </h3>
         <p className="mt-2">Organization agrees to:</p>
         <ul className="mt-1 list-outside list-disc pl-5">
@@ -161,15 +161,34 @@ export function FundraisingServicesAgreementBody({
             requirements
           </li>
           <li>Obtain any required approvals from schools or governing bodies</li>
+          <li>
+            Comply with all applicable federal, state, and local laws and
+            regulations, including state charitable solicitation and fundraising
+            laws where they apply to Organization&apos;s programs
+          </li>
+          <li>
+            Comply with school district and institutional policies that govern
+            fundraising, technology use, and student activities
+          </li>
+          <li>
+            Comply with all laws relating to minors participating in fundraising,
+            including when parental or guardian consent is required for
+            collection or use of personal information or participation in
+            communications
+          </li>
         </ul>
         <p className="mt-2">
           Organization assumes full responsibility for all participant actions.
+          Organization is solely responsible for the lawful collection, use, and
+          sharing of participant and donor information in connection with its
+          programs, except as otherwise expressly handled by Company as described
+          in this Agreement and the Privacy policy.
         </p>
       </section>
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          6. PARTICIPANT COMMUNICATIONS
+          6. PARTICIPANT COMMUNICATIONS &amp; MESSAGING COMPLIANCE
         </h3>
         <p className="mt-2">Company may provide preset messaging templates.</p>
         <p className="mt-2">Organization acknowledges that:</p>
@@ -182,13 +201,33 @@ export function FundraisingServicesAgreementBody({
         </ul>
         <p className="mt-2">
           Organization is solely responsible for all communications sent by
-          participants.
+          participants using the platform, including obtaining any legally
+          required consent before sending SMS or other messages to contacts,
+          and for compliance with the Telephone Consumer Protection Act (TCPA),
+          state telemarketing and privacy laws, and other applicable
+          communication laws. Company provides tools and templates only;
+          Organization and participants remain solely responsible for how those
+          tools are used.
+        </p>
+        <p className="mt-2">
+          Separately, the Service may send <strong>optional</strong>, consent-based
+          automated fundraiser reminder SMS to users who opt in as described in
+          the Service&apos;s SMS disclosures (including the publicly posted{" "}
+          <Link
+            href="/sms-reminders"
+            className="font-semibold text-hh-primary underline underline-offset-2"
+          >
+            SMS reminders
+          </Link>{" "}
+          page). Those messages are operational reminders tied to an active
+          campaign—not substitute for Organization&apos;s own compliance
+          obligations for participant-originated outreach.
         </p>
       </section>
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          7. PAYMENTS &amp; USE OF FUNDS
+          7. PAYMENTS, CHARGEBACKS, FRAUD &amp; USE OF FUNDS
         </h3>
         <p className="mt-2">
           Following the close of a campaign (or other agreed payout trigger),
@@ -201,6 +240,19 @@ export function FundraisingServicesAgreementBody({
           Company&apos;s control may affect when funds are received by
           Organization, but Company will use commercially reasonable efforts to
           meet the foregoing initiation standard.
+        </p>
+        <p className="mt-2">
+          Organization is responsible for disputes, claims, or chargebacks
+          arising from or related to its campaign, participants, or donors to the
+          extent not solely caused by Company&apos;s gross negligence or willful
+          misconduct. Company may withhold, offset, or recover amounts from
+          Organization&apos;s share (or pursue reimbursement) for chargebacks,
+          refunds, reversals, fees, or suspected fraudulent or unauthorized
+          transactions. Donations that are disputed, charged back, flagged as
+          fraudulent, or under review must fully clear or resolve before the
+          related amounts are treated as available for payout. Company may delay
+          or withhold payouts pending investigation of fraud, compliance concerns,
+          or payment-processor holds.
         </p>
         <p className="mt-2">
           Organization is solely responsible for:
@@ -258,17 +310,8 @@ export function FundraisingServicesAgreementBody({
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
           9. DATA USE &amp; PRIVACY
         </h3>
-        <p className="mt-2">Company does not sell personal data.</p>
-        <p className="mt-2">Data is used only for:</p>
-        <ul className="mt-1 list-outside list-disc pl-5">
-          <li>Platform functionality</li>
-          <li>Payment processing</li>
-          <li>Legal and tax compliance</li>
-        </ul>
         <p className="mt-2">
-          Company shares personal data with service providers (for example, payment
-          processors and hosting or authentication services) only as needed to
-          operate the platform and as described in the publicly posted{" "}
+          The publicly posted{" "}
           {privacyPolicyHref ? (
             <Link
               href={privacyPolicyHref}
@@ -279,9 +322,30 @@ export function FundraisingServicesAgreementBody({
           ) : (
             <strong>Privacy policy</strong>
           )}{" "}
-          for {BRAND.name}. That policy and this Section are written to be
-          consistent. Company retains only data necessary to meet legal and
-          financial obligations.
+          for {BRAND.name} is <strong>incorporated by reference</strong> into this
+          Agreement. If there is a conflict between this Section and the Privacy
+          policy as to data practices, the Privacy policy controls as to privacy
+          matters; this Agreement controls as to commercial and program terms.
+        </p>
+        <p className="mt-2">Company does not sell personal data.</p>
+        <p className="mt-2">Data is used only for:</p>
+        <ul className="mt-1 list-outside list-disc pl-5">
+          <li>Platform functionality</li>
+          <li>Payment processing</li>
+          <li>Legal and tax compliance</li>
+        </ul>
+        <p className="mt-2">
+          Company shares personal data with service providers (including, without
+          limitation, payment processors such as Stripe, hosting, authentication,
+          and messaging vendors) only as needed to operate the platform and as
+          described in the Privacy policy. Company retains only data necessary to
+          meet legal and financial obligations.
+        </p>
+        <p className="mt-2">
+          The platform may involve minors. Organization represents that it will
+          comply with applicable laws regarding participation of minors in
+          fundraising and the collection of personal information, including when
+          parental or guardian consent is required.
         </p>
         <p className="mt-2">
           Optional fundraiser reminder SMS to participants—consent, frequency,
@@ -302,18 +366,35 @@ export function FundraisingServicesAgreementBody({
           10. LIMITATION OF LIABILITY
         </h3>
         <p className="mt-2">
-          To the fullest extent permitted by law, Company shall not be liable
-          for:
+          To the fullest extent permitted by law, Company shall not be liable for
+          any indirect, incidental, special, consequential, or punitive damages,
+          or for lost profits, lost revenue, lost data, or business interruption,
+          whether based in contract, tort, strict liability, or otherwise, even if
+          advised of the possibility of such damages.
+        </p>
+        <p className="mt-2">
+          Except for claims arising from Company&apos;s gross negligence or
+          willful misconduct, Company&apos;s aggregate liability arising out of
+          or relating to this Agreement or the Service shall not exceed the
+          aggregate service fees actually retained by Company from donations
+          processed for Organization&apos;s campaigns during the twelve (12)
+          months immediately preceding the event giving rise to the claim. If no
+          such fees were retained in that period, this cap shall be zero except
+          where a greater limitation is prohibited by applicable law.
+        </p>
+        <p className="mt-2">
+          Company shall not be liable for:
         </p>
         <ul className="mt-1 list-outside list-disc pl-5">
           <li>Participant conduct or misuse of the platform</li>
           <li>Altered or unauthorized communications</li>
           <li>Fundraising performance or outcomes</li>
-          <li>Actions of Organization, Sponsor, or participants</li>
+          <li>Actions of Organization, Organizer, or participants</li>
         </ul>
         <p className="mt-2">
-          Company&apos;s liability is strictly limited to issues directly related
-          to the technical functionality of the platform.
+          Company&apos;s liability is otherwise strictly limited to issues
+          directly related to the technical functionality of the platform, subject
+          to the cap above.
         </p>
       </section>
 
@@ -340,8 +421,8 @@ export function FundraisingServicesAgreementBody({
         </h3>
         <p className="mt-2">
           This Agreement is effective upon acceptance and continues through the
-          fundraiser period. Either party may terminate at any time. Company may
-          immediately terminate for:
+          fundraiser period. <strong>Either party may terminate this Agreement at
+          any time.</strong> Company may immediately terminate for:
         </p>
         <ul className="mt-1 list-outside list-disc pl-5">
           <li>Ineligibility</li>
@@ -349,14 +430,54 @@ export function FundraisingServicesAgreementBody({
           <li>Policy violations</li>
         </ul>
         <p className="mt-2">
+          If a campaign ends early—whether because Organization or Company
+          terminates or for any other reason—the 90/10 split described in Section 3
+          continues to apply to funds that have cleared and are not subject to
+          chargeback, hold, or offset under Section 7. Company may delay or adjust
+          payout as permitted in Section 7 for fraud, chargebacks, investigations,
+          or compliance issues.
+        </p>
+        <p className="mt-2">
           Funds raised prior to termination will be distributed in accordance
-          with this Agreement.
+          with this Agreement, subject to the foregoing.
         </p>
       </section>
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          13. INDEPENDENT RELATIONSHIP
+          13. ACCOUNT SECURITY &amp; ACCESS
+        </h3>
+        <p className="mt-2">
+          Organization and its Organizer(s) are responsible for maintaining the
+          confidentiality of login credentials and for all activities that occur
+          under Organization&apos;s accounts. Company is not liable for loss or
+          damage arising from unauthorized access due to compromised credentials,
+          sharing of passwords, or failure to secure devices. Organization must
+          notify Company promptly of any suspected unauthorized use of an account
+          or security breach.
+        </p>
+      </section>
+
+      <section>
+        <h3 className="text-base font-semibold text-hh-dark print:font-bold">
+          14. PLATFORM AVAILABILITY; DISCLAIMER OF WARRANTIES
+        </h3>
+        <p className="mt-2">
+          The Service is provided on an <strong>&quot;as is&quot;</strong> and{" "}
+          <strong>&quot;as available&quot;</strong> basis. Company does not
+          guarantee uninterrupted, error-free, or secure operation; the Service
+          may experience downtime, bugs, delays, or data loss. To the fullest
+          extent permitted by law, Company disclaims all warranties, whether express,
+          implied, or statutory, including implied warranties of merchantability,
+          fitness for a particular purpose, title, and non-infringement. No oral or
+          written advice from Company creates any warranty not expressly stated in
+          this Agreement.
+        </p>
+      </section>
+
+      <section>
+        <h3 className="text-base font-semibold text-hh-dark print:font-bold">
+          15. INDEPENDENT RELATIONSHIP
         </h3>
         <p className="mt-2">
           Company is an independent contractor and is not an employee, agent, or
@@ -366,16 +487,54 @@ export function FundraisingServicesAgreementBody({
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          14. GOVERNING LAW
+          16. GOVERNING LAW
         </h3>
         <p className="mt-2">
-          This Agreement shall be governed by the laws of the State of Illinois.
+          This Agreement shall be governed by the laws of the State of Illinois,
+          without regard to conflict-of-law principles.
         </p>
       </section>
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          15. FORCE MAJEURE
+          17. DISPUTE RESOLUTION
+        </h3>
+        <p className="mt-2">
+          <strong>Binding arbitration.</strong> Except for claims that may be
+          brought in small claims court where jurisdiction and amount requirements
+          are met, any dispute, claim, or controversy arising out of or relating to
+          this Agreement or the Service shall be resolved by binding arbitration
+          administered by the American Arbitration Association (&quot;AAA&quot;)
+          under its Commercial Arbitration Rules. The Federal Arbitration Act
+          applies. The seat of arbitration shall be Kankakee County, Illinois.
+        </p>
+        <p className="mt-2">
+          <strong>Class action waiver.</strong> Organization and Company agree
+          that each may bring claims against the other only in an individual
+          capacity and not as a plaintiff or class member in any purported class,
+          collective, or representative proceeding.
+        </p>
+        <p className="mt-2">
+          <strong>Jury trial waiver.</strong> To the fullest extent permitted by
+          law, the parties waive any right to a jury trial in any action or
+          proceeding arising out of or relating to this Agreement.
+        </p>
+        <p className="mt-2">
+          <strong>Fees.</strong> Each party shall bear its own attorneys&apos; fees
+          and costs in connection with any dispute, unless the arbitrator awards
+          fees to the prevailing party as permitted under applicable rules and law.
+        </p>
+        <p className="mt-2">
+          Judgment on the arbitration award may be entered in any court of
+          competent jurisdiction. Venue for any court proceeding permitted under
+          this Section (including to confirm an award) shall be Kankakee County,
+          Illinois, unless otherwise required by law.
+        </p>
+      </section>
+
+      <section>
+        <h3 className="text-base font-semibold text-hh-dark print:font-bold">
+          18. FORCE MAJEURE
         </h3>
         <p className="mt-2">
           Neither party is liable for delay or failure to perform (except for
@@ -394,7 +553,7 @@ export function FundraisingServicesAgreementBody({
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          16. ELECTRONIC COMMUNICATIONS &amp; CONSENT
+          19. ELECTRONIC COMMUNICATIONS &amp; CONSENT
         </h3>
         <p className="mt-2">
           Organization consents to receive from Company, at the contact points
@@ -405,7 +564,9 @@ export function FundraisingServicesAgreementBody({
           by or through our payment processor (e.g. Stripe); (c) campaign,
           program, and platform updates; and (d) operational messages related
           to active or recent fundraisers, consistent with our publicly posted
-          terms and privacy practices. Organization is responsible for keeping
+          terms and privacy practices. Where users have opted in as disclosed on
+          the Service, Company may also send consent-based fundraiser reminder SMS
+          through its messaging vendors. Organization is responsible for keeping
           contact information accurate. Organization agrees that (i) this
           Agreement and related documents may be accepted and signed
           electronically where offered, and (ii) electronic records and
@@ -416,13 +577,13 @@ export function FundraisingServicesAgreementBody({
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          17. INTELLECTUAL PROPERTY
+          20. INTELLECTUAL PROPERTY
         </h3>
         <p className="mt-2">
           Company retains all right, title, and interest in and to the
           platform, software, user interface, documentation, trade names, logos,
           and other materials made available to Organization (the &quot;Company
-          IP&quot;), subject only to the limited right for Organization, Sponsor,
+          IP&quot;), subject only to the limited right for Organization, Organizer,
           and participants to use the Service for approved program fundraising
           as permitted by this Agreement. Organization shall not, and shall not
           permit others to, reverse engineer, decompile, disassemble, or
@@ -436,7 +597,7 @@ export function FundraisingServicesAgreementBody({
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          18. FEEDBACK
+          21. FEEDBACK
         </h3>
         <p className="mt-2">
           If Organization or its representatives provide Company with any
@@ -453,7 +614,7 @@ export function FundraisingServicesAgreementBody({
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          19. SEVERABILITY
+          22. SEVERABILITY
         </h3>
         <p className="mt-2">
           If any provision of this Agreement is found unenforceable, the
@@ -463,7 +624,7 @@ export function FundraisingServicesAgreementBody({
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          20. ACCEPTANCE
+          23. ACCEPTANCE
         </h3>
         <p className="mt-2">
           To complete enrollment, the Organization will provide the information

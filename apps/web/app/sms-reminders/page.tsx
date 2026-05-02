@@ -62,7 +62,8 @@ export default function SmsRemindersInfoPage() {
             >
               Terms of service
             </Link>{" "}
-            (including Section 9 and electronic communications) and{" "}
+            (including Sections 6, 9, and 19 — messaging compliance, data &amp;
+            privacy, and electronic communications) and{" "}
             <Link
               href="/privacy"
               className="font-semibold text-hh-primary underline underline-offset-2"
