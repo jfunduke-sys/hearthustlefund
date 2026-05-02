@@ -52,7 +52,7 @@ export function MarketingSiteHeader({
       <Button
         variant="outline"
         size="default"
-        className="w-full text-sm sm:w-auto sm:text-base lg:px-3 lg:text-sm xl:px-4 xl:text-base"
+        className="w-full border-2 border-blue-600 bg-white text-sm text-blue-700 hover:bg-blue-50 sm:w-auto sm:text-base lg:px-3 lg:text-sm xl:px-4 xl:text-base"
         asChild
       >
         <Link href="/coach/login" onClick={close}>
