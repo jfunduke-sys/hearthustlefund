@@ -92,12 +92,12 @@ export async function createFundraiserAction(input: {
   const assigned = codeRow.assigned_to_email?.trim().toLowerCase();
   if (!assigned) {
     throw new Error(
-      "This code is not assigned to a coach email. Contact Heart & Hustle support."
+      "This code is not assigned to an Organizer email. Contact Heart & Hustle support."
     );
   }
   if (assigned !== email) {
     throw new Error(
-      "This code is assigned to a different coach email. Sign in with the email that received the code."
+      "This code is assigned to a different Organizer email. Sign in with the email that received the code."
     );
   }
 
@@ -297,7 +297,7 @@ export async function ensureCoachParticipantAthlete(fundraiserId: string) {
     (fromSchoolRequest?.trim() || null) ||
     fromMeta ||
     coachDisplayNameFromEmail(coachEmail ?? undefined) ||
-    `Coach · ${fr.team_name}`
+    `Organizer · ${fr.team_name}`
   ).trim();
 
   const { data: existing, error: exErr } = await admin

@@ -18,7 +18,8 @@ const STEPS: {
 }[] = [
   {
     title: "Request a fundraiser",
-    summary: "The coach or team lead submits one intake form for the school program.",
+    summary:
+      "The Organizer (coach, sponsor, or lead fundraising contact) submits one intake form for the school program.",
     detail:
       "Usually the head coach or fundraising contact completes the form with school and district details. Their email is the one Heart & Hustle ties to the HH campaign setup code. School administration typically signs required Illinois paperwork when Heart & Hustle sends it—not necessarily the person who submitted this form.",
   },
@@ -30,25 +31,29 @@ const STEPS: {
   },
   {
     title: "Approval & campaign setup code",
-    summary: "Approved programs receive a one-time HH campaign setup code tied to the lead coach’s email.",
+    summary:
+      "Approved programs receive a one-time HH campaign setup code tied to the Organizer’s email.",
     detail:
-      "Heart & Hustle emails the code to the coach (or your team’s contact). That code is only for creating the campaign in the coach portal—not for athletes joining as participants.",
+      "Heart & Hustle emails the code to the Organizer (or your team’s designated contact). That code is only for creating the campaign on the website—not for athletes joining as participants.",
   },
   {
-    title: "Coach activates & builds the campaign",
-    summary: "The coach opens Coach login, enters their email and code, creates a password, then completes fundraiser details.",
+    title: "Organizer activates & builds the campaign",
+    summary:
+      "The Organizer opens Organizer login, enters their email and code, creates a password, then completes fundraiser details.",
     detail:
-      "On the website they use Coach login → Start with my code: same email the code was assigned to, the HH code, then a password they’ll use on return visits. After that they enter school and team info, goals, dates, and optional logos. When the campaign is active, the platform assigns a 7-character team join code for athletes (plus an optional legacy web link for bookmarks).",
+      "On the website they use Organizer login → Start with my code: same email the code was assigned to, the HH code, then a password they’ll use on return visits. After that they enter school and team info, goals, dates, and optional logos. When the campaign is active, the platform assigns a 7-character team join code for athletes (plus an optional legacy web link for bookmarks).",
   },
   {
     title: "Participants join & share",
-    summary: "Athletes join in the mobile app with the 7-character team code from their coach.",
+    summary:
+      "Athletes join in the mobile app with the 7-character team code from their Organizer.",
     detail:
       "Each participant gets a personal donation link. Contacts and reminder texting use the same participant model whether someone uses the mobile app or the web—one record per person per campaign.",
   },
   {
     title: "Donations & tracking",
-    summary: "Supporters donate through secure checkout; progress is visible to coaches and participants.",
+    summary:
+      "Supporters donate through secure checkout; progress is visible to Organizers and participants.",
     detail:
       "Donations are processed through Stripe. The campaign dashboard shows raised amounts and activity so the team can see momentum through the end date.",
   },
@@ -56,7 +61,7 @@ const STEPS: {
     title: "Campaign closes",
     summary: "When the scheduled end date passes, fundraising for that campaign is complete.",
     detail:
-      "Final totals are available in the coach dashboard. Under the Terms of service (Fundraising Services Agreement), 90% of funds raised is allocated to the organization and 10% is retained by Heart & Hustle as its service fee; card processing is the Company’s responsibility from its 10% share and does not reduce the program’s 90%.",
+      "Final totals are available in the Organizer dashboard. Under the Terms of service (Fundraising Services Agreement), 90% of funds raised is allocated to the organization and 10% is retained by Heart & Hustle as its service fee; card processing is the Company’s responsibility from its 10% share and does not reduce the program’s 90%.",
   },
   {
     title: "Payout to your program",
@@ -107,8 +112,8 @@ export default function HowItWorksPage() {
         <div className="mt-14 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="font-semibold text-hh-dark">Ready to begin?</h2>
           <p className="mt-2 text-sm text-slate-600">
-            Schools start with a request. Approved coaches use{" "}
-            <strong>Coach login</strong> with their emailed code the first time,
+            Schools start with a request. Approved Organizers use{" "}
+            <strong>Organizer login</strong> with their emailed code the first time,
             then email and password after that.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -116,7 +121,7 @@ export default function HowItWorksPage() {
               <Link href="/request-fundraiser">Request a fundraiser</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/coach/login">Coach login</Link>
+              <Link href="/coach/login">Organizer login</Link>
             </Button>
           </div>
         </div>

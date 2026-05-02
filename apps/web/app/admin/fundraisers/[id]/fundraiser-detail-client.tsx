@@ -57,12 +57,12 @@ export function FundraiserDetailClient({
         </Button>
         {coachEmail ? (
           <Button variant="secondary" asChild>
-            <a href={`mailto:${coachEmail}`}>Email coach</a>
+            <a href={`mailto:${coachEmail}`}>Email Organizer</a>
           </Button>
         ) : null}
         <Button variant="outline" asChild>
           <Link href="/coach/login" target="_blank" rel="noreferrer">
-            Coach login (opens new tab)
+            Organizer login (opens new tab)
           </Link>
         </Button>
         <Button variant="outline" asChild>
@@ -87,8 +87,8 @@ export function FundraiserDetailClient({
           ) : null}
         </p>
         <p className="mt-2 text-sm text-slate-600">
-          Coaches manage the live campaign in{" "}
-          <strong>Coach login</strong> using{" "}
+          Organizers manage the live campaign in{" "}
+          <strong>Organizer login</strong> using{" "}
           {coachEmail ?? "their registered email"}
           . You cannot open their session from here; use this page to review
           data and internal notes.

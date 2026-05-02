@@ -124,7 +124,7 @@ export default async function JoinTeamLandingPage({
           </div>
 
           <p className="mt-4 text-center text-xs text-slate-600">
-            <strong>Coaches:</strong> In the app, use <strong>Sign in</strong> with
+            <strong>Organizers:</strong> In the app, use <strong>Sign in</strong> with
             your website email and password—<strong>not</strong> this team code
             (this code is only for athletes).
           </p>

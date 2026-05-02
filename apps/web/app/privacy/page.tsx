@@ -34,6 +34,16 @@ export default function PrivacyPage() {
         <strong>consistent</strong> with that agreement.
       </p>
 
+      <p className="mt-6 rounded-lg border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm leading-relaxed text-slate-800">
+        <strong>Organizer</strong> refers to the coach, program sponsor, or lead
+        fundraising contact whom the school or organization authorizes to request and
+        manage a campaign—the role described in our{" "}
+        <Link href="/terms" className="text-hh-primary underline">
+          Terms of service
+        </Link>{" "}
+        (Fundraising Services Agreement).
+      </p>
+
       <section className="mt-8 space-y-4 text-sm leading-relaxed">
         <h2 className="text-lg font-semibold text-hh-dark">What we collect</h2>
         <p>
@@ -104,14 +114,15 @@ export default function PrivacyPage() {
           remain available during an active campaign and any closeout period.
           When SuperAdmin finalizes closeout for a fundraiser (completed or
           cancelled), participant campaign access is removed for that fundraiser.
-          Coaches maintain persistent portal accounts and can recover access via
+          Organizers maintain persistent portal accounts and can recover access via
           secure password-reset flow.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Donor anonymity</h2>
         <p>
           Donors may give anonymously where the product supports it; anonymous
-          donations may omit display names in athlete and coach views while
+          donations may omit display names in views shown to athletes and to the
+          program Organizer while
           still recording the financial transaction.
         </p>
 

@@ -56,14 +56,14 @@ export default function CoachRegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <Card className="w-full max-w-md border-hh-dark/10">
         <CardHeader>
-          <CardTitle className="text-hh-dark">Coach registration</CardTitle>
+          <CardTitle className="text-hh-dark">Organizer registration</CardTitle>
           <CardDescription>{BRAND.name}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 rounded-lg border border-hh-primary/20 bg-hh-primary/5 px-3 py-2 text-sm text-slate-700">
             <strong className="text-hh-dark">Have a fundraiser code?</strong> Use{" "}
             <Link href="/coach/login" className="font-medium text-hh-primary underline">
-              Coach login
+              Organizer login
             </Link>{" "}
             → <strong>Start with my code</strong> so you can enter your email,
             code, and password in one flow—then build your campaign.
@@ -104,7 +104,7 @@ export default function CoachRegisterPage() {
               </p>
             ) : null}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating…" : "Create coach account"}
+              {loading ? "Creating…" : "Create Organizer account"}
             </Button>
             <p className="text-center text-sm text-slate-600">
               Already registered?{" "}

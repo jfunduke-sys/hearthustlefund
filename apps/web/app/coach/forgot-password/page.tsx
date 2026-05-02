@@ -46,16 +46,16 @@ export default function CoachForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <Card className="w-full max-w-md border-hh-dark/10">
         <CardHeader>
-          <CardTitle className="text-hh-dark">Coach password recovery</CardTitle>
+          <CardTitle className="text-hh-dark">Organizer password recovery</CardTitle>
           <p className="text-sm text-slate-600">{BRAND.name}</p>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-slate-600">
-            Enter your coach account email and we&apos;ll send a secure reset link.
+            Enter your Organizer account email and we&apos;ll send a secure reset link.
           </p>
           <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="email">Coach email</Label>
+              <Label htmlFor="email">Organizer email</Label>
               <Input
                 id="email"
                 type="email"
@@ -81,7 +81,7 @@ export default function CoachForgotPasswordPage() {
           </form>
           <p className="text-center text-sm text-slate-600">
             <Link href="/coach/login" className="text-hh-primary hover:underline">
-              Back to coach login
+              Back to Organizer login
             </Link>
           </p>
         </CardContent>

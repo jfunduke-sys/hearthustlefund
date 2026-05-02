@@ -56,7 +56,7 @@ export function MarketingSiteHeader({
         asChild
       >
         <Link href="/coach/login" onClick={close}>
-          Coach login
+          Organizer login
         </Link>
       </Button>
       <Button

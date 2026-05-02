@@ -45,7 +45,7 @@ export default async function JoinParticipatePage({
         </Link>
         <p className="mt-4 rounded-xl border border-hh-primary/25 bg-hh-primary/5 p-3 text-xs leading-relaxed text-hh-dark">
           <strong>For athletes:</strong> use the {PLATFORM.shortName} mobile app
-          with your coach&apos;s team code. This web form is only for internal
+          with your Organizer&apos;s team code. This web form is only for internal
           testing.
         </p>
         <p className="mt-3 rounded-xl border border-amber-200/80 bg-amber-50/90 p-3 text-xs leading-relaxed text-amber-950">

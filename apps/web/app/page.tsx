@@ -127,7 +127,7 @@ export default function HomePage() {
               <p className="font-semibold text-hh-dark">Built for teams and clubs, not catalogs</p>
               <p className="mt-1 text-sm leading-snug text-slate-600">
                 Personal donation links and optional texting replace order forms,
-                deliveries, and quota pressure—so coaches and advisors focus on
+                deliveries, and quota pressure—so Organizers and advisors focus on
                 participants.
               </p>
             </li>

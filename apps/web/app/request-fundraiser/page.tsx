@@ -55,8 +55,8 @@ function validateRequestForm(fd: FormData): string | null {
 
   const adminFirst = trimOrEmpty(fd.get("admin_first_name"));
   const adminLast = trimOrEmpty(fd.get("admin_last_name"));
-  if (!adminFirst) return "Coach / lead first name is required.";
-  if (!adminLast) return "Coach / lead last name is required.";
+  if (!adminFirst) return "Organizer first name is required.";
+  if (!adminLast) return "Organizer last name is required.";
 
   const email = trimOrEmpty(fd.get("admin_email"));
   if (!email) return "Email is required.";
@@ -369,7 +369,7 @@ export default function RequestFundraiserPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="admin_first_name" className="text-base">
-                      Coach / Lead First Name
+                      Organizer first name
                     </Label>
                     <Input
                       id="admin_first_name"
@@ -381,7 +381,7 @@ export default function RequestFundraiserPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="admin_last_name" className="text-base">
-                      Coach / Lead Last Name
+                      Organizer last name
                     </Label>
                     <Input
                       id="admin_last_name"
@@ -398,7 +398,7 @@ export default function RequestFundraiserPage() {
                   </Label>
                   <p className="text-sm leading-relaxed text-slate-600">
                     The email you use here will be the email you use to sign in
-                    to your coach dashboard.
+                    to your Organizer dashboard.
                   </p>
                   <Input
                     id="admin_email"

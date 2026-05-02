@@ -205,14 +205,14 @@ export default function NewFundraiserClient({ initialCode }: Props) {
     const assigned = row.assigned_to_email?.trim().toLowerCase();
     if (!assigned) {
       setCodeError(
-        "This code is not assigned to a coach email. Contact Heart & Hustle support."
+        "This code is not assigned to an Organizer email. Contact Heart & Hustle support."
       );
       setLoading(false);
       return;
     }
     if (assigned !== email) {
       setCodeError(
-        "This code is for a different coach. Sign in with the email that received the code."
+        "This code is for a different Organizer. Sign in with the email that received the code."
       );
       setLoading(false);
       return;
@@ -372,7 +372,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                   </Button>
                 </div>
                 <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm leading-relaxed text-amber-950">
-                  <strong>You (coach):</strong> On the mobile app, use{" "}
+                  <strong>You (Organizer):</strong> On the mobile app, use{" "}
                   <strong>Sign in</strong> with the same email and password as this
                   website—<strong>not</strong> this team code. Send the code only to
                   athletes.
@@ -398,7 +398,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
               <div className="space-y-4">
                 <p className="text-sm text-slate-600">
                   Enter the fundraiser code you received from Heart & Hustle. If
-                  you just used <strong>Coach login → Start with my code</strong>,
+                  you just used <strong>Organizer login → Start with my code</strong>,
                   you can skip this step—you&apos;re already verified.
                 </p>
                 <div className="space-y-2">

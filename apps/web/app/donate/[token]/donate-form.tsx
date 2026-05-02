@@ -337,7 +337,7 @@ export default function DonateForm({
             />
             {athleteGoal == null ? (
               <p className="mt-2 text-xs text-slate-500">
-                A personal goal will show here when set by the athlete or coach.
+                A personal goal will show here when set by the athlete or Organizer.
               </p>
             ) : null}
           </div>

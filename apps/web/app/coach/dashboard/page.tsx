@@ -31,7 +31,7 @@ export default async function CoachDashboardPage() {
   if (!activeRaw) {
     return (
       <div className="min-h-screen bg-slate-50 px-4 py-16 text-center">
-        <h1 className="text-2xl font-semibold text-hh-dark">Coach dashboard</h1>
+        <h1 className="text-2xl font-semibold text-hh-dark">Organizer dashboard</h1>
         <p className="mt-2 text-slate-600">
           You don&apos;t have a fundraiser yet. Create one with your approved
           code.
@@ -40,7 +40,7 @@ export default async function CoachDashboardPage() {
           If your HH code shows as already used but you see this message, you may
           be signed in with a <strong>different email</strong> than the one the
           code was assigned to. Sign out and use{" "}
-          <strong>Returning coach</strong> with the same email you used when you
+          <strong>Returning Organizer</strong> with the same email you used when you
           first entered the code.
         </p>
         <Link

@@ -65,7 +65,7 @@ export default function CoachResetPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <Card className="w-full max-w-md border-hh-dark/10">
         <CardHeader>
-          <CardTitle className="text-hh-dark">Set new coach password</CardTitle>
+          <CardTitle className="text-hh-dark">Set new Organizer password</CardTitle>
           <p className="text-sm text-slate-600">{BRAND.name}</p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -103,7 +103,7 @@ export default function CoachResetPasswordPage() {
             ) : null}
             {done ? (
               <p className="text-sm text-emerald-700">
-                Password updated. Redirecting to coach login…
+                Password updated. Redirecting to Organizer login…
               </p>
             ) : null}
             <Button type="submit" className="w-full" disabled={loading}>

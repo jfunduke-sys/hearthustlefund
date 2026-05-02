@@ -316,7 +316,7 @@ More tips will show inside the app once you're in. Thanks!`;
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-hh-primary">
-              Coach dashboard
+              Organizer dashboard
             </p>
             <h1 className="mt-1 text-2xl font-extrabold tracking-tight md:text-3xl">
               {fundraiser.school_name}
@@ -456,7 +456,7 @@ More tips will show inside the app once you're in. Thanks!`;
           <ul className="list-disc space-y-1.5 pl-5 leading-snug text-sky-950">
             <li>
               <span className="font-medium">{PLATFORM.shortName} app</span> —
-              same coach login. Text contacts and send reminders.
+              same Organizer login. Text contacts and send reminders.
             </li>
             <li>
               <span className="font-medium">This site</span> — campaign setup,
@@ -655,7 +655,7 @@ More tips will show inside the app once you're in. Thanks!`;
                   {joinCode || "—".repeat(7)}
                 </p>
                 <p className="mt-2 text-xs leading-snug text-white/65">
-                  Coaches: sign in to the app with this website&apos;s email—do
+                  Organizers: sign in to the app with this website&apos;s email—do
                   not use this code.
                 </p>
               </div>

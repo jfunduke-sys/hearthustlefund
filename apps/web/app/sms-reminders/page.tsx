@@ -38,8 +38,8 @@ export default function SmsRemindersInfoPage() {
           <p className="text-sm leading-relaxed sm:text-base">
             You agree to reminder texts separately from account creation. Saving a
             U.S. mobile number for reminders requires the consent language below when
-            SMS is enabled (mobile profile, limited web joins, or coach onboarding
-            where applicable). Coaches who receive reminders must provide numbers
+            SMS is enabled (mobile profile, limited web joins, or Organizer onboarding
+            where applicable). Organizers who receive reminders must provide numbers
             and consent through the same flows where the platform offers SMS.
           </p>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

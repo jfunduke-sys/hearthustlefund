@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
           </form>
           <p className="text-center text-sm text-slate-600">
             <Link href="/coach/login" className="text-hh-primary hover:underline">
-              Coach Login
+              Organizer login
             </Link>
           </p>
         </CardContent>

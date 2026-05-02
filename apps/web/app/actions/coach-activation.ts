@@ -49,14 +49,14 @@ export async function verifyAndSetCoachActivationCookie(
     return {
       ok: false,
       error:
-        "This code is not assigned to a coach email. Contact Heart & Hustle support.",
+        "This code is not assigned to an Organizer email. Contact Heart & Hustle support.",
     };
   }
   if (assigned !== email) {
     return {
       ok: false,
       error:
-        "Use the same email address Heart & Hustle sent the code to—usually the lead coach or fundraiser contact.",
+        "Use the same email address Heart & Hustle sent the code to—usually the lead Organizer or fundraiser contact.",
     };
   }
 

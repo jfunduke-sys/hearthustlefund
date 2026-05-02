@@ -135,12 +135,12 @@ function buildCoachLaunchEmail(payload: CodeModalPayload) {
 
   return `Subject: ${appName} fundraiser approval + your setup code
 
-Hi Coach,
+Hello,
 
 Your fundraiser request has been approved.
 
 ${schoolLine}${activityLine}${dateLine}Your one-time ${appName} setup code: ${payload.code}
-Code is locked to this coach email: ${payload.coachEmail}
+Code is locked to this Organizer email: ${payload.coachEmail}
 
 Step-by-step setup
 1) Desktop setup (first login with code)
@@ -152,16 +152,16 @@ Step-by-step setup
 2) Complete fundraiser setup on desktop
    • Confirm team/school details, goals, and campaign dates
    • Save and activate so your participant join code is generated
-   • Open Coach Dashboard after setup: ${dashboardUrl}
+   • Open Organizer Dashboard after setup: ${dashboardUrl}
 
-3) Share participant instructions from Coach Dashboard
+3) Share participant instructions from Organizer Dashboard
    • In dashboard, use "Invite message for participants" and tap "Copy full message"
    • Send that message to your participants (text/email/team app)
    • It includes app download links + the participant join code
 
 4) Set yourself up as a participant too
-   • In Coach Dashboard, add yourself as a participant if needed
-   • In the app, log in with the same coach email + password (do not use the join code for coach login)
+   • In Organizer Dashboard, add yourself as a participant if needed
+   • In the app, log in with the same Organizer email + password (do not use the join code for Organizer login)
    • Turn ON "Show my name on the team participant list" if you want your name visible
    • Copy/share your personal donation link from the app dashboard
 
@@ -171,7 +171,7 @@ Step-by-step setup
    • Reminder texts and outreach metrics are tracked in dashboard when messages are sent from the app tools
 
 6) During campaign
-   • Use desktop Coach Dashboard for totals, roster, and exports
+   • Use desktop Organizer Dashboard for totals, roster, and exports
    • Use app for participant texting/reminders and personal link sharing
 
 7) Fundraiser close + payment
@@ -181,8 +181,8 @@ Step-by-step setup
    • Keep exported records for accounting/compliance reporting
 
 Quick links
-• Coach login (desktop): ${coachLoginUrl}
-• Coach dashboard (desktop): ${dashboardUrl}
+• Organizer login (desktop): ${coachLoginUrl}
+• Organizer dashboard (desktop): ${dashboardUrl}
 • iPhone app: ${appStoreUrl}
 • Android app: ${playStoreUrl}
 
@@ -316,7 +316,7 @@ export function SuperadminTabs({
                     <TableHead>Lead contact</TableHead>
                     <TableHead>Proposed start</TableHead>
                     <TableHead>Proposed end</TableHead>
-                    <TableHead>Coach email</TableHead>
+                    <TableHead>Organizer email</TableHead>
                     <TableHead>Submitted</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -420,7 +420,7 @@ export function SuperadminTabs({
                 <CardTitle>Approved fundraiser requests</CardTitle>
                 <p className="mt-1 text-sm text-slate-600">
                   Intake form data and the HH start code issued for each approval.
-                  When the coach redeems the code, a live campaign appears under
+                  When the Organizer redeems the code, a live campaign appears under
                   Active fundraisers.
                 </p>
               </div>
@@ -438,7 +438,7 @@ export function SuperadminTabs({
                     <TableHead>Proposed start</TableHead>
                     <TableHead>Proposed end</TableHead>
                     <TableHead>HH start code</TableHead>
-                    <TableHead>Coach email</TableHead>
+                    <TableHead>Organizer email</TableHead>
                     <TableHead>Est. athletes</TableHead>
                     <TableHead>Campaign</TableHead>
                   </TableRow>
@@ -540,9 +540,9 @@ export function SuperadminTabs({
             <CardHeader>
               <CardTitle>Active fundraisers</CardTitle>
               <p className="text-sm text-slate-600">
-                Click a row to open the admin fundraiser view (metrics, coach
-                email, compliance notes, and tools). Coaches use{" "}
-                <strong>Coach login</strong> with their own account to manage the
+                Click a row to open the admin fundraiser view (metrics,
+                Organizer email, compliance notes, and tools). Organizers use{" "}
+                <strong>Organizer login</strong> with their own account to manage the
                 live dashboard.
               </p>
             </CardHeader>
@@ -739,15 +739,15 @@ export function SuperadminTabs({
           <DialogHeader>
             <DialogTitle>Fundraiser code generated</DialogTitle>
             <DialogDescription>
-              Copy the full coach launch email below, paste into your message,
-              and send it to the assigned coach.
+              Copy the full Organizer launch email below, paste into your message,
+              and send it to the assigned Organizer.
             </DialogDescription>
           </DialogHeader>
           <p className="rounded-md bg-slate-100 p-4 text-center font-mono text-lg">
             {codeModal?.code}
           </p>
           <p className="text-xs text-slate-600">
-            Assigned coach email:{" "}
+            Assigned Organizer email:{" "}
             <span className="font-medium text-slate-800">
               {codeModal?.coachEmail ?? "—"}
             </span>
@@ -771,7 +771,7 @@ export function SuperadminTabs({
                 void navigator.clipboard.writeText(buildCoachLaunchEmail(codeModal))
               }
             >
-              Copy full coach email
+              Copy full Organizer email
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -780,15 +780,15 @@ export function SuperadminTabs({
       <Dialog open={standaloneOpen} onOpenChange={setStandaloneOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Generate coach code</DialogTitle>
+            <DialogTitle>Generate Organizer code</DialogTitle>
             <DialogDescription>
-              Every code is locked to one coach email. They use{" "}
-              <strong>Coach login → Start with my code</strong> with that email
+              Every code is locked to one Organizer email. They use{" "}
+              <strong>Organizer login → Start with my code</strong> with that email
               plus this code the first time (then a password for later).
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="assign">Coach email (required)</Label>
+            <Label htmlFor="assign">Organizer email (required)</Label>
             <Input
               id="assign"
               type="email"
@@ -881,7 +881,7 @@ export function SuperadminTabs({
               </div>
               <div>
                 <dt className="font-semibold text-slate-600">
-                  Coach / lead (first &amp; last)
+                  Organizer (first &amp; last)
                 </dt>
                 <dd>
                   {[
@@ -893,11 +893,11 @@ export function SuperadminTabs({
                 </dd>
               </div>
               <div>
-                <dt className="font-semibold text-slate-600">Coach email</dt>
+                <dt className="font-semibold text-slate-600">Organizer email</dt>
                 <dd>{viewOpen.admin_email}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-slate-600">Coach phone</dt>
+                <dt className="font-semibold text-slate-600">Organizer phone</dt>
                 <dd>{viewOpen.admin_phone}</dd>
               </div>
               <div>

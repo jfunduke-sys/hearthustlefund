@@ -76,7 +76,7 @@ export default function CoachParticipantCard({
         <CardHeader>
           <CardTitle className="text-hh-dark">Your Participation</CardTitle>
           <CardDescription>
-            Your participant record is created automatically from your coach
+            Your participant record is created automatically from your Organizer
             account so you can use the mobile app with the same email and
             password—no extra signup form. If this card doesn&apos;t load after
             a moment, refresh the page.
@@ -138,7 +138,7 @@ export default function CoachParticipantCard({
             </Label>
             <p className="text-xs leading-relaxed text-slate-600">
               Athletes see this list on their mobile dashboard. Off by default for
-              coaches—turn it on if you want to appear next to your players. You
+              Organizers—turn it on if you want to appear next to your players. You
               can still use the app either way.
             </p>
           </div>
@@ -151,7 +151,7 @@ export default function CoachParticipantCard({
         ) : null}
 
         <p className="text-xs text-slate-500">
-          Sign in to the mobile app with the same coach email and password as
+          Sign in to the mobile app with the same Organizer email and password as
           this site to send fundraising texts—you do not need the team join
           code.
         </p>

@@ -51,7 +51,7 @@ export async function approveAndGenerateCode(requestId: string) {
   const coachEmail = req.admin_email?.trim().toLowerCase();
   if (!coachEmail) {
     throw new Error(
-      "School request has no lead coach / contact email. Update the request before approving."
+      "School request has no Organizer / contact email. Update the request before approving."
     );
   }
 
@@ -89,7 +89,7 @@ export async function rejectRequest(requestId: string, notes: string) {
 function isValidCoachEmail(raw: string) {
   const e = raw.trim().toLowerCase();
   if (!e || e.length > 254) return null;
-  // pragmatic email check — coach must use this exact address at signup
+  // pragmatic email check — Organizer must use this exact address at signup
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return null;
   return e;
 }
@@ -98,7 +98,7 @@ export async function generateStandaloneCode(assignedEmail: string) {
   const user = await assertSuperAdmin();
   const coachEmail = isValidCoachEmail(assignedEmail);
   if (!coachEmail) {
-    throw new Error("Enter a valid coach email. The code only works for that account.");
+    throw new Error("Enter a valid Organizer email. The code only works for that account.");
   }
   const admin = createAdminClient();
   const code = await uniqueFundraiserCode(admin);

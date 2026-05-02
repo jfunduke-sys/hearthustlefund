@@ -17,7 +17,7 @@ export default function CoachAppBridgePage() {
 
     if (!access_token || !refresh_token) {
       setMessage(
-        "Open the coach dashboard from the Heart & Hustle app after you sign in."
+        "Open the Organizer dashboard from the Heart & Hustle app after you sign in."
       );
       return;
     }

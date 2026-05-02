@@ -30,7 +30,7 @@ export default function JoinAppDownload() {
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/85">
           Team fundraising for athletes happens in the {PLATFORM.shortName}{" "}
           mobile app. Download it, tap <strong>Team code</strong>, enter your
-          coach&apos;s <strong>{TEAM_JOIN_CODE_LENGTH}-character</strong> code,
+          Organizer&apos;s <strong>{TEAM_JOIN_CODE_LENGTH}-character</strong> code,
           then create your email and password to reach your dashboard.{" "}
           {NEW_PASSWORD_REQUIREMENT_COPY}
         </p>
@@ -40,7 +40,7 @@ export default function JoinAppDownload() {
           <p className="mt-2 text-sm text-slate-600">
             Search for <strong>{PLATFORM.displayName}</strong> or{" "}
             <strong>{PLATFORM.shortName}</strong> in the App Store or Google
-            Play. Your coach will text or hand you the team code—different from
+            Play. Your Organizer will text or hand you the team code—different from
             the HH setup code they use on the website.
           </p>
           <p className="mt-4 text-xs leading-relaxed text-slate-500">
@@ -49,7 +49,7 @@ export default function JoinAppDownload() {
         </div>
 
         <p className="mx-auto mt-10 max-w-md text-xs text-white/70">
-          <strong className="text-white">Coaches:</strong> create campaigns and
+          <strong className="text-white">Organizers:</strong> create campaigns and
           view dashboards on the website. Use the same app login to text
           contacts and join as a participant on your phone.
         </p>

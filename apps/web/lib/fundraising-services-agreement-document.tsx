@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
 /** Bump when the document body text changes (SuperAdmin + public /terms). */
-export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "7" as const;
+export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "8" as const;
 
 type Props = {
   pfrReg: string;
@@ -135,8 +135,10 @@ export function FundraisingServicesAgreementBody({
           4. FUNDRAISER CONTROL
         </h3>
         <p className="mt-2">
-          Organization, through its designated coach, sponsor, or representative
-          (&quot;Sponsor&quot;), is solely responsible for:
+          Organization, through its designated Organizer (&quot;Organizer&quot;)—the
+          coach, program sponsor, or lead fundraising representative the Organization
+          authorizes to request and manage campaigns for the team, club, or
+          activity—is solely responsible for:
         </p>
         <ul className="mt-1 list-outside list-disc pl-5">
           <li>Requesting fundraisers</li>

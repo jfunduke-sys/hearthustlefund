@@ -225,7 +225,7 @@ export default function CoachLoginInner() {
     }
     setActivationError(
       signInAfter?.message ??
-        "Could not continue. Use the Returning coach tab to sign in with this email and password."
+        "Could not continue. Use the Returning Organizer tab to sign in with this email and password."
     );
   }
 
@@ -241,13 +241,13 @@ export default function CoachLoginInner() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <Card className="w-full max-w-md border-hh-dark/10">
         <CardHeader>
-          <CardTitle className="text-hh-dark">Coach portal</CardTitle>
+          <CardTitle className="text-hh-dark">Organizer portal</CardTitle>
           <CardDescription>{BRAND.name}</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="returning" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="returning">Returning coach</TabsTrigger>
+              <TabsTrigger value="returning">Returning Organizer</TabsTrigger>
               <TabsTrigger value="code">Start with my code</TabsTrigger>
             </TabsList>
 
@@ -353,7 +353,7 @@ export default function CoachLoginInner() {
                   <p className="text-sm text-slate-600">
                     {existingAccountMode
                       ? "Sign in with your existing password to continue to fundraiser setup."
-                      : "Create a password you’ll use every time you return to the coach portal."}
+                      : "Create a password you’ll use every time you return to the Organizer portal."}
                   </p>
                   {!existingAccountMode ? (
                     <p className="text-xs leading-relaxed text-slate-500">
