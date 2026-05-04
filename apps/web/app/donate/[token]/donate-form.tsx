@@ -236,7 +236,7 @@ export default function DonateForm({
               ) : null}
               <div className="min-w-0">
                 <p className="text-xs font-medium uppercase tracking-wider text-white/60">
-                  Support a student-athlete
+                  Support this participant
                 </p>
                 <h1 className="mt-1 text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">
                   {athlete.full_name}
@@ -316,13 +316,13 @@ export default function DonateForm({
           </p>
         </section>
 
-        {/* Athlete progress */}
+        {/* Participant progress */}
         <section
           className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6"
-          aria-labelledby="athlete-progress"
+          aria-labelledby="participant-progress"
         >
           <h2
-            id="athlete-progress"
+            id="participant-progress"
             className="text-sm font-semibold uppercase tracking-wide text-slate-500"
           >
             {athlete.full_name}&apos;s progress
@@ -337,7 +337,7 @@ export default function DonateForm({
             />
             {athleteGoal == null ? (
               <p className="mt-2 text-xs text-slate-500">
-                A personal goal will show here when set by the athlete or Organizer.
+                A personal goal will show here when set by the participant or Organizer.
               </p>
             ) : null}
           </div>
@@ -570,7 +570,7 @@ export default function DonateForm({
             Full team campaign
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Overall progress toward the program&apos;s team goal — every athlete
+            Overall progress toward the program&apos;s team goal — every participant
             contributes to this total.
           </p>
           <div className="mt-5">

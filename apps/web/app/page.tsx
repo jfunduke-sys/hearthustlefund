@@ -57,7 +57,7 @@ export default function HomePage() {
             />
             <span>
               <strong className="font-semibold text-hh-dark">Zero data selling</strong>{" "}
-              — donor and athlete information stays in your campaign.
+              — donor and participant information stays in your campaign.
             </span>
           </li>
           <li className="flex gap-3">

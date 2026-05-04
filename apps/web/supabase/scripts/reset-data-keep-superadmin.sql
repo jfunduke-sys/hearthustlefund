@@ -28,6 +28,9 @@ BEGIN
   END IF;
 
   TRUNCATE TABLE
+    public.fundraiser_group_managers,
+    public.fundraiser_group_members,
+    public.fundraiser_groups,
     public.athlete_contacts,
     public.donations,
     public.athletes,

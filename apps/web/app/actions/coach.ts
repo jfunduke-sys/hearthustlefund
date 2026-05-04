@@ -72,6 +72,8 @@ export async function createFundraiserAction(input: {
   team_logo_url: string | null;
   /** Optional “About this fundraiser” on public donate pages. */
   donor_page_about?: string | null;
+  /** From intake prefill: campaign uses teams/groups and group managers. */
+  uses_campaign_groups?: boolean;
 }) {
   const user = await assertCoach();
   const admin = createAdminClient();
@@ -126,6 +128,7 @@ export async function createFundraiserAction(input: {
       start_date: input.start_date,
       end_date: input.end_date,
       donor_page_about: about,
+      uses_campaign_groups: input.uses_campaign_groups === true,
       status: "active",
       unique_slug,
       join_code,
@@ -160,6 +163,7 @@ export type NewFundraiserPrefill = {
   start_date: string;
   end_date: string;
   participant_count: number | null;
+  wants_campaign_groups: boolean;
 };
 
 /**
@@ -187,7 +191,7 @@ export async function getNewFundraiserPrefillAction(
   const { data: sr, error: srErr } = await admin
     .from("school_requests")
     .select(
-      "school_name, sport_club_activity, fundraiser_start_date, fundraiser_end_date, estimated_athletes"
+      "school_name, sport_club_activity, fundraiser_start_date, fundraiser_end_date, estimated_athletes, wants_campaign_groups"
     )
     .eq("id", codeRow.school_request_id)
     .maybeSingle();
@@ -208,6 +212,7 @@ export async function getNewFundraiserPrefillAction(
       typeof sr.estimated_athletes === "number" && sr.estimated_athletes > 0
         ? sr.estimated_athletes
         : null,
+    wants_campaign_groups: sr.wants_campaign_groups === true,
   };
 }
 
@@ -263,7 +268,7 @@ async function coachNameFromSchoolRequest(
 }
 
 /**
- * Ensures the head coach has one athlete row for this fundraiser so they can use
+ * Ensures the head Organizer has one participant (athlete) row for this fundraiser so they can use
  * the mobile app (donate link, texting) with the same login—no extra form.
  */
 export async function ensureCoachParticipantAthlete(fundraiserId: string) {
@@ -461,6 +466,248 @@ export async function updateCoachFundraiserDonorPageAbout(input: {
     .eq("id", input.fundraiserId);
 
   if (upErr) throw new Error(upErr.message);
+
+  revalidatePath("/coach/dashboard");
+}
+
+/**
+ * Lead Organizer: enable or disable teams/groups. Turning off deletes all
+ * `fundraiser_groups`, member placements, and group manager rows for this campaign.
+ */
+export async function updateCoachFundraiserUsesCampaignGroups(input: {
+  fundraiserId: string;
+  usesCampaignGroups: boolean;
+}) {
+  const user = await assertCoach();
+  const admin = createAdminClient();
+
+  const { data: fr, error: frErr } = await admin
+    .from("fundraisers")
+    .select("id, coach_id")
+    .eq("id", input.fundraiserId)
+    .single();
+
+  if (frErr || !fr || fr.coach_id !== user.id) {
+    throw new Error("You can only update your own fundraiser.");
+  }
+
+  if (!input.usesCampaignGroups) {
+    const { error: delGErr } = await admin
+      .from("fundraiser_groups")
+      .delete()
+      .eq("fundraiser_id", input.fundraiserId);
+    if (delGErr) throw new Error(delGErr.message);
+  }
+
+  const { error: upErr } = await admin
+    .from("fundraisers")
+    .update({ uses_campaign_groups: input.usesCampaignGroups })
+    .eq("id", input.fundraiserId);
+
+  if (upErr) throw new Error(upErr.message);
+
+  revalidatePath("/coach/dashboard");
+}
+
+const GROUP_NAME_MAX = 80;
+const MIN_GROUPS = 1;
+const MAX_GROUPS = 25;
+
+/**
+ * Replace all groups with empty shells named "Group 1" … (clears members & managers).
+ */
+export async function replaceCoachFundraiserGroupShells(input: {
+  fundraiserId: string;
+  groupCount: number;
+}) {
+  const user = await assertCoach();
+  const admin = createAdminClient();
+  const n = input.groupCount;
+  if (!Number.isFinite(n) || n < MIN_GROUPS || n > MAX_GROUPS) {
+    throw new Error(`Use between ${MIN_GROUPS} and ${MAX_GROUPS} groups.`);
+  }
+
+  const { data: fr, error: frErr } = await admin
+    .from("fundraisers")
+    .select("coach_id")
+    .eq("id", input.fundraiserId)
+    .single();
+
+  if (frErr || !fr || fr.coach_id !== user.id) {
+    throw new Error("You can only update your own fundraiser.");
+  }
+
+  const { error: delErr } = await admin
+    .from("fundraiser_groups")
+    .delete()
+    .eq("fundraiser_id", input.fundraiserId);
+  if (delErr) throw new Error(delErr.message);
+
+  const rows = Array.from({ length: n }, (_, i) => ({
+    fundraiser_id: input.fundraiserId,
+    name: `Group ${i + 1}`,
+    sort_order: i,
+  }));
+  const { error: insErr } = await admin.from("fundraiser_groups").insert(rows);
+  if (insErr) throw new Error(insErr.message);
+
+  revalidatePath("/coach/dashboard");
+}
+
+export async function renameCoachFundraiserGroup(input: {
+  fundraiserId: string;
+  groupId: string;
+  name: string;
+}) {
+  const user = await assertCoach();
+  const admin = createAdminClient();
+  const nm = input.name.trim();
+  if (nm.length < 1 || nm.length > GROUP_NAME_MAX) {
+    throw new Error(`Name must be 1–${GROUP_NAME_MAX} characters.`);
+  }
+
+  const { data: g, error: gErr } = await admin
+    .from("fundraiser_groups")
+    .select("id, fundraiser_id")
+    .eq("id", input.groupId)
+    .single();
+  if (gErr || !g || g.fundraiser_id !== input.fundraiserId) {
+    throw new Error("Invalid group.");
+  }
+
+  const { data: fr, error: frErr } = await admin
+    .from("fundraisers")
+    .select("coach_id")
+    .eq("id", input.fundraiserId)
+    .single();
+  if (frErr || !fr || fr.coach_id !== user.id) {
+    throw new Error("You can only update your own fundraiser.");
+  }
+
+  const { error: upErr } = await admin
+    .from("fundraiser_groups")
+    .update({ name: nm })
+    .eq("id", input.groupId);
+  if (upErr) throw new Error(upErr.message);
+
+  revalidatePath("/coach/dashboard");
+}
+
+export async function setCoachFundraiserParticipantGroup(input: {
+  fundraiserId: string;
+  athleteId: string;
+  groupId: string | null;
+}) {
+  const user = await assertCoach();
+  const admin = createAdminClient();
+
+  const { data: fr, error: frErr } = await admin
+    .from("fundraisers")
+    .select("coach_id")
+    .eq("id", input.fundraiserId)
+    .single();
+  if (frErr || !fr || fr.coach_id !== user.id) {
+    throw new Error("You can only update your own fundraiser.");
+  }
+
+  const { data: ath, error: aErr } = await admin
+    .from("athletes")
+    .select("id, fundraiser_id")
+    .eq("id", input.athleteId)
+    .single();
+  if (aErr || !ath || ath.fundraiser_id !== input.fundraiserId) {
+    throw new Error("Invalid participant.");
+  }
+
+  if (input.groupId == null) {
+    const { error: delErr } = await admin
+      .from("fundraiser_group_members")
+      .delete()
+      .eq("athlete_id", input.athleteId);
+    if (delErr) throw new Error(delErr.message);
+    revalidatePath("/coach/dashboard");
+    return;
+  }
+
+  const { data: grp, error: grpErr } = await admin
+    .from("fundraiser_groups")
+    .select("id, fundraiser_id")
+    .eq("id", input.groupId)
+    .single();
+  if (grpErr || !grp || grp.fundraiser_id !== input.fundraiserId) {
+    throw new Error("Invalid group.");
+  }
+
+  const { error: upErr } = await admin.from("fundraiser_group_members").upsert(
+    { athlete_id: input.athleteId, group_id: input.groupId },
+    { onConflict: "athlete_id" }
+  );
+  if (upErr) throw new Error(upErr.message);
+
+  revalidatePath("/coach/dashboard");
+}
+
+export async function setCoachFundraiserGroupManager(input: {
+  fundraiserId: string;
+  groupId: string;
+  managerUserId: string | null;
+}) {
+  const user = await assertCoach();
+  const admin = createAdminClient();
+
+  const { data: fr, error: frErr } = await admin
+    .from("fundraisers")
+    .select("coach_id")
+    .eq("id", input.fundraiserId)
+    .single();
+  if (frErr || !fr || fr.coach_id !== user.id) {
+    throw new Error("You can only update your own fundraiser.");
+  }
+
+  const { data: grp, error: grpErr } = await admin
+    .from("fundraiser_groups")
+    .select("id, fundraiser_id")
+    .eq("id", input.groupId)
+    .single();
+  if (grpErr || !grp || grp.fundraiser_id !== input.fundraiserId) {
+    throw new Error("Invalid group.");
+  }
+
+  if (input.managerUserId == null) {
+    const { error: delErr } = await admin
+      .from("fundraiser_group_managers")
+      .delete()
+      .eq("group_id", input.groupId);
+    if (delErr) throw new Error(delErr.message);
+    revalidatePath("/coach/dashboard");
+    return;
+  }
+
+  const { data: ath, error: aErr } = await admin
+    .from("athletes")
+    .select("id")
+    .eq("fundraiser_id", input.fundraiserId)
+    .eq("user_id", input.managerUserId)
+    .maybeSingle();
+  if (aErr || !ath) {
+    throw new Error(
+      "Group managers must be a participant on this campaign with a mobile app account (signed in at least once)."
+    );
+  }
+
+  await admin
+    .from("fundraiser_group_managers")
+    .delete()
+    .eq("fundraiser_id", input.fundraiserId)
+    .eq("user_id", input.managerUserId);
+  await admin.from("fundraiser_group_managers").delete().eq("group_id", input.groupId);
+
+  const { error: insErr } = await admin.from("fundraiser_group_managers").insert({
+    fundraiser_id: input.fundraiserId,
+    group_id: input.groupId,
+    user_id: input.managerUserId,
+  });
+  if (insErr) throw new Error(insErr.message);
 
   revalidatePath("/coach/dashboard");
 }

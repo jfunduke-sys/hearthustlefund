@@ -17,7 +17,7 @@ export async function generateMetadata({
   }
   return {
     title: `Web signup (testing) — ${fr.team_name}`,
-    description: `Internal testing only — ${fr.school_name} ${fr.team_name}. Athletes use the ${BRAND.name} app with the team code.`,
+    description: `Internal testing only — ${fr.school_name} ${fr.team_name}. Participants use the ${BRAND.name} app with the team code.`,
     robots: { index: false, follow: false },
   };
 }
@@ -44,7 +44,7 @@ export default async function JoinParticipatePage({
           ← Find a team
         </Link>
         <p className="mt-4 rounded-xl border border-hh-primary/25 bg-hh-primary/5 p-3 text-xs leading-relaxed text-hh-dark">
-          <strong>For athletes:</strong> use the {PLATFORM.shortName} mobile app
+          <strong>For participants:</strong> use the {PLATFORM.shortName} mobile app
           with your Organizer&apos;s team code. This web form is only for internal
           testing.
         </p>

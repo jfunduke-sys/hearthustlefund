@@ -541,3 +541,10 @@ create policy "Authenticated delete own logos"
   on storage.objects for delete
   to authenticated
   using (bucket_id = 'logos');
+
+-- Campaign teams/groups (intake + live flag). Full DDL, RLS, and RPCs:
+-- run migrations/add_campaign_groups.sql after the base schema.
+alter table public.school_requests
+  add column if not exists wants_campaign_groups boolean not null default false;
+alter table public.fundraisers
+  add column if not exists uses_campaign_groups boolean not null default false;

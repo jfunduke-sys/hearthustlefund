@@ -142,6 +142,8 @@ export default function NewFundraiserClient({ initialCode }: Props) {
   const [donorPageAbout, setDonorPageAbout] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [usesCampaignGroupsFromIntake, setUsesCampaignGroupsFromIntake] =
+    useState(false);
 
   useEffect(() => {
     if (step !== 2) return;
@@ -161,6 +163,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
         if (p.participant_count != null) {
           setParticipantCount(String(p.participant_count));
         }
+        setUsesCampaignGroupsFromIntake(p.wants_campaign_groups === true);
       } catch {
         /* prefill is best-effort */
       }
@@ -311,6 +314,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
         school_logo_url: logoUrl,
         team_logo_url: logoUrl,
         donor_page_about: donorPageAbout.trim() || null,
+        uses_campaign_groups: usesCampaignGroupsFromIntake,
       });
       setDoneInfo({
         slug: res.unique_slug,
@@ -354,7 +358,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                 </p>
                 <div className="rounded-xl border border-hh-dark/10 bg-gradient-to-br from-hh-dark to-slate-800 p-4 text-center text-white shadow-inner">
                   <p className="text-xs font-medium uppercase tracking-wider text-white/70">
-                    Team join code — for athletes only
+                    Team join code — for participants only
                   </p>
                   <p className="mt-1 font-mono text-3xl font-bold tracking-[0.2em]">
                     {doneInfo.joinCode}
@@ -375,10 +379,10 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                   <strong>You (Organizer):</strong> On the mobile app, use{" "}
                   <strong>Sign in</strong> with the same email and password as this
                   website—<strong>not</strong> this team code. Send the code only to
-                  athletes.
+                  participants.
                 </p>
                 <p className="text-sm text-slate-600">
-                  <strong>Athletes</strong> use the <strong>mobile app</strong> with
+                  <strong>Participants</strong> use the <strong>mobile app</strong> with
                   this code (Team code tab). Point them to{" "}
                   <span className="font-medium">{base}/join</span> if they need
                   download instructions—not for signup on the web.
@@ -477,6 +481,15 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                     it.
                   </p>
                 </div>
+
+                {usesCampaignGroupsFromIntake ? (
+                  <p className="rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs leading-relaxed text-amber-950">
+                    Your intake requested <strong>teams or groups</strong> with group
+                    managers. This fundraiser will be flagged for that flow; you will
+                    set up group names, participant placement, and managers on the
+                    dashboard once that step is available.
+                  </p>
+                ) : null}
 
                 <fieldset className="space-y-4 rounded-md border border-slate-200 p-3">
                   <legend className="px-1 text-sm font-medium text-slate-800">
@@ -611,7 +624,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                 <div className="space-y-2">
                   <Label htmlFor="donor-about">
                     Donor page message (optional — shown under &quot;About this
-                    fundraiser&quot; on each athlete&apos;s donation link; leave
+                    fundraiser&quot; on each participant&apos;s donation link; leave
                     blank for default text in gray)
                   </Label>
                   <Textarea
@@ -628,7 +641,7 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                   />
                   <p className="text-xs text-slate-500">
                     Optional. If empty, donors see the default wording (same idea
-                    as the gray placeholder — with each athlete&apos;s name on
+                    as the gray placeholder — with each participant&apos;s name on
                     their page).
                   </p>
                 </div>

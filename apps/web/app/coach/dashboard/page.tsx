@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { BRAND } from "@/lib/brand";
 import CoachDashboardClient from "./coach-dashboard-client";
+
+type CoachGroupRow = { id: string; name: string; sort_order: number };
 import type { Athlete, Donation, Fundraiser } from "@heart-and-hustle/shared";
 import { ensureFundraiserJoinCode } from "@/lib/join-code";
 import { ensureCoachParticipantAthlete } from "@/app/actions/coach";
@@ -173,6 +175,54 @@ export default async function CoachDashboardPage({
   const coachAthlete =
     athleteList.find((a) => a.user_id === user.id) ?? null;
 
+  let groupsSetup: {
+    groups: CoachGroupRow[];
+    memberGroupByAthleteId: Record<string, string | null>;
+    managerUserIdByGroupId: Record<string, string | null>;
+  } | null = null;
+
+  if (active.uses_campaign_groups) {
+    const { data: grpRows } = await admin
+      .from("fundraiser_groups")
+      .select("id, name, sort_order")
+      .eq("fundraiser_id", active.id)
+      .order("sort_order", { ascending: true });
+
+    const groupsList = (grpRows ?? []) as CoachGroupRow[];
+
+    const memberGroupByAthleteId: Record<string, string | null> = {};
+    for (const a of athleteList) {
+      memberGroupByAthleteId[a.id] = null;
+    }
+    if (athleteIds.length > 0) {
+      const { data: memRows } = await admin
+        .from("fundraiser_group_members")
+        .select("athlete_id, group_id")
+        .in("athlete_id", athleteIds);
+      for (const row of memRows ?? []) {
+        memberGroupByAthleteId[row.athlete_id as string] = row.group_id as string;
+      }
+    }
+
+    const managerUserIdByGroupId: Record<string, string | null> = {};
+    for (const g of groupsList) {
+      managerUserIdByGroupId[g.id] = null;
+    }
+    const { data: mgrRows } = await admin
+      .from("fundraiser_group_managers")
+      .select("group_id, user_id")
+      .eq("fundraiser_id", active.id);
+    for (const row of mgrRows ?? []) {
+      managerUserIdByGroupId[row.group_id as string] = row.user_id as string;
+    }
+
+    groupsSetup = {
+      groups: groupsList,
+      memberGroupByAthleteId,
+      managerUserIdByGroupId,
+    };
+  }
+
   return (
     <CoachDashboardClient
       fundraiser={active}
@@ -195,6 +245,7 @@ export default async function CoachDashboardPage({
       textsByAthlete={Object.fromEntries(textsByAthlete)}
       donationsByAthlete={donationsByAthlete}
       raisedByAthlete={raisedByAthlete}
+      groupsSetup={groupsSetup}
     />
   );
 }

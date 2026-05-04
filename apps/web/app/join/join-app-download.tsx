@@ -25,10 +25,10 @@ export default function JoinAppDownload() {
           📱
         </p>
         <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white md:text-4xl">
-          Athletes join in the app
+          Participants join in the app
         </h1>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/85">
-          Team fundraising for athletes happens in the {PLATFORM.shortName}{" "}
+          Team fundraising for participants happens in the {PLATFORM.shortName}{" "}
           mobile app. Download it, tap <strong>Team code</strong>, enter your
           Organizer&apos;s <strong>{TEAM_JOIN_CODE_LENGTH}-character</strong> code,
           then create your email and password to reach your dashboard.{" "}

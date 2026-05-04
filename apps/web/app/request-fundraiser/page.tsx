@@ -91,6 +91,11 @@ function validateRequestForm(fd: FormData): string | null {
     return "Please choose how you’d like to run your fundraiser kickoff.";
   }
 
+  const groupsChoice = trimOrEmpty(fd.get("wants_campaign_groups"));
+  if (groupsChoice !== "yes" && groupsChoice !== "no") {
+    return "Please choose whether you want to divide the campaign into teams or groups.";
+  }
+
   return null;
 }
 
@@ -124,6 +129,7 @@ export default function RequestFundraiserPage() {
     const schoolZip = trimOrEmpty(fd.get("school_zip"));
     const schoolAddress = `${schoolStreet}, ${schoolCity}, ${schoolState} ${schoolZip}`;
     const estNum = parseInt(trimOrEmpty(fd.get("estimated_athletes")), 10);
+    const wantsGroups = trimOrEmpty(fd.get("wants_campaign_groups")) === "yes";
     const adminFirst = trimOrEmpty(fd.get("admin_first_name"));
     const adminLast = trimOrEmpty(fd.get("admin_last_name"));
     const adminFull = [adminFirst, adminLast].filter(Boolean).join(" ");
@@ -146,6 +152,7 @@ export default function RequestFundraiserPage() {
       admin_email: trimOrEmpty(fd.get("admin_email")),
       admin_phone: trimOrEmpty(fd.get("admin_phone")),
       estimated_athletes: estNum,
+      wants_campaign_groups: wantsGroups,
       fundraiser_start_date: trimOrEmpty(fd.get("fundraiser_start_date")),
       fundraiser_end_date: trimOrEmpty(fd.get("fundraiser_end_date")),
       kickoff_setup_preference: trimOrEmpty(fd.get("kickoff_setup_preference")),
@@ -438,6 +445,38 @@ export default function RequestFundraiserPage() {
                     className="h-12 text-base"
                   />
                 </div>
+                <fieldset className="space-y-2">
+                  <legend className="text-base font-medium text-hh-dark">
+                    Teams / groups for this campaign?
+                  </legend>
+                  <p className="text-sm leading-relaxed text-slate-600">
+                    If yes, after approval your Head Organizer can split participants
+                    into teams or groups, assign a group manager per group, and run a
+                    group scoreboard (totals only). You can still run a single-team
+                    campaign if you choose no.
+                  </p>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <input
+                        type="radio"
+                        name="wants_campaign_groups"
+                        value="yes"
+                        required
+                        className="h-4 w-4 accent-hh-primary"
+                      />
+                      Yes — we want teams or groups with group managers
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <input
+                        type="radio"
+                        name="wants_campaign_groups"
+                        value="no"
+                        className="h-4 w-4 accent-hh-primary"
+                      />
+                      No — one campaign roster only
+                    </label>
+                  </div>
+                </fieldset>
                 <div className="space-y-2">
                   <Label htmlFor="notes" className="text-base">
                     Additional Notes{" "}

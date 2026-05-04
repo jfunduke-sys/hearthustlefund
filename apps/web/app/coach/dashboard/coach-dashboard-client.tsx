@@ -16,8 +16,24 @@ import {
   getDefaultDonorPageAboutText,
 } from "@heart-and-hustle/shared";
 import CoachParticipantCard from "./coach-participant-card";
-import { updateCoachFundraiserDonorPageAbout } from "@/app/actions/coach";
+import CoachGroupsSetup, {
+  type CoachGroupRow,
+} from "./coach-groups-setup";
+import {
+  updateCoachFundraiserDonorPageAbout,
+  updateCoachFundraiserUsesCampaignGroups,
+} from "@/app/actions/coach";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -47,6 +63,11 @@ type Props = {
   textsByAthlete: Record<string, number>;
   donationsByAthlete: Record<string, number>;
   raisedByAthlete: Record<string, number>;
+  groupsSetup: {
+    groups: CoachGroupRow[];
+    memberGroupByAthleteId: Record<string, string | null>;
+    managerUserIdByGroupId: Record<string, string | null>;
+  } | null;
 };
 
 function coachDashboardDonationsHref(
@@ -89,7 +110,7 @@ function progressMotivation(pct: number): string {
   if (pct >= 75) return "Almost there—finish strong with your team.";
   if (pct >= 50) return "Past halfway—momentum is on your side.";
   if (pct > 0) return "Strong start—keep sharing those links.";
-  return "Invite athletes and share links to see donations roll in.";
+  return "Invite participants and share links to see donations roll in.";
 }
 
 const statTones = {
@@ -164,9 +185,11 @@ export default function CoachDashboardClient({
   textsByAthlete,
   donationsByAthlete,
   raisedByAthlete,
+  groupsSetup,
 }: Props) {
   const router = useRouter();
   const [settingsPending, startSettingsTransition] = useTransition();
+  const [groupsPending, startGroupsTransition] = useTransition();
   const [donorPageAbout, setDonorPageAbout] = useState(
     () => fundraiser.donor_page_about ?? ""
   );
@@ -181,10 +204,20 @@ export default function CoachDashboardClient({
   const [accountMsg, setAccountMsg] = useState<string | null>(null);
   const [accountBusy, setAccountBusy] = useState(false);
 
+  const [usesCampaignGroupsLocal, setUsesCampaignGroupsLocal] = useState(
+    () => fundraiser.uses_campaign_groups === true
+  );
+  const [groupsOffConfirmOpen, setGroupsOffConfirmOpen] = useState(false);
+  const [groupsMsg, setGroupsMsg] = useState<string | null>(null);
+
   useEffect(() => {
     setDonorPageAbout(fundraiser.donor_page_about ?? "");
     setDonorPageEditOpen(false);
   }, [fundraiser.id, fundraiser.donor_page_about]);
+
+  useEffect(() => {
+    setUsesCampaignGroupsLocal(fundraiser.uses_campaign_groups === true);
+  }, [fundraiser.id, fundraiser.uses_campaign_groups]);
   const baseUrl =
     typeof window !== "undefined"
       ? window.location.origin
@@ -317,7 +350,7 @@ export default function CoachDashboardClient({
 More tips will show inside the app once you're in. Thanks!`;
   }, [joinCode]);
 
-  async function copyAthleteInvite() {
+  async function copyParticipantInvite() {
     if (!participantInviteMessage.trim()) return;
     await navigator.clipboard.writeText(participantInviteMessage);
     setInviteCopied(true);
@@ -492,7 +525,7 @@ More tips will show inside the app once you're in. Thanks!`;
               Donor page message
             </CardTitle>
             <p className="text-xs text-slate-500">
-              Shown under &quot;About this fundraiser&quot; on each athlete&apos;s
+              Shown under &quot;About this fundraiser&quot; on each participant&apos;s
               public donation link.
             </p>
           </CardHeader>
@@ -596,6 +629,166 @@ More tips will show inside the app once you're in. Thanks!`;
           </CardContent>
         </Card>
 
+        <Card className="border-slate-200/90 shadow-sm">
+          <CardHeader className="space-y-1 pb-3 pt-4">
+            <CardTitle className="text-base text-hh-dark">
+              Teams and groups
+            </CardTitle>
+            <p className="text-xs text-slate-500">
+              Optional: split the roster into teams with a group manager each and a
+              scoreboard (each team&apos;s total raised only). Group setup on this
+              site and the group manager experience in the app will arrive in a
+              future update.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3 pb-5 pt-0">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="uses-campaign-groups"
+                checked={usesCampaignGroupsLocal}
+                disabled={groupsPending}
+                className="mt-0.5"
+                onCheckedChange={(v) => {
+                  const on = v === true;
+                  if (!on && usesCampaignGroupsLocal) {
+                    setGroupsMsg(null);
+                    setGroupsOffConfirmOpen(true);
+                    return;
+                  }
+                  if (on && !usesCampaignGroupsLocal) {
+                    setGroupsMsg(null);
+                    startGroupsTransition(async () => {
+                      try {
+                        await updateCoachFundraiserUsesCampaignGroups({
+                          fundraiserId: fundraiser.id,
+                          usesCampaignGroups: true,
+                        });
+                        setUsesCampaignGroupsLocal(true);
+                        router.refresh();
+                      } catch (e: unknown) {
+                        setGroupsMsg(
+                          e instanceof Error ? e.message : "Could not update."
+                        );
+                      }
+                    });
+                  }
+                }}
+              />
+              <div className="min-w-0 space-y-1">
+                <Label
+                  htmlFor="uses-campaign-groups"
+                  className="cursor-pointer text-sm font-medium leading-snug text-hh-dark"
+                >
+                  Use teams and groups on this campaign
+                </Label>
+                <p className="text-xs leading-relaxed text-slate-600">
+                  When enabled, you&apos;ll be able to define groups, assign a
+                  manager per group, and place each participant in one group. When
+                  disabled, all of that configuration is removed.
+                </p>
+              </div>
+            </div>
+
+            {usesCampaignGroupsLocal ? (
+              <p
+                className="rounded-lg border border-amber-200/90 bg-amber-50 px-3 py-2 text-xs font-medium leading-relaxed text-amber-950"
+                role="note"
+              >
+                If you turn this off, all groups, group manager assignments, and
+                which participant was in which group will be permanently deleted.
+                Turning teams and groups back on later will require setting everyone
+                up again from scratch.
+              </p>
+            ) : null}
+
+            {groupsMsg ? (
+              <p className="text-sm text-red-700" role="status">
+                {groupsMsg}
+              </p>
+            ) : null}
+
+            {fundraiser.uses_campaign_groups && groupsSetup ? (
+              <div className="border-t border-slate-100 pt-5">
+                <CoachGroupsSetup
+                  fundraiserId={fundraiser.id}
+                  groups={groupsSetup.groups}
+                  memberGroupByAthleteId={groupsSetup.memberGroupByAthleteId}
+                  managerUserIdByGroupId={groupsSetup.managerUserIdByGroupId}
+                  athletes={athletes.map((a) => ({
+                    id: a.id,
+                    full_name: a.full_name,
+                    user_id: a.user_id,
+                  }))}
+                />
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        <Dialog open={groupsOffConfirmOpen} onOpenChange={setGroupsOffConfirmOpen}>
+          <DialogContent
+            onPointerDownOutside={(e) => {
+              if (groupsPending) e.preventDefault();
+            }}
+            onEscapeKeyDown={(e) => {
+              if (groupsPending) e.preventDefault();
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Turn off teams and groups?</DialogTitle>
+              <DialogDescription asChild>
+                <div className="space-y-2 text-sm text-slate-600">
+                  <p>
+                    This will permanently delete all groups on this campaign, every
+                    group manager assignment, and every participant&apos;s group
+                    placement.
+                  </p>
+                  <p className="font-medium text-amber-950">
+                    If you turn teams and groups back on later, you will need to
+                    recreate groups, reassign managers, and place participants again.
+                  </p>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={groupsPending}
+                onClick={() => setGroupsOffConfirmOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="border-red-300 bg-red-50 font-semibold text-red-900 hover:bg-red-100"
+                disabled={groupsPending}
+                onClick={() => {
+                  setGroupsMsg(null);
+                  startGroupsTransition(async () => {
+                    try {
+                      await updateCoachFundraiserUsesCampaignGroups({
+                        fundraiserId: fundraiser.id,
+                        usesCampaignGroups: false,
+                      });
+                      setUsesCampaignGroupsLocal(false);
+                      setGroupsOffConfirmOpen(false);
+                      router.refresh();
+                    } catch (e: unknown) {
+                      setGroupsMsg(
+                        e instanceof Error ? e.message : "Could not update."
+                      );
+                    }
+                  });
+                }}
+              >
+                {groupsPending ? "Working…" : "Turn off and clear groups"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <Card className="overflow-hidden border-0 shadow-xl shadow-hh-dark/10 ring-1 ring-slate-200/80">
           <div className="relative overflow-hidden bg-gradient-to-br from-hh-dark via-[#252542] to-slate-900 px-5 pb-8 pt-6 text-white md:px-8 md:pb-10 md:pt-8">
             <div
@@ -670,7 +863,7 @@ More tips will show inside the app once you're in. Thanks!`;
             <div className="relative mt-6 flex flex-col gap-3 rounded-xl border border-white/15 bg-white/10 px-4 py-4 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-white/55">
-                  Athlete app · team join code
+                  Participant app · team join code
                 </p>
                 <p className="mt-1 break-all font-mono text-2xl font-bold tracking-[0.14em] sm:text-3xl">
                   {joinCode || "—".repeat(7)}
@@ -720,7 +913,7 @@ More tips will show inside the app once you're in. Thanks!`;
                   tone="amber"
                   label="Donations"
                   value={String(analytics.donationCount)}
-                  hint="All gifts to your athletes"
+                  hint="All gifts to your participants"
                 />
                 <CommandStat
                   tone="sky"
@@ -758,7 +951,7 @@ More tips will show inside the app once you're in. Thanks!`;
                 />
                 <CommandStat
                   tone="emerald"
-                  label="Athletes"
+                  label="Participants"
                   value={String(athletes.length)}
                   hint="On this roster"
                 />
@@ -788,7 +981,7 @@ More tips will show inside the app once you're in. Thanks!`;
                   variant="outline"
                   className="mt-3"
                   disabled={!joinCode}
-                  onClick={() => void copyAthleteInvite()}
+                  onClick={() => void copyParticipantInvite()}
                 >
                   {inviteCopied ? "Copied!" : "Copy full message"}
                 </Button>
@@ -805,7 +998,7 @@ More tips will show inside the app once you're in. Thanks!`;
 
         <Card className="overflow-hidden border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
           <CardHeader className="border-b border-slate-100 bg-slate-50/60">
-            <CardTitle className="text-hh-dark">Athlete roster</CardTitle>
+            <CardTitle className="text-hh-dark">Participant roster</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
@@ -842,7 +1035,7 @@ More tips will show inside the app once you're in. Thanks!`;
                           <span
                             title={
                               usesCampaignDefault
-                                ? "Uses campaign default; athlete can set a personal goal in the app when supported."
+                                ? "Uses campaign default; participant can set a personal goal in the app when supported."
                                 : undefined
                             }
                           >
@@ -874,118 +1067,120 @@ More tips will show inside the app once you're in. Thanks!`;
         <Card className="overflow-hidden border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
           <CardHeader className="border-b border-slate-100 bg-slate-50/60">
             <CardTitle className="text-hh-dark">All donations</CardTitle>
-            <p className="mt-1 text-xs text-slate-600">
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <p className="text-xs text-slate-600">
               {donationsTotalCount === 0
                 ? "No donations yet."
                 : `Showing ${donations.length} of ${donationsTotalCount} donation${donationsTotalCount === 1 ? "" : "s"} (page ${donationsPage} of ${Math.max(1, Math.ceil(donationsTotalCount / donationsPageSize))}).`}
             </p>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Donor</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Athlete</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {donations.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="py-8 text-center text-sm text-slate-500"
-                    >
-                      No donations on this page.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  donations.map((d) => (
-                    <TableRow key={d.id}>
-                      <TableCell>
-                        {formatDisplayDateTime(d.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        {d.anonymous ? "Anonymous" : d.donor_name ?? "—"}
-                      </TableCell>
-                      <TableCell>${Number(d.amount).toFixed(2)}</TableCell>
-                      <TableCell>
-                        {athletes.find((a) => a.id === d.athlete_id)?.full_name ??
-                          "—"}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
 
             {donationsTotalCount > 0 ? (
-              <div className="mt-4 flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="font-medium text-slate-600">Sort by date:</span>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                <span className="font-medium text-slate-600">Sort by date:</span>
+                <Link
+                  href={coachDashboardDonationsHref(1, "newest")}
+                  className={cn(
+                    "rounded-md px-2.5 py-1 text-sm font-medium transition-colors",
+                    donationsSort === "newest"
+                      ? "bg-hh-primary text-white"
+                      : "text-hh-primary underline underline-offset-2 hover:bg-slate-100"
+                  )}
+                >
+                  Newest first
+                </Link>
+                <Link
+                  href={coachDashboardDonationsHref(1, "oldest")}
+                  className={cn(
+                    "rounded-md px-2.5 py-1 text-sm font-medium transition-colors",
+                    donationsSort === "oldest"
+                      ? "bg-hh-primary text-white"
+                      : "text-hh-primary underline underline-offset-2 hover:bg-slate-100"
+                  )}
+                >
+                  Oldest first
+                </Link>
+              </div>
+            ) : null}
+
+            <div className={cn(donationsTotalCount > 0 && "mt-4")}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Donor</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Participant</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {donations.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={4}
+                        className="py-8 text-center text-sm text-slate-500"
+                      >
+                        No donations on this page.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    donations.map((d) => (
+                      <TableRow key={d.id}>
+                        <TableCell>
+                          {formatDisplayDateTime(d.created_at)}
+                        </TableCell>
+                        <TableCell>
+                          {d.anonymous ? "Anonymous" : d.donor_name ?? "—"}
+                        </TableCell>
+                        <TableCell>${Number(d.amount).toFixed(2)}</TableCell>
+                        <TableCell>
+                          {athletes.find((a) => a.id === d.athlete_id)?.full_name ??
+                            "—"}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {donationsTotalCount > donationsPageSize ? (
+              <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 pt-4">
+                <Button variant="outline" size="sm" asChild disabled={donationsPage <= 1}>
                   <Link
-                    href={coachDashboardDonationsHref(1, "newest")}
-                    className={cn(
-                      "rounded-md px-2.5 py-1 text-sm font-medium transition-colors",
-                      donationsSort === "newest"
-                        ? "bg-hh-primary text-white"
-                        : "text-hh-primary underline underline-offset-2 hover:bg-slate-100"
+                    href={coachDashboardDonationsHref(
+                      donationsPage - 1,
+                      donationsSort
                     )}
                   >
-                    Newest first
+                    Previous
                   </Link>
+                </Button>
+                <span className="text-sm tabular-nums text-slate-600">
+                  Page {donationsPage} /{" "}
+                  {Math.max(
+                    1,
+                    Math.ceil(donationsTotalCount / donationsPageSize)
+                  )}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  disabled={
+                    donationsPage >=
+                    Math.ceil(donationsTotalCount / donationsPageSize)
+                  }
+                >
                   <Link
-                    href={coachDashboardDonationsHref(1, "oldest")}
-                    className={cn(
-                      "rounded-md px-2.5 py-1 text-sm font-medium transition-colors",
-                      donationsSort === "oldest"
-                        ? "bg-hh-primary text-white"
-                        : "text-hh-primary underline underline-offset-2 hover:bg-slate-100"
+                    href={coachDashboardDonationsHref(
+                      donationsPage + 1,
+                      donationsSort
                     )}
                   >
-                    Oldest first
+                    Next
                   </Link>
-                </div>
-                {donationsTotalCount > donationsPageSize ? (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button variant="outline" size="sm" asChild disabled={donationsPage <= 1}>
-                      <Link
-                        href={coachDashboardDonationsHref(
-                          donationsPage - 1,
-                          donationsSort
-                        )}
-                      >
-                        Previous
-                      </Link>
-                    </Button>
-                    <span className="text-sm tabular-nums text-slate-600">
-                      Page {donationsPage} /{" "}
-                      {Math.max(
-                        1,
-                        Math.ceil(donationsTotalCount / donationsPageSize)
-                      )}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      disabled={
-                        donationsPage >=
-                        Math.ceil(donationsTotalCount / donationsPageSize)
-                      }
-                    >
-                      <Link
-                        href={coachDashboardDonationsHref(
-                          donationsPage + 1,
-                          donationsSort
-                        )}
-                      >
-                        Next
-                      </Link>
-                    </Button>
-                  </div>
-                ) : null}
+                </Button>
               </div>
             ) : null}
           </CardContent>

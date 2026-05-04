@@ -24,7 +24,7 @@ export const DONATE_MAJOR_TIERS: DonateTier[] = [
   {
     amount: 100,
     title: "Hero",
-    subtitle: "Makes a strong impact for our athletes.",
+    subtitle: "Makes a strong impact for our participants.",
   },
 ];
 

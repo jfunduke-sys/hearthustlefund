@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import JoinAppDownload from "./join-app-download";
 
 export const metadata: Metadata = {
-  title: "Athletes — use the app",
+  title: "Participants — use the app",
   description:
-    "Heart & Hustle athlete team join happens in the mobile app with a 7-character team code from your Organizer (coach, sponsor, or fundraising lead).",
+    "Heart & Hustle team join for participants happens in the mobile app with a 7-character team code from your Organizer (coach, sponsor, or fundraising lead).",
   alternates: { canonical: "/join" },
 };
 

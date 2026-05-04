@@ -96,7 +96,7 @@ export default function CoachParticipantCard({
       <CardHeader className="pb-2">
         <CardTitle className="text-lg text-hh-dark">Your participation</CardTitle>
         <CardDescription className="text-sm leading-relaxed">
-          Your personal donate link (same as athletes). Copy for email; use the
+          Your personal donate link (same as participants). Copy for email; use the
           app on your phone to text contacts.
         </CardDescription>
       </CardHeader>
@@ -137,7 +137,7 @@ export default function CoachParticipantCard({
               Show my name on the team participant list in the app
             </Label>
             <p className="text-xs leading-relaxed text-slate-600">
-              Athletes see this list on their mobile dashboard. Off by default for
+              Participants see this list on their mobile dashboard. Off by default for
               Organizers—turn it on if you want to appear next to your players. You
               can still use the app either way.
             </p>

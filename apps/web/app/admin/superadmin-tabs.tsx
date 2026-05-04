@@ -439,7 +439,7 @@ export function SuperadminTabs({
                     <TableHead>Proposed end</TableHead>
                     <TableHead>HH start code</TableHead>
                     <TableHead>Organizer email</TableHead>
-                    <TableHead>Est. athletes</TableHead>
+                    <TableHead>Est. participants</TableHead>
                     <TableHead>Campaign</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -902,9 +902,17 @@ export function SuperadminTabs({
               </div>
               <div>
                 <dt className="font-semibold text-slate-600">
-                  Estimated student-athletes
+                  Estimated participants
                 </dt>
                 <dd>{viewOpen.estimated_athletes ?? "—"}</dd>
+                <dt className="text-sm text-slate-600">Teams / groups</dt>
+                <dd>
+                  {viewOpen.wants_campaign_groups === true
+                    ? "Yes — groups & group managers"
+                    : viewOpen.wants_campaign_groups === false
+                      ? "No — single roster"
+                      : "—"}
+                </dd>
               </div>
               <div>
                 <dt className="font-semibold text-slate-600">Additional notes</dt>

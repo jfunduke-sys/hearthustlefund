@@ -51,13 +51,13 @@ npm run dev:web
 ## Mobile setup
 
 1. Copy `apps/mobile/.env.example` → `apps/mobile/.env` and set Supabase + **`EXPO_PUBLIC_API_URL`** to your running web origin (e.g. `http://192.168.x.x:3000` on LAN for a physical device).  
-2. **Auth**: In Supabase, disable “Confirm email” for development or athletes won’t get a session immediately after `signUp` (required for the `athletes` insert + RLS).  
+2. **Auth**: In Supabase, disable “Confirm email” for development or participants won’t get a session immediately after `signUp` (required for the `athletes` insert + RLS).  
 3. `npm run dev:mobile` from root (or `cd apps/mobile && npx expo start`).  
 4. **SMS / contacts**: use a **dev build** or simulator limitations apply; Expo Go may restrict `expo-sms` / `expo-contacts` on some platforms.
 
 ## Coach as participant
 
-The head coach / campaign admin can **create a participant profile** on the coach dashboard (same `athletes` + `athlete_contacts` model as the mobile app), add contacts, and open SMS from the browser. Contacts are **deduped per athlete** by normalized phone digits.
+The Head Organizer / campaign admin can **create a participant profile** on the coach dashboard (same `athletes` + `athlete_contacts` model as the mobile app), add contacts, and open SMS from the browser. Contacts are **deduped per participant** by normalized phone digits.
 
 ## Branding (from build doc)
 

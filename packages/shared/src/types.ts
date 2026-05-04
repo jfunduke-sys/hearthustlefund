@@ -27,6 +27,11 @@ export interface SchoolRequest {
   admin_email: string;
   admin_phone: string;
   estimated_athletes: number | null;
+  /**
+   * Intake: whether the program wants to split the campaign into teams/groups
+   * with group managers after approval (Head Organizer completes group setup on the web).
+   */
+  wants_campaign_groups?: boolean | null;
   paperwork_sent: boolean;
   paperwork_returned: boolean;
   status: SchoolRequestStatus;
@@ -111,6 +116,12 @@ export interface Fundraiser {
   closed_at?: string | null;
   /** Optional copy for public donate page (“About this fundraiser”). */
   donor_page_about?: string | null;
+  /**
+   * When true, campaign uses `fundraiser_groups` / group managers. Lead Organizer
+   * can toggle off on the web dashboard (clears all group data). Copied from intake
+   * at fundraiser creation when applicable.
+   */
+  uses_campaign_groups?: boolean | null;
   created_at: string;
 }
 

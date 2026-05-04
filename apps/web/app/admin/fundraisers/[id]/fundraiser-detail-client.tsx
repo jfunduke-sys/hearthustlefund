@@ -86,6 +86,13 @@ export function FundraiserDetailClient({
             </>
           ) : null}
         </p>
+        {fundraiser.uses_campaign_groups ? (
+          <p className="mt-2 text-sm font-medium text-amber-900">
+            Teams / groups: enabled for this campaign (group setup and group
+            manager app flows in progress). The Lead Organizer can turn this off on
+            their dashboard, which deletes all group configuration.
+          </p>
+        ) : null}
         <p className="mt-2 text-sm text-slate-600">
           Organizers manage the live campaign in{" "}
           <strong>Organizer login</strong> using{" "}
@@ -97,7 +104,7 @@ export function FundraiserDetailClient({
 
       <Card className="max-w-md">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Participants (athletes)</CardTitle>
+          <CardTitle className="text-sm">Participants</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-bold">{analytics.participantCount}</p>
@@ -142,7 +149,7 @@ export function FundraiserDetailClient({
               </dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-sm text-slate-600">Avg raised / athlete</dt>
+              <dt className="text-sm text-slate-600">Avg raised / participant</dt>
               <dd className="text-xl font-semibold tabular-nums text-hh-dark">
                 ${analytics.avgRaisedPerAthlete.toFixed(2)}
               </dd>

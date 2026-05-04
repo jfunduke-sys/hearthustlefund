@@ -21,7 +21,7 @@ const STEPS: {
     summary:
       "The Organizer (coach, sponsor, or lead fundraising contact) submits one intake form for the school program.",
     detail:
-      "Usually the head coach or fundraising contact completes the form with school and district details. Their email is the one Heart & Hustle ties to the HH campaign setup code. School administration typically signs required Illinois paperwork when Heart & Hustle sends it—not necessarily the person who submitted this form.",
+      "Usually the Head Organizer or fundraising contact completes the form with school and district details. Their email is the one Heart & Hustle ties to the HH campaign setup code. School administration typically signs required Illinois paperwork when Heart & Hustle sends it—not necessarily the person who submitted this form.",
   },
   {
     title: "Compliance & Illinois paperwork",
@@ -34,19 +34,19 @@ const STEPS: {
     summary:
       "Approved programs receive a one-time HH campaign setup code tied to the Organizer’s email.",
     detail:
-      "Heart & Hustle emails the code to the Organizer (or your team’s designated contact). That code is only for creating the campaign on the website—not for athletes joining as participants.",
+      "Heart & Hustle emails the code to the Organizer (or your team’s designated contact). That code is only for creating the campaign on the website—not for participants joining in the app.",
   },
   {
     title: "Organizer activates & builds the campaign",
     summary:
       "The Organizer opens Organizer login, enters their email and code, creates a password, then completes fundraiser details.",
     detail:
-      "On the website they use Organizer login → Start with my code: same email the code was assigned to, the HH code, then a password they’ll use on return visits. After that they enter school and team info, goals, dates, and optional logos. When the campaign is active, the platform assigns a 7-character team join code for athletes (plus an optional legacy web link for bookmarks).",
+      "On the website they use Organizer login → Start with my code: same email the code was assigned to, the HH code, then a password they’ll use on return visits. After that they enter school and team info, goals, dates, and optional logos. When the campaign is active, the platform assigns a 7-character team join code for participants (plus an optional legacy web link for bookmarks).",
   },
   {
     title: "Participants join & share",
     summary:
-      "Athletes join in the mobile app with the 7-character team code from their Organizer.",
+      "Participants join in the mobile app with the 7-character team code from their Organizer.",
     detail:
       "Each participant gets a personal donation link. Contacts and reminder texting use the same participant model whether someone uses the mobile app or the web—one record per person per campaign.",
   },

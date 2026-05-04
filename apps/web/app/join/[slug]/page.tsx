@@ -109,7 +109,7 @@ export default async function JoinTeamLandingPage({
               {joinCode}
             </p>
             <p className="mt-2 text-xs text-white/75">
-              Athletes enter this in the {PLATFORM.shortName} app—not on the web.
+              Participants enter this in the {PLATFORM.shortName} app—not on the web.
             </p>
           </div>
 
@@ -126,7 +126,7 @@ export default async function JoinTeamLandingPage({
           <p className="mt-4 text-center text-xs text-slate-600">
             <strong>Organizers:</strong> In the app, use <strong>Sign in</strong> with
             your website email and password—<strong>not</strong> this team code
-            (this code is only for athletes).
+            (this code is only for participants).
           </p>
           <p className="mt-2 text-center text-[11px] text-slate-400">
             Deep link:{" "}
@@ -139,7 +139,7 @@ export default async function JoinTeamLandingPage({
               Staff testing: web participant signup
             </summary>
             <p className="mt-2">
-              Not for real athletes.{" "}
+              Not for real campaign use.{" "}
               <Link
                 href={`/join/${params.slug}/participate`}
                 className="font-medium text-hh-primary underline"

@@ -47,7 +47,7 @@ export default function PrivacyPage() {
       <section className="mt-8 space-y-4 text-sm leading-relaxed">
         <h2 className="text-lg font-semibold text-hh-dark">What we collect</h2>
         <p>
-          We collect information you provide to run fundraisers: athlete names
+          We collect information you provide to run fundraisers: participant names
           and jersey numbers, school and team context, optional donor name and
           email for receipts, and phone numbers for contacts you explicitly
           choose to message through the app.
@@ -121,7 +121,7 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold text-hh-dark">Donor anonymity</h2>
         <p>
           Donors may give anonymously where the product supports it; anonymous
-          donations may omit display names in views shown to athletes and to the
+          donations may omit display names in views shown to participants and to the
           program Organizer while
           still recording the financial transaction.
         </p>
