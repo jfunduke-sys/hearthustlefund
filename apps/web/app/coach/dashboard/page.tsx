@@ -8,7 +8,18 @@ import type { Athlete, Donation, Fundraiser } from "@heart-and-hustle/shared";
 import { ensureFundraiserJoinCode } from "@/lib/join-code";
 import { ensureCoachParticipantAthlete } from "@/app/actions/coach";
 
-export default async function CoachDashboardPage() {
+const DONATIONS_PAGE_SIZE = 100;
+
+type Search = {
+  donationsPage?: string;
+  donationsSort?: string;
+};
+
+export default async function CoachDashboardPage({
+  searchParams,
+}: {
+  searchParams?: Search;
+}) {
   const supabase = createClient();
   const {
     data: { user },
@@ -79,15 +90,69 @@ export default async function CoachDashboardPage() {
     .select("*")
     .eq("fundraiser_id", active.id);
 
-  const { data: donations } = await admin
+  const donationsSort =
+    searchParams?.donationsSort === "oldest" ? "oldest" : "newest";
+  const sortAsc = donationsSort === "oldest";
+
+  const { count: donationsTotalCountRaw } = await supabase
+    .from("donations")
+    .select("*", { count: "exact", head: true })
+    .eq("fundraiser_id", active.id);
+
+  const donationsTotalCount = donationsTotalCountRaw ?? 0;
+  const maxPage = Math.max(
+    1,
+    Math.ceil(donationsTotalCount / DONATIONS_PAGE_SIZE)
+  );
+
+  const requestedDonationsPage = Math.max(
+    1,
+    parseInt(String(searchParams?.donationsPage ?? "1"), 10) || 1
+  );
+  if (requestedDonationsPage > maxPage) {
+    redirect(
+      `/coach/dashboard?donationsPage=${maxPage}&donationsSort=${donationsSort}`
+    );
+  }
+  const donationsPage = requestedDonationsPage;
+
+  const from = (donationsPage - 1) * DONATIONS_PAGE_SIZE;
+  const to = from + DONATIONS_PAGE_SIZE - 1;
+
+  const { data: donationsPageRows } = await supabase
     .from("donations")
     .select("*")
     .eq("fundraiser_id", active.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: sortAsc })
+    .range(from, to);
+
+  const { data: totalRaisedRaw } = await supabase.rpc("fundraiser_total_raised", {
+    p_fundraiser_id: active.id,
+  });
+
+  const campaignTotalRaised =
+    totalRaisedRaw != null ? Number(totalRaisedRaw) : 0;
+
+  const { data: perAthleteRows } = await supabase.rpc(
+    "fundraiser_donation_totals_by_athlete",
+    { p_fundraiser_id: active.id }
+  );
 
   const athleteList = (athletes ?? []) as Athlete[];
-  const donationList = (donations ?? []) as Donation[];
+  const donationList = (donationsPageRows ?? []) as Donation[];
   const athleteIds = athleteList.map((a) => a.id);
+
+  const donationsByAthlete: Record<string, number> = {};
+  const raisedByAthlete: Record<string, number> = {};
+  for (const row of perAthleteRows ?? []) {
+    const aid = row.athlete_id as string;
+    donationsByAthlete[aid] = Number(row.donation_count);
+    raisedByAthlete[aid] = Number(row.raised_total);
+  }
+  for (const a of athleteList) {
+    if (donationsByAthlete[a.id] === undefined) donationsByAthlete[a.id] = 0;
+    if (raisedByAthlete[a.id] === undefined) raisedByAthlete[a.id] = 0;
+  }
 
   let contactRows: { athlete_id: string; texted_at: string | null }[] = [];
   if (athleteIds.length) {
@@ -103,18 +168,6 @@ export default async function CoachDashboardPage() {
     if (!c.texted_at) continue;
     const n = textsByAthlete.get(c.athlete_id) ?? 0;
     textsByAthlete.set(c.athlete_id, n + 1);
-  }
-
-  const donationsByAthlete = new Map<string, number>();
-  for (const d of donationList) {
-    const n = donationsByAthlete.get(d.athlete_id) ?? 0;
-    donationsByAthlete.set(d.athlete_id, n + 1);
-  }
-
-  const raisedByAthlete = new Map<string, number>();
-  for (const d of donationList) {
-    const sum = raisedByAthlete.get(d.athlete_id) ?? 0;
-    raisedByAthlete.set(d.athlete_id, sum + Number(d.amount));
   }
 
   const coachAthlete =
@@ -134,9 +187,14 @@ export default async function CoachDashboardPage() {
       }
       athletes={athleteList}
       donations={donationList}
+      campaignTotalRaised={campaignTotalRaised}
+      donationsTotalCount={donationsTotalCount}
+      donationsPage={donationsPage}
+      donationsPageSize={DONATIONS_PAGE_SIZE}
+      donationsSort={donationsSort}
       textsByAthlete={Object.fromEntries(textsByAthlete)}
-      donationsByAthlete={Object.fromEntries(donationsByAthlete)}
-      raisedByAthlete={Object.fromEntries(raisedByAthlete)}
+      donationsByAthlete={donationsByAthlete}
+      raisedByAthlete={raisedByAthlete}
     />
   );
 }

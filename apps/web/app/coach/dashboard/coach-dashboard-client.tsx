@@ -20,6 +20,7 @@ import { updateCoachFundraiserDonorPageAbout } from "@/app/actions/coach";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -35,11 +36,29 @@ type Props = {
   coachEmail: string | null;
   coachUsername: string | null;
   athletes: Athlete[];
+  /** One page of donations for the table (see pagination props). */
   donations: Donation[];
+  /** Sum of all donations on this campaign (not just the current page). */
+  campaignTotalRaised: number;
+  donationsTotalCount: number;
+  donationsPage: number;
+  donationsPageSize: number;
+  donationsSort: "newest" | "oldest";
   textsByAthlete: Record<string, number>;
   donationsByAthlete: Record<string, number>;
   raisedByAthlete: Record<string, number>;
 };
+
+function coachDashboardDonationsHref(
+  page: number,
+  sort: "newest" | "oldest"
+): string {
+  const p = new URLSearchParams();
+  if (page > 1) p.set("donationsPage", String(page));
+  if (sort === "oldest") p.set("donationsSort", "oldest");
+  const q = p.toString();
+  return q ? `/coach/dashboard?${q}` : "/coach/dashboard";
+}
 
 /** Campaign-level per-athlete target from setup (not athlete-specific overrides). */
 function fundraiserImpliedPerAthleteGoal(fr: Fundraiser): number | null {
@@ -137,6 +156,11 @@ export default function CoachDashboardClient({
   coachUsername,
   athletes,
   donations,
+  campaignTotalRaised,
+  donationsTotalCount,
+  donationsPage,
+  donationsPageSize,
+  donationsSort,
   textsByAthlete,
   donationsByAthlete,
   raisedByAthlete,
@@ -166,10 +190,7 @@ export default function CoachDashboardClient({
       ? window.location.origin
       : process.env.NEXT_PUBLIC_APP_URL || "";
 
-  const totalRaised = donations.reduce(
-    (s, d) => s + Number(d.amount),
-    0
-  );
+  const totalRaised = campaignTotalRaised;
   const goal = Number(fundraiser.total_goal);
   const pct = goal > 0 ? Math.min(100, (totalRaised / goal) * 100) : 0;
   const end = new Date(fundraiser.end_date);
@@ -190,7 +211,7 @@ export default function CoachDashboardClient({
   );
 
   const analytics = useMemo(() => {
-    const donationCount = donations.length;
+    const donationCount = donationsTotalCount;
     const textsSentTotal = Object.values(textsByAthlete).reduce(
       (s, v) => s + v,
       0
@@ -208,7 +229,7 @@ export default function CoachDashboardClient({
       dollarsPerText,
       donationsPerText,
     };
-  }, [donations, textsByAthlete, totalRaised]);
+  }, [donationsTotalCount, textsByAthlete, totalRaised]);
 
   async function signOut() {
     const supabase = createClient();
@@ -853,6 +874,11 @@ More tips will show inside the app once you're in. Thanks!`;
         <Card className="overflow-hidden border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
           <CardHeader className="border-b border-slate-100 bg-slate-50/60">
             <CardTitle className="text-hh-dark">All donations</CardTitle>
+            <p className="mt-1 text-xs text-slate-600">
+              {donationsTotalCount === 0
+                ? "No donations yet."
+                : `Showing ${donations.length} of ${donationsTotalCount} donation${donationsTotalCount === 1 ? "" : "s"} (page ${donationsPage} of ${Math.max(1, Math.ceil(donationsTotalCount / donationsPageSize))}).`}
+            </p>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
@@ -865,23 +891,103 @@ More tips will show inside the app once you're in. Thanks!`;
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {donations.map((d) => (
-                  <TableRow key={d.id}>
-                    <TableCell>
-                      {formatDisplayDateTime(d.created_at)}
-                    </TableCell>
-                    <TableCell>
-                      {d.anonymous ? "Anonymous" : d.donor_name ?? "—"}
-                    </TableCell>
-                    <TableCell>${Number(d.amount).toFixed(2)}</TableCell>
-                    <TableCell>
-                      {athletes.find((a) => a.id === d.athlete_id)?.full_name ??
-                        "—"}
+                {donations.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={4}
+                      className="py-8 text-center text-sm text-slate-500"
+                    >
+                      No donations on this page.
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  donations.map((d) => (
+                    <TableRow key={d.id}>
+                      <TableCell>
+                        {formatDisplayDateTime(d.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        {d.anonymous ? "Anonymous" : d.donor_name ?? "—"}
+                      </TableCell>
+                      <TableCell>${Number(d.amount).toFixed(2)}</TableCell>
+                      <TableCell>
+                        {athletes.find((a) => a.id === d.athlete_id)?.full_name ??
+                          "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
+
+            {donationsTotalCount > 0 ? (
+              <div className="mt-4 flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="font-medium text-slate-600">Sort by date:</span>
+                  <Link
+                    href={coachDashboardDonationsHref(1, "newest")}
+                    className={cn(
+                      "rounded-md px-2.5 py-1 text-sm font-medium transition-colors",
+                      donationsSort === "newest"
+                        ? "bg-hh-primary text-white"
+                        : "text-hh-primary underline underline-offset-2 hover:bg-slate-100"
+                    )}
+                  >
+                    Newest first
+                  </Link>
+                  <Link
+                    href={coachDashboardDonationsHref(1, "oldest")}
+                    className={cn(
+                      "rounded-md px-2.5 py-1 text-sm font-medium transition-colors",
+                      donationsSort === "oldest"
+                        ? "bg-hh-primary text-white"
+                        : "text-hh-primary underline underline-offset-2 hover:bg-slate-100"
+                    )}
+                  >
+                    Oldest first
+                  </Link>
+                </div>
+                {donationsTotalCount > donationsPageSize ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button variant="outline" size="sm" asChild disabled={donationsPage <= 1}>
+                      <Link
+                        href={coachDashboardDonationsHref(
+                          donationsPage - 1,
+                          donationsSort
+                        )}
+                      >
+                        Previous
+                      </Link>
+                    </Button>
+                    <span className="text-sm tabular-nums text-slate-600">
+                      Page {donationsPage} /{" "}
+                      {Math.max(
+                        1,
+                        Math.ceil(donationsTotalCount / donationsPageSize)
+                      )}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      disabled={
+                        donationsPage >=
+                        Math.ceil(donationsTotalCount / donationsPageSize)
+                      }
+                    >
+                      <Link
+                        href={coachDashboardDonationsHref(
+                          donationsPage + 1,
+                          donationsSort
+                        )}
+                      >
+                        Next
+                      </Link>
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 
