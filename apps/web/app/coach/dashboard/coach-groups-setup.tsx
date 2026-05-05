@@ -109,50 +109,60 @@ export default function CoachGroupsSetup({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5">
-      <h3 className="text-sm font-bold uppercase tracking-wide text-slate-600">
-        Group setup
-      </h3>
-      <p className="mt-1 text-xs leading-relaxed text-slate-600">
-        Create teams, assign each participant to one group, and pick one group
-        manager per group (they need an app account on this campaign). Replacing
-        the number of groups clears all placements and manager assignments.
-      </p>
+    <div className="space-y-5">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+          Roster setup
+        </p>
+        <h3 className="mt-1 text-lg font-semibold text-hh-dark">
+          Groups, managers, and placements
+        </h3>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          Set how many groups you need, name them, assign a manager per group, then
+          place each participant. Managers must already use the app on this campaign.
+          Replacing the group count clears names, placements, and managers.
+        </p>
+      </div>
 
       {msg ? (
-        <p className="mt-3 text-sm text-red-700" role="status">
+        <p className="text-sm text-red-700" role="status">
           {msg}
         </p>
       ) : null}
 
-      <div className="mt-4 flex flex-wrap items-end gap-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="group-shell-count" className="text-xs">
-            Number of groups
-          </Label>
-          <Input
-            id="group-shell-count"
-            type="text"
-            inputMode="numeric"
-            className="h-9 w-24"
-            value={shellCount}
-            onChange={(e) => setShellCount(e.target.value.replace(/\D/g, ""))}
+      <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+          Step 1 · Group shells
+        </p>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="group-shell-count" className="text-sm font-medium text-hh-dark">
+              How many groups?
+            </Label>
+            <Input
+              id="group-shell-count"
+              type="text"
+              inputMode="numeric"
+              className="h-11 w-28 text-base"
+              value={shellCount}
+              onChange={(e) => setShellCount(e.target.value.replace(/\D/g, ""))}
+              disabled={pending}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11"
             disabled={pending}
-          />
+            onClick={() => {
+              setMsg(null);
+              if (groups.length > 0) setReplaceOpen(true);
+              else runReplace();
+            }}
+          >
+            {groups.length > 0 ? "Replace all groups…" : "Create groups"}
+          </Button>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={pending}
-          onClick={() => {
-            setMsg(null);
-            if (groups.length > 0) setReplaceOpen(true);
-            else runReplace();
-          }}
-        >
-          {groups.length > 0 ? "Replace all groups…" : "Create groups"}
-        </Button>
       </div>
 
       <Dialog open={replaceOpen} onOpenChange={setReplaceOpen}>
@@ -181,21 +191,26 @@ export default function CoachGroupsSetup({
       </Dialog>
 
       {sortedGroups.length > 0 ? (
-        <div className="mt-6 space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Group names and managers
-          </p>
+        <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+              Step 2 · Names and managers
+            </p>
+            <p className="mt-1 text-sm text-slate-600">
+              Save each group name, then pick who leads that group in the app.
+            </p>
+          </div>
           <ul className="space-y-3">
             {sortedGroups.map((g) => (
               <li
                 key={g.id}
-                className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-slate-50/80 p-3 sm:flex-row sm:flex-wrap sm:items-end"
+                className="flex flex-col gap-3 rounded-lg border border-slate-200/90 bg-white p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-end"
               >
-                <div className="min-w-0 flex-1 space-y-1">
-                  <Label className="text-xs text-slate-600">Group name</Label>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Label className="text-sm font-medium text-hh-dark">Group name</Label>
                   <div className="flex flex-wrap gap-2">
                     <Input
-                      className="h-9 max-w-xs"
+                      className="h-10 max-w-xs text-base"
                       value={nameDraft[g.id] ?? g.name}
                       onChange={(e) =>
                         setNameDraft((d) => ({ ...d, [g.id]: e.target.value }))
@@ -230,10 +245,10 @@ export default function CoachGroupsSetup({
                     </Button>
                   </div>
                 </div>
-                <div className="min-w-[12rem] space-y-1 sm:min-w-[14rem]">
-                  <Label className="text-xs text-slate-600">Group manager</Label>
+                <div className="min-w-[12rem] space-y-2 sm:min-w-[14rem]">
+                  <Label className="text-sm font-medium text-hh-dark">Group manager</Label>
                   <select
-                    className="h-9 w-full max-w-xs rounded-md border border-slate-300 bg-white px-2 text-sm"
+                    className="h-10 w-full max-w-xs rounded-md border border-slate-300 bg-white px-3 text-sm"
                     disabled={pending}
                     value={managerUserIdByGroupId[g.id] ?? ""}
                     onChange={(e) => {
@@ -273,10 +288,15 @@ export default function CoachGroupsSetup({
       ) : null}
 
       {sortedGroups.length > 0 && athletes.length > 0 ? (
-        <div className="mt-8 overflow-x-auto">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Participant → group
-          </p>
+        <div className="space-y-3 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+              Step 3 · Participant placement
+            </p>
+            <p className="mt-1 text-sm text-slate-600">
+              Put each person in exactly one group (or leave unassigned until ready).
+            </p>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>

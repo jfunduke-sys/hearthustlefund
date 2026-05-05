@@ -107,6 +107,8 @@ type CodeModalPayload = {
   activityName?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  /** From intake: Organizer asked for sub-teams / group managers. */
+  wantsCampaignGroups?: boolean;
 };
 
 function buildCoachLaunchEmail(payload: CodeModalPayload) {
@@ -132,61 +134,50 @@ function buildCoachLaunchEmail(payload: CodeModalPayload) {
     payload.startDate && payload.endDate
       ? `Fundraiser dates: ${formatDisplayDate(payload.startDate)} to ${formatDisplayDate(payload.endDate)}\n`
       : "";
+  const groupsBlock =
+    payload.wantsCampaignGroups === true
+      ? `
+Teams / groups (you requested this on intake)
+On Organizer Dashboard → Teams / groups for this campaign: turn the feature on, set how many groups you need, name each group, assign every participant to a group, and pick one group manager per group (they must have joined this campaign in the app first). Managers get a Teams tab in the app for their group’s scoreboard.
+`
+      : "";
 
-  return `Subject: ${appName} fundraiser approval + your setup code
+  return `Subject: ${appName} — you're approved. Your setup code is inside.
 
 Hello,
 
-Your fundraiser request has been approved.
+Your fundraiser is approved.
 
-${schoolLine}${activityLine}${dateLine}Your one-time ${appName} setup code: ${payload.code}
-Code is locked to this Organizer email: ${payload.coachEmail}
+${schoolLine}${activityLine}${dateLine}Setup code: ${payload.code}
+(Use with this Organizer email only: ${payload.coachEmail})
 
-Step-by-step setup
-1) Desktop setup (first login with code)
-   • Go to: ${coachLoginUrl}
-   • Select "Start with my code"
-   • Enter this same email (${payload.coachEmail}) + the setup code above
-   • Create your password (you'll use email + password on return visits)
+What to do next
 
-2) Complete fundraiser setup on desktop
-   • Confirm team/school details, goals, and campaign dates
-   • Save and activate so your participant join code is generated
-   • Open Organizer Dashboard after setup: ${dashboardUrl}
+1) First-time login (desktop)
+${coachLoginUrl}
+→ "Start with my code" → same email as above + code → create your password.
 
-3) Share participant instructions from Organizer Dashboard
-   • In dashboard, use "Invite message for participants" and tap "Copy full message"
-   • Send that message to your participants (text/email/team app)
-   • It includes app download links + the participant join code
+2) Finish campaign setup on desktop
+Confirm details, goals, and dates, then activate so your participant join code is ready. Your dashboard: ${dashboardUrl}
 
-4) Set yourself up as a participant too
-   • In Organizer Dashboard, add yourself as a participant if needed
-   • In the app, log in with the same Organizer email + password (do not use the join code for Organizer login)
-   • Turn ON "Show my name on the team participant list" if you want your name visible
-   • Copy/share your personal donation link from the app dashboard
+3) Tell participants how to join
+On the dashboard, open "Invite message for participants" → Copy full message → send it (text, email, or team channel). It has app links and the team join code.
 
-5) Participant flow (what your team does)
-   • Participants download the app and join with your team code
-   • They create accounts, get personal donation links, and use Send Messages for outreach
-   • Reminder texts and outreach metrics are tracked in dashboard when messages are sent from the app tools
+4) Optional: add yourself as a participant
+Use the same Organizer email + password in the app if you want your own donation link on the roster. Do not use the team join code for Organizer login.
 
-6) During campaign
-   • Use desktop Organizer Dashboard for totals, roster, and exports
-   • Use app for participant texting/reminders and personal link sharing
+${groupsBlock.trim() ? `${groupsBlock.trim()}\n` : ""}5) While the campaign runs
+Desktop dashboard for totals, roster, and exports. Mobile app for what participants use day to day.
 
-7) Fundraiser close + payment
-   • At campaign end, review totals and donation records
-   • Disbursement timing and method follow the Terms of service (Fundraising Services Agreement), Section 7: Company initiates the organization’s share within three business days after applicable funds have cleared through Stripe, subject to W-9/agreement on file and the caveats in that section
-   • Full terms: ${webBase}/terms
-   • Keep exported records for accounting/compliance reporting
+After the campaign, our team will reach out about payout steps (W-9 and similar). You can export donation history from the dashboard anytime.
 
-Quick links
-• Organizer login (desktop): ${coachLoginUrl}
-• Organizer dashboard (desktop): ${dashboardUrl}
-• iPhone app: ${appStoreUrl}
-• Android app: ${playStoreUrl}
+Links
+Organizer login: ${coachLoginUrl}
+Dashboard: ${dashboardUrl}
+iPhone: ${appStoreUrl}
+Android: ${playStoreUrl}
 
-Reply to this email if you want us to walk through setup with you live.`;
+Reply if you want a quick walkthrough.`;
 }
 
 export function SuperadminTabs({
@@ -381,6 +372,8 @@ export function SuperadminTabs({
                                   activityName: r.sport_club_activity,
                                   startDate: r.fundraiser_start_date,
                                   endDate: r.fundraiser_end_date,
+                                  wantsCampaignGroups:
+                                    r.wants_campaign_groups === true,
                                 });
                                 router.refresh();
                               })
@@ -417,16 +410,31 @@ export function SuperadminTabs({
           <Card>
             <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4">
               <div>
-                <CardTitle>Approved fundraiser requests</CardTitle>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                  Post-approval
+                </p>
+                <CardTitle className="mt-1 text-hh-dark">
+                  Approved fundraiser requests
+                </CardTitle>
                 <p className="mt-1 text-sm text-slate-600">
                   Intake form data and the HH start code issued for each approval.
                   When the Organizer redeems the code, a live campaign appears under
                   Active fundraisers.
                 </p>
               </div>
-              <Button onClick={() => setStandaloneOpen(true)}>
-                Generate standalone code
-              </Button>
+              <div className="flex max-w-sm flex-col items-stretch gap-2 sm:items-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setStandaloneOpen(true)}
+                >
+                  Issue code without a request row
+                </Button>
+                <p className="text-right text-xs leading-snug text-slate-500">
+                  Use when an Organizer never filled the school request form but still
+                  needs a code tied to their email (same login flow as Approve).
+                </p>
+              </div>
             </CardHeader>
             <CardContent className="overflow-x-auto">
               <Table>
@@ -739,8 +747,9 @@ export function SuperadminTabs({
           <DialogHeader>
             <DialogTitle>Fundraiser code generated</DialogTitle>
             <DialogDescription>
-              Copy the full Organizer launch email below, paste into your message,
-              and send it to the assigned Organizer.
+              Copy the email below and send it to the Organizer. It matches what
+              they need for first login, dashboard setup, participants, and—if
+              they asked for it on intake—teams/groups.
             </DialogDescription>
           </DialogHeader>
           <p className="rounded-md bg-slate-100 p-4 text-center font-mono text-lg">
@@ -755,7 +764,7 @@ export function SuperadminTabs({
           <Textarea
             readOnly
             value={codeModal ? buildCoachLaunchEmail(codeModal) : ""}
-            rows={16}
+            rows={18}
             className="text-xs leading-relaxed"
           />
           <DialogFooter>
@@ -780,11 +789,14 @@ export function SuperadminTabs({
       <Dialog open={standaloneOpen} onOpenChange={setStandaloneOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Generate Organizer code</DialogTitle>
+            <DialogTitle>Issue Organizer code (standalone)</DialogTitle>
             <DialogDescription>
-              Every code is locked to one Organizer email. They use{" "}
-              <strong>Organizer login → Start with my code</strong> with that email
-              plus this code the first time (then a password for later).
+              Creates the same kind of 7-character setup code as{" "}
+              <strong>Approve and Generate Code</strong>, but{" "}
+              <strong>not</strong> linked to a school request row. Use it when you
+              already know the Organizer&apos;s email outside the intake form. The
+              code only works with that exact email at Organizer login → Start with
+              my code.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
@@ -816,6 +828,7 @@ export function SuperadminTabs({
                   setCodeModal({
                     code: res.code,
                     coachEmail: assigned,
+                    wantsCampaignGroups: false,
                   });
                   router.refresh();
                 })

@@ -328,9 +328,13 @@ export default function RequestFundraiserPage() {
                   </div>
                 </div>
                 <fieldset className="space-y-3">
-                  <legend className="text-base font-semibold text-hh-dark">
+                  <legend className="sr-only">Fundraiser kickoff preference</legend>
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                    Kickoff preference
+                  </p>
+                  <p className="text-base font-semibold text-hh-dark">
                     Fundraiser Kickoff
-                  </legend>
+                  </p>
                   <p className="text-sm text-slate-600">
                     Choose one. This helps us schedule support if you want a
                     Heart &amp; Hustle team member on-site.
@@ -445,35 +449,56 @@ export default function RequestFundraiserPage() {
                     className="h-12 text-base"
                   />
                 </div>
-                <fieldset className="space-y-2">
-                  <legend className="text-base font-medium text-hh-dark">
-                    Teams / groups for this campaign?
+                <fieldset className="space-y-3">
+                  <legend className="sr-only">
+                    Teams or groups for this campaign
                   </legend>
-                  <p className="text-sm leading-relaxed text-slate-600">
-                    If yes, after approval your Head Organizer can split participants
-                    into teams or groups, assign a group manager per group, and run a
-                    group scoreboard (totals only). You can still run a single-team
-                    campaign if you choose no.
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                    Campaign structure
                   </p>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <p className="text-base font-semibold text-hh-dark">
+                    Teams / groups for this campaign?
+                  </p>
+                  <p className="text-sm leading-relaxed text-slate-600">
+                    If yes, your Organizer can split participants into named groups,
+                    assign a manager per group, and use a per-group scoreboard. Pick
+                    no for one combined roster.
+                  </p>
+                  <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                    <label className="flex cursor-pointer gap-3">
                       <input
                         type="radio"
                         name="wants_campaign_groups"
                         value="yes"
                         required
-                        className="h-4 w-4 accent-hh-primary"
+                        className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
                       />
-                      Yes — we want teams or groups with group managers
+                      <span className="text-sm leading-snug text-slate-800">
+                        <span className="font-semibold text-hh-dark">
+                          Yes — sub-teams with group managers
+                        </span>
+                        <span className="mt-0.5 block text-slate-600">
+                          We want named groups, a manager each, and group-level
+                          totals in the app.
+                        </span>
+                      </span>
                     </label>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <label className="flex cursor-pointer gap-3">
                       <input
                         type="radio"
                         name="wants_campaign_groups"
                         value="no"
-                        className="h-4 w-4 accent-hh-primary"
+                        className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
                       />
-                      No — one campaign roster only
+                      <span className="text-sm leading-snug text-slate-800">
+                        <span className="font-semibold text-hh-dark">
+                          No — one roster for everyone
+                        </span>
+                        <span className="mt-0.5 block text-slate-600">
+                          Single participant list; no group managers or split
+                          scoreboards.
+                        </span>
+                      </span>
                     </label>
                   </div>
                 </fieldset>

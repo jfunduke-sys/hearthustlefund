@@ -24,8 +24,6 @@ import {
   updateCoachFundraiserUsesCampaignGroups,
 } from "@/app/actions/coach";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -521,7 +519,10 @@ More tips will show inside the app once you're in. Thanks!`;
 
         <Card className="border-slate-200/90 shadow-sm">
           <CardHeader className="space-y-1 pb-3 pt-4">
-            <CardTitle className="text-base text-hh-dark">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+              Donation pages
+            </p>
+            <CardTitle className="text-lg font-semibold text-hh-dark">
               Donor page message
             </CardTitle>
             <p className="text-xs text-slate-500">
@@ -629,33 +630,65 @@ More tips will show inside the app once you're in. Thanks!`;
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200/90 shadow-sm">
-          <CardHeader className="space-y-1 pb-3 pt-4">
-            <CardTitle className="text-base text-hh-dark">
-              Teams and groups
+        <Card className="border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
+          <CardHeader className="space-y-1 border-b border-slate-100 bg-slate-50/60 pb-4 pt-5">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+              Campaign structure
+            </p>
+            <CardTitle className="text-lg font-semibold text-hh-dark">
+              Teams / groups for this campaign
             </CardTitle>
-            <p className="text-xs text-slate-500">
-              Optional: split the roster into teams with a group manager each and a
-              scoreboard (each team&apos;s total raised only). Group setup on this
-              site and the group manager experience in the app will arrive in a
-              future update.
+            <p className="text-sm leading-relaxed text-slate-600">
+              Choose one. You can change this later, but turning groups off deletes
+              group names, manager picks, and who was in which group.
             </p>
           </CardHeader>
-          <CardContent className="space-y-3 pb-5 pt-0">
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="uses-campaign-groups"
-                checked={usesCampaignGroupsLocal}
+          <CardContent className="space-y-4 pb-6 pt-5">
+            <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+              <button
+                type="button"
                 disabled={groupsPending}
-                className="mt-0.5"
-                onCheckedChange={(v) => {
-                  const on = v === true;
-                  if (!on && usesCampaignGroupsLocal) {
+                onClick={() => {
+                  if (usesCampaignGroupsLocal) {
                     setGroupsMsg(null);
                     setGroupsOffConfirmOpen(true);
-                    return;
                   }
-                  if (on && !usesCampaignGroupsLocal) {
+                }}
+                className={cn(
+                  "flex w-full gap-3 rounded-lg border p-3.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-hh-primary/40",
+                  !usesCampaignGroupsLocal
+                    ? "border-hh-primary/45 bg-white shadow-sm ring-2 ring-hh-primary/20"
+                    : "border-transparent bg-white/50 hover:bg-white/90"
+                )}
+              >
+                <span
+                  className={cn(
+                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
+                    !usesCampaignGroupsLocal
+                      ? "border-hh-primary bg-hh-primary"
+                      : "border-slate-400 bg-white"
+                  )}
+                  aria-hidden
+                >
+                  {!usesCampaignGroupsLocal ? (
+                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                  ) : null}
+                </span>
+                <span className="min-w-0">
+                  <span className="block font-semibold text-hh-dark">
+                    Single roster
+                  </span>
+                  <span className="mt-1 block text-sm leading-snug text-slate-600">
+                    One participant list and one team total. Use this when you are
+                    not splitting into sub-teams or group managers.
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                disabled={groupsPending}
+                onClick={() => {
+                  if (!usesCampaignGroupsLocal) {
                     setGroupsMsg(null);
                     startGroupsTransition(async () => {
                       try {
@@ -673,20 +706,37 @@ More tips will show inside the app once you're in. Thanks!`;
                     });
                   }
                 }}
-              />
-              <div className="min-w-0 space-y-1">
-                <Label
-                  htmlFor="uses-campaign-groups"
-                  className="cursor-pointer text-sm font-medium leading-snug text-hh-dark"
+                className={cn(
+                  "flex w-full gap-3 rounded-lg border p-3.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-hh-primary/40",
+                  usesCampaignGroupsLocal
+                    ? "border-hh-primary/45 bg-white shadow-sm ring-2 ring-hh-primary/20"
+                    : "border-transparent bg-white/50 hover:bg-white/90"
+                )}
+              >
+                <span
+                  className={cn(
+                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
+                    usesCampaignGroupsLocal
+                      ? "border-hh-primary bg-hh-primary"
+                      : "border-slate-400 bg-white"
+                  )}
+                  aria-hidden
                 >
-                  Use teams and groups on this campaign
-                </Label>
-                <p className="text-xs leading-relaxed text-slate-600">
-                  When enabled, you&apos;ll be able to define groups, assign a
-                  manager per group, and place each participant in one group. When
-                  disabled, all of that configuration is removed.
-                </p>
-              </div>
+                  {usesCampaignGroupsLocal ? (
+                    <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                  ) : null}
+                </span>
+                <span className="min-w-0">
+                  <span className="block font-semibold text-hh-dark">
+                    Teams and groups
+                  </span>
+                  <span className="mt-1 block text-sm leading-snug text-slate-600">
+                    Create named groups, assign each participant to a group, and set
+                    one group manager per group (they use the app on this campaign).
+                    Managers see a Teams tab for their group scoreboard.
+                  </span>
+                </span>
+              </button>
             </div>
 
             {usesCampaignGroupsLocal ? (
@@ -998,7 +1048,12 @@ More tips will show inside the app once you're in. Thanks!`;
 
         <Card className="overflow-hidden border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
           <CardHeader className="border-b border-slate-100 bg-slate-50/60">
-            <CardTitle className="text-hh-dark">Participant roster</CardTitle>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+              Roster
+            </p>
+            <CardTitle className="mt-1 text-lg font-semibold text-hh-dark">
+              Participant roster
+            </CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
@@ -1066,7 +1121,12 @@ More tips will show inside the app once you're in. Thanks!`;
 
         <Card className="overflow-hidden border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
           <CardHeader className="border-b border-slate-100 bg-slate-50/60">
-            <CardTitle className="text-hh-dark">All donations</CardTitle>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+              Revenue
+            </p>
+            <CardTitle className="mt-1 text-lg font-semibold text-hh-dark">
+              All donations
+            </CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <p className="text-xs text-slate-600">
