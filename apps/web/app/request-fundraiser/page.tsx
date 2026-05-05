@@ -457,7 +457,12 @@ export default function RequestFundraiserPage() {
                     Campaign structure
                   </p>
                   <p className="text-base font-semibold text-hh-dark">
-                    Teams / groups for this campaign?
+                    Teams/Groups for This Campaign?
+                  </p>
+                  <p className="text-sm leading-relaxed text-slate-600">
+                    If yes, your Organizer can split participants into named groups,
+                    assign a manager per group, and use a per-group scoreboard. Pick
+                    no for one combined roster.
                   </p>
                   <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                     <label className="flex cursor-pointer items-center gap-3">
