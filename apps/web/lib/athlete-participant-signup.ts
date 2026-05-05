@@ -1,33 +1,19 @@
 import { z } from "zod";
-import { SMS_REMINDER_CONSENT_VERSION } from "@heart-and-hustle/shared";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { normalizeUsToE164 } from "@/lib/sms-phone";
 
-export const athleteSignupBodySchema = z
-  .object({
-    fundraiserId: z.string().uuid(),
-    email: z.string().email().transform((e) => e.toLowerCase().trim()),
-    password: z.string().min(8).max(128),
-    fullName: z.string().trim().min(1).max(200),
-    teamName: z.string().trim().min(1).max(200),
-    jerseyNumber: z.string().trim().max(20).nullable().optional(),
-    /** Consent to automated fundraiser reminder SMS (Twilio). */
-    smsRemindersOptIn: z.boolean().default(false),
-    /** US mobile; required when smsRemindersOptIn is true. */
-    mobilePhone: z.string().optional().nullable().default(null),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.smsRemindersOptIn) return;
-    const normalized = normalizeUsToE164(data.mobilePhone ?? "");
-    if (!normalized) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message:
-          "Enter a valid US mobile number (10 digits) to receive text reminders.",
-        path: ["mobilePhone"],
-      });
-    }
-  });
+/**
+ * Participant account creation — no SMS opt-in fields. Twilio/US carrier policy:
+ * agreeing to SMS must not appear bundled with signup; opt-in is a separate
+ * step post-account (dashboard or sms-phone API after session exists).
+ */
+export const athleteSignupBodySchema = z.object({
+  fundraiserId: z.string().uuid(),
+  email: z.string().email().transform((e) => e.toLowerCase().trim()),
+  password: z.string().min(8).max(128),
+  fullName: z.string().trim().min(1).max(200),
+  teamName: z.string().trim().min(1).max(200),
+  jerseyNumber: z.string().trim().max(20).nullable().optional(),
+});
 
 export type AthleteSignupResult =
   | { ok: true }
@@ -38,14 +24,9 @@ export async function registerAthleteParticipant(
 ): Promise<AthleteSignupResult> {
   const parsed = athleteSignupBodySchema.safeParse(raw);
   if (!parsed.success) {
-    const flat = parsed.error.flatten();
-    const field =
-      flat.fieldErrors.mobilePhone?.[0] ??
-      flat.fieldErrors.smsRemindersOptIn?.[0] ??
-      parsed.error.errors[0]?.message;
     return {
       ok: false,
-      error: field ?? "Invalid request.",
+      error: parsed.error.errors[0]?.message ?? "Invalid request.",
       status: 400,
     };
   }
@@ -56,22 +37,7 @@ export async function registerAthleteParticipant(
     fullName,
     teamName,
     jerseyNumber,
-    smsRemindersOptIn,
-    mobilePhone,
   } = parsed.data;
-
-  const smsE164 =
-    smsRemindersOptIn && mobilePhone
-      ? normalizeUsToE164(mobilePhone)
-      : null;
-  if (smsRemindersOptIn && !smsE164) {
-    return {
-      ok: false,
-      error:
-        "Enter a valid US mobile number (10 digits) to receive text reminders.",
-      status: 400,
-    };
-  }
 
   const admin = createAdminClient();
   const { data: fr, error: frErr } = await admin
@@ -102,21 +68,11 @@ export async function registerAthleteParticipant(
     };
   }
 
-  const consentAt = new Date().toISOString();
   const { data: created, error: cuErr } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    user_metadata: {
-      sms_reminders_opt_in: smsRemindersOptIn,
-      ...(smsE164
-        ? {
-            sms_phone: smsE164,
-            sms_consent_at: consentAt,
-            sms_consent_version: SMS_REMINDER_CONSENT_VERSION,
-          }
-        : {}),
-    },
+    user_metadata: {},
   });
 
   if (cuErr) {

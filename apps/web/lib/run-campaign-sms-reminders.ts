@@ -21,8 +21,8 @@ function smsPhoneFromUser(user: User): string | null {
     sms_phone?: string;
     sms_reminders_opt_in?: boolean;
   } | undefined;
-  /** Explicit opt-out at signup — never send. */
-  if (meta?.sms_reminders_opt_in === false) return null;
+  /** Only send after explicit opt-in (dashboard or post-signup sms-phone API). */
+  if (meta?.sms_reminders_opt_in !== true) return null;
 
   const raw =
     typeof meta?.sms_phone === "string" && meta.sms_phone.trim()

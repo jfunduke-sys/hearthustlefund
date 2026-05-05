@@ -36,11 +36,13 @@ export default function SmsRemindersInfoPage() {
         <section className="mt-10 space-y-4 text-slate-800">
           <h2 className="text-lg font-semibold text-hh-dark">Consent</h2>
           <p className="text-sm leading-relaxed sm:text-base">
-            You agree to reminder texts separately from account creation. Saving a
-            U.S. mobile number for reminders requires the consent language below when
-            SMS is enabled (mobile profile, limited web joins, or Organizer onboarding
-            where applicable). Organizers who receive reminders must provide numbers
-            and consent through the same flows where the platform offers SMS.
+            Joining a team and creating your login do <strong>not</strong> require
+            SMS or a reminder phone number. Automated reminders are purely optional:
+            after your account exists, you can turn them on using the standalone
+            opt-in inside the mobile app (Dashboard → Your Contact Info). On the
+            internal web signup success screen, we also offer an optional reminder
+            opt-in step <strong>only after</strong> account creation succeeds—never on
+            the same form as signup.
           </p>
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">

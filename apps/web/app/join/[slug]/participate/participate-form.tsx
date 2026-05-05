@@ -28,6 +28,137 @@ type Fr = {
   unique_slug: string;
 };
 
+function PostJoinSmsOptIn({ accessToken }: { accessToken: string }) {
+  const [mobile, setMobile] = useState("");
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  async function onEnable() {
+    setFeedback(null);
+    if (!consentChecked) {
+      setFeedback("Check the agreement box to turn on reminder texts.");
+      return;
+    }
+    const digits = mobile.replace(/\D/g, "");
+    if (digits.length < 10) {
+      setFeedback("Enter a valid 10-digit US mobile number.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/mobile/sms-phone", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          smsRemindersOptIn: true,
+          phone: mobile.trim(),
+        }),
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      if (!res.ok) {
+        throw new Error(payload.error || "Could not save reminder settings.");
+      }
+      setSaved(true);
+      setFeedback("Reminder texts enabled. Reply STOP anytime to opt out.");
+    } catch (err: unknown) {
+      setFeedback(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (saved) {
+    return (
+      <p className="rounded-lg border border-emerald-200 bg-emerald-50/90 px-3 py-2 text-sm text-emerald-900">
+        {feedback}
+      </p>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50/90 p-4">
+      <p className="text-sm font-semibold text-hh-dark">
+        Optional: campaign reminder texts
+      </p>
+      <p className="mt-2 text-xs leading-relaxed text-slate-600">
+        Your account is already set up—you can skip this. This step is{" "}
+        <strong>only</strong> for automated fundraiser reminders from{" "}
+        {PLATFORM.shortName}.
+      </p>
+      <div className="mt-3 space-y-2">
+        <Label htmlFor="postJoinSmsMobile">US mobile</Label>
+        <Input
+          id="postJoinSmsMobile"
+          type="tel"
+          inputMode="numeric"
+          autoComplete="tel"
+          value={mobile}
+          onChange={(e) => setMobile(e.target.value)}
+          placeholder="10-digit mobile"
+        />
+      </div>
+      <label className="mt-3 flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-slate-700">
+        <Checkbox
+          checked={consentChecked}
+          onCheckedChange={(v) => setConsentChecked(v === true)}
+          className="mt-0.5"
+          aria-labelledby="post-join-sms-consent-label"
+        />
+        <span id="post-join-sms-consent-label">
+          {SMS_REMINDER_CONSENT_CHECKBOX_COPY}{" "}
+          <Link
+            href="/terms"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-hh-primary underline"
+          >
+            Terms
+          </Link>
+          ,{" "}
+          <Link
+            href="/privacy"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-hh-primary underline"
+          >
+            Privacy
+          </Link>
+          ,{" "}
+          <Link
+            href="/sms-reminders"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-hh-primary underline"
+          >
+            SMS program page
+          </Link>
+          .
+        </span>
+      </label>
+      {feedback ? (
+        <p className="mt-2 text-sm text-red-600" role="alert">
+          {feedback}
+        </p>
+      ) : null}
+      <Button
+        type="button"
+        className="mt-3 w-full bg-hh-primary hover:bg-hh-primary/90"
+        disabled={busy}
+        onClick={() => void onEnable()}
+      >
+        {busy ? "Saving…" : "Turn on reminder texts"}
+      </Button>
+    </div>
+  );
+}
+
 export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
   const [fullName, setFullName] = useState("");
   const [jersey, setJersey] = useState("");
@@ -35,11 +166,10 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [smsMobile, setSmsMobile] = useState("");
-  const [smsRemindersOptIn, setSmsRemindersOptIn] = useState(false);
   const [done, setDone] = useState<{
     donatePath: string;
     name: string;
+    accessToken: string;
   } | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
@@ -52,15 +182,6 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
     if (password.length < 8) {
       setError(NEW_PASSWORD_REQUIREMENT_COPY);
       return;
-    }
-    if (smsRemindersOptIn) {
-      const digits = smsMobile.replace(/\D/g, "");
-      if (digits.length < 10) {
-        setError(
-          "Enter a valid 10-digit US mobile for SMS reminders, or uncheck SMS."
-        );
-        return;
-      }
     }
     setLoading(true);
     try {
@@ -75,8 +196,6 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
           fullName: fullName.trim(),
           teamName: fundraiser.team_name,
           jerseyNumber: jersey.trim() || null,
-          smsRemindersOptIn,
-          mobilePhone: smsRemindersOptIn ? smsMobile.trim() : null,
         }),
       });
       const regJson = (await regRes.json()) as { error?: string };
@@ -91,8 +210,10 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
           password,
         });
       if (signErr) throw signErr;
+      const accessToken = signInData.session?.access_token;
       const userId = signInData.session?.user?.id;
-      if (!userId) throw new Error("Could not start your session.");
+      if (!accessToken || !userId)
+        throw new Error("Could not start your session.");
 
       const { data: athlete } = await supabase
         .from("athletes")
@@ -101,11 +222,13 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
         .eq("fundraiser_id", fundraiser.id)
         .single();
 
-      if (!athlete?.unique_link_token) throw new Error("Could not load your link.");
+      if (!athlete?.unique_link_token)
+        throw new Error("Could not load your link.");
 
       setDone({
         donatePath: `/donate/${athlete.unique_link_token}`,
         name: fullName.trim(),
+        accessToken,
       });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -155,6 +278,9 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
             For contacts and texting, open the {PLATFORM.shortName} app and sign
             in with the same email.
           </p>
+
+          <PostJoinSmsOptIn accessToken={done.accessToken} />
+
           <Link href="/" className="text-sm font-medium text-hh-primary hover:underline">
             ← {BRAND.name}
           </Link>
@@ -183,6 +309,11 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
             Create your login below. You&apos;ll get your own donation page to
             share with supporters—quick to set up, easy to text from your phone
             in the app.
+          </p>
+          <p className="text-xs leading-relaxed text-slate-500">
+            Automated SMS reminders are not part of signup. After joining
+            successfully, this page—and the app Dashboard under Your Contact
+            Info—offer an optional reminder opt-in separately.
           </p>
         </div>
       </CardHeader>
@@ -240,64 +371,6 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
               autoComplete="new-password"
               required
             />
-          </div>
-          <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
-            <p className="text-sm font-medium text-hh-dark">
-              Optional: campaign SMS reminders
-            </p>
-            <div className="space-y-2">
-              <Label htmlFor="smsMobile">US mobile (if you want texts)</Label>
-              <Input
-                id="smsMobile"
-                name="hh-participant-sms-mobile"
-                type="tel"
-                inputMode="numeric"
-                autoComplete="tel"
-                value={smsMobile}
-                onChange={(e) => setSmsMobile(e.target.value)}
-                placeholder="10-digit mobile"
-              />
-            </div>
-            <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-slate-700">
-              <Checkbox
-                checked={smsRemindersOptIn}
-                onCheckedChange={(v) =>
-                  setSmsRemindersOptIn(v === true)
-                }
-                className="mt-0.5"
-                aria-labelledby="sms-consent-label"
-              />
-              <span id="sms-consent-label">
-                {SMS_REMINDER_CONSENT_CHECKBOX_COPY}{" "}
-                <Link
-                  href="/terms"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold text-hh-primary underline"
-                >
-                  Terms
-                </Link>
-                ,{" "}
-                <Link
-                  href="/privacy"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold text-hh-primary underline"
-                >
-                  Privacy
-                </Link>
-                ,{" "}
-                <Link
-                  href="/sms-reminders"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold text-hh-primary underline"
-                >
-                  SMS program page
-                </Link>
-                .
-              </span>
-            </label>
           </div>
           {error ? (
             <p className="text-sm text-red-600" role="alert">
