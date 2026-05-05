@@ -459,45 +459,28 @@ export default function RequestFundraiserPage() {
                   <p className="text-base font-semibold text-hh-dark">
                     Teams / groups for this campaign?
                   </p>
-                  <p className="text-sm leading-relaxed text-slate-600">
-                    If yes, your Organizer can split participants into named groups,
-                    assign a manager per group, and use a per-group scoreboard. Pick
-                    no for one combined roster.
-                  </p>
-                  <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
-                    <label className="flex cursor-pointer gap-3">
+                  <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                    <label className="flex cursor-pointer items-center gap-3">
                       <input
                         type="radio"
                         name="wants_campaign_groups"
                         value="yes"
                         required
-                        className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
+                        className="h-4 w-4 shrink-0 accent-hh-primary"
                       />
-                      <span className="text-sm leading-snug text-slate-800">
-                        <span className="font-semibold text-hh-dark">
-                          Yes — sub-teams with group managers
-                        </span>
-                        <span className="mt-0.5 block text-slate-600">
-                          We want named groups, a manager each, and group-level
-                          totals in the app.
-                        </span>
+                      <span className="text-sm font-semibold leading-snug text-hh-dark">
+                        Yes — Groups with Group Managers
                       </span>
                     </label>
-                    <label className="flex cursor-pointer gap-3">
+                    <label className="flex cursor-pointer items-center gap-3">
                       <input
                         type="radio"
                         name="wants_campaign_groups"
                         value="no"
-                        className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
+                        className="h-4 w-4 shrink-0 accent-hh-primary"
                       />
-                      <span className="text-sm leading-snug text-slate-800">
-                        <span className="font-semibold text-hh-dark">
-                          No — one roster for everyone
-                        </span>
-                        <span className="mt-0.5 block text-slate-600">
-                          Single participant list; no group managers or split
-                          scoreboards.
-                        </span>
+                      <span className="text-sm font-semibold leading-snug text-hh-dark">
+                        No — One Roster for All
                       </span>
                     </label>
                   </div>
