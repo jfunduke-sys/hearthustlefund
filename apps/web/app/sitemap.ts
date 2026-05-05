@@ -17,6 +17,8 @@ const STATIC_PATHS: {
     { path: "/support", changeFrequency: "monthly", priority: 0.75 },
     { path: "/terms", changeFrequency: "yearly", priority: 0.7 },
     { path: "/privacy", changeFrequency: "yearly", priority: 0.7 },
+    { path: "/donor-terms", changeFrequency: "yearly", priority: 0.6 },
+    { path: "/donor-privacy", changeFrequency: "yearly", priority: 0.6 },
     { path: "/sms-reminders", changeFrequency: "yearly", priority: 0.65 },
     { path: "/request-fundraiser", changeFrequency: "monthly", priority: 0.8 },
   ];

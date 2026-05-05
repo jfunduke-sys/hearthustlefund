@@ -5,7 +5,7 @@ import { BRAND } from "@/lib/brand";
 export const metadata: Metadata = {
   title: "Privacy policy",
   description:
-    "What Heart & Hustle Fundraising collects and how we use personal data — consistent with our Terms of service (Fundraising Services Agreement).",
+    "Organization and participant data practices for Heart & Hustle's website and mobile app.",
   alternates: { canonical: "/privacy" },
 };
 
@@ -24,123 +24,66 @@ export default function PrivacyPage() {
         </Link>
       </p>
       <p className="mt-2 text-xs text-slate-500">
-        The <strong>Fundraising Services Agreement</strong> is published as our{" "}
-        <Link href="/terms" className="text-hh-primary underline">
-          Terms of service
-        </Link>{" "}
-        and includes program data-use terms (Section 9). This{" "}
-        <strong>Privacy policy</strong> is the dedicated page for what we
-        collect and how we use personal data; it is written to be{" "}
-        <strong>consistent</strong> with that agreement.
+        This Privacy policy applies to Company interactions with Organizations,
+        Organizers, and participants on the website and mobile app. Donor-specific
+        policies are published on donor-facing pages.
       </p>
 
       <p className="mt-6 rounded-lg border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm leading-relaxed text-slate-800">
-        <strong>Organizer</strong> refers to the coach, program sponsor, or lead
-        fundraising contact whom the school or organization authorizes to request and
-        manage a campaign—the role described in our{" "}
-        <Link href="/terms" className="text-hh-primary underline">
-          Terms of service
-        </Link>{" "}
-        (Fundraising Services Agreement).
+        <strong>Organizer</strong> means the coach, sponsor, or lead fundraising
+        representative authorized by an Organization to manage campaigns. For this
+        policy, participant activity is treated as part of Organization activity and
+        responsibilities under our <Link href="/terms" className="text-hh-primary underline">Terms of service</Link>.
       </p>
 
       <section className="mt-8 space-y-4 text-sm leading-relaxed">
         <h2 className="text-lg font-semibold text-hh-dark">What we collect</h2>
         <p>
-          We collect information you provide to run fundraisers: participant names
-          and jersey numbers, school and team context, optional donor name and
-          email for receipts, and phone numbers for contacts you explicitly
-          choose to message through the app.
+          We collect information Organizations and participants provide for campaign
+          setup and operation: participant names, roster details, contact lists that
+          users explicitly choose to upload, campaign metadata, and account login data.
+        </p>
+
+        <h2 className="text-lg font-semibold text-hh-dark">How we use data</h2>
+        <p>
+          We use personal data only to operate the platform, support campaign workflows,
+          process payments through service providers, provide security and fraud controls,
+          and satisfy legal, accounting, and compliance requirements.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">What we do not do</h2>
         <p>
-          We do <strong>not</strong> sell personal data. We do not use donor or
-          participant data for third-party marketing or advertising. We share
-          data only with service providers needed to run the platform (for
-          example, payment processing and hosting/auth), and as required for
-          legal, regulatory, and tax compliance—matching Section 9 of our{" "}
-          <Link href="/terms" className="text-hh-primary underline">
-            Terms of service
-          </Link>{" "}
-          (Fundraising Services Agreement) for approved program organizations.
-        </p>
-
-        <h2 className="text-lg font-semibold text-hh-dark">Payments (Stripe)</h2>
-        <p>
-          Card and payment details are handled by Stripe, Inc. under
-          PCI-compliant flows. We store donation amounts and optional donor
-          fields needed for reporting—not full card numbers. Donors who provide
-          an email may receive a <strong>payment receipt from Stripe</strong>;
-          that receipt shows that a payment was processed. It is{" "}
-          <strong>not</strong>, by itself, a charitable tax acknowledgment;
-          that is the same position stated in our{" "}
-          <Link href="/terms" className="text-hh-primary underline">
-            Terms of service
-          </Link>{" "}
-          (Section 8). Eligible 501(c)(3) or other exempt
-          organizations that receive funds are responsible for any donor
-          acknowledgments required by law.
+          We do <strong>not</strong> sell personal data. We do not use Organization or
+          participant data for third-party advertising. We share data only with providers
+          needed to run the service (for example hosting, auth, messaging, and payment
+          processing) and only as required to perform those services or comply with law.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Device contacts</h2>
         <p>
-          The mobile app may request access to your contacts only so you can
-          pick recipients for fundraising texts. Only contacts you select are
-          sent to our servers (name and phone), to support reminder flows—not
-          your entire address book.
+          The mobile app may request access to contacts so participants can choose who to
+          message for campaign outreach. Only contacts the user selects are sent to Company
+          systems; we do not ingest the entire address book by default.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">SMS reminders</h2>
         <p>
-          We may send <strong>optional</strong> short fundraiser reminder texts
-          only when a user has opted in with the consent shown on our{" "}
-          <Link
-            href="/sms-reminders"
-            className="text-hh-primary underline"
-          >
-            SMS program disclosures
-          </Link>{" "}
-          page. We do not buy phone lists or use SMS for unrelated marketing.
-          That page also explains message frequency and how to opt out (STOP,
-          HELP, and app settings).
-        </p>
-
-        <h2 className="text-lg font-semibold text-hh-dark">
-          Participant access lifecycle
-        </h2>
-        <p>
-          Participant app access is campaign-specific. Participant accounts may
-          remain available during an active campaign and any closeout period.
-          When SuperAdmin finalizes closeout for a fundraiser (completed or
-          cancelled), participant campaign access is removed for that fundraiser.
-          Organizers maintain persistent portal accounts and can recover access via
-          secure password-reset flow.
-        </p>
-
-        <h2 className="text-lg font-semibold text-hh-dark">Donor anonymity</h2>
-        <p>
-          Donors may give anonymously where the product supports it; anonymous
-          donations may omit display names in views shown to participants and to the
-          program Organizer while
-          still recording the financial transaction.
+          The service may send optional reminder texts only when a user opts in to the
+          SMS program terms. Message cadence, STOP/HELP instructions, and consent language
+          are published at <Link href="/sms-reminders" className="text-hh-primary underline">SMS reminders</Link>.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Retention</h2>
         <p>
-          We retain information according to data-minimization principles and our
-          legal obligations. Outreach/contact list data is minimized after
-          fundraiser closeout, while records needed for payment operations, tax,
-          accounting, compliance, fraud prevention, and dispute resolution are
-          retained for required periods under applicable law and contract terms.
-          Contact{" "}
-          <a
-            className="text-hh-primary underline"
-            href="mailto:privacy@hearthustlefund.com"
-          >
-            privacy@hearthustlefund.com
-          </a>{" "}
-          for privacy or deletion requests where applicable.
+          We retain information under data-minimization principles and legal requirements.
+          Contact/outreach data may be minimized after campaign closeout, while records
+          needed for financial operations, dispute handling, tax/accounting, and compliance
+          may be retained for required periods.
+        </p>
+
+        <h2 className="text-lg font-semibold text-hh-dark">Support and requests</h2>
+        <p>
+          For privacy questions, contact <a className="text-hh-primary underline" href="mailto:privacy@hearthustlefund.com">privacy@hearthustlefund.com</a>. For general support, contact <a className="text-hh-primary underline" href="mailto:support@hearthustlefund.com">support@hearthustlefund.com</a>.
         </p>
       </section>
     </div>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
 /** Bump when the document body text changes (SuperAdmin + public /terms). */
-export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "9" as const;
+export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "10" as const;
 
 type Props = {
   pfrReg: string;
@@ -180,7 +180,7 @@ export function FundraisingServicesAgreementBody({
         <p className="mt-2">
           Organization assumes full responsibility for all participant actions.
           Organization is solely responsible for the lawful collection, use, and
-          sharing of participant and donor information in connection with its
+          sharing of participant and Organization information in connection with its
           programs, except as otherwise expressly handled by Company as described
           in this Agreement and the Privacy policy.
         </p>
@@ -243,7 +243,7 @@ export function FundraisingServicesAgreementBody({
         </p>
         <p className="mt-2">
           Organization is responsible for disputes, claims, or chargebacks
-          arising from or related to its campaign, participants, or donors to the
+          arising from or related to its campaign, participants, or third-party contributors to the
           extent not solely caused by Company&apos;s gross negligence or willful
           misconduct. Company may withhold, offset, or recover amounts from
           Organization&apos;s share (or pursue reimbursement) for chargebacks,
@@ -265,44 +265,24 @@ export function FundraisingServicesAgreementBody({
 
       <section>
         <h3 className="text-base font-semibold text-hh-dark print:font-bold">
-          8. TAX DEDUCTIBILITY OF DONATIONS
+          8. PAYMENT PROCESSING RECORDS
         </h3>
         <p className="mt-2">
-          Heart &amp; Hustle Fundraising, LLC is a registered Professional Fund
-          Raiser with the Illinois Attorney General&apos;s Office and is not a
-          charitable organization or tax-exempt entity under Section 501(c)(3) or
-          any other provision of the Internal Revenue Code. Company makes no
-          representation, warranty, or guarantee regarding the tax deductibility
-          of any donation processed through its platform.
+          Company facilitates campaign payment processing through Stripe, Inc.
+          and maintains transaction records required for financial operations,
+          reconciliation, fraud prevention, dispute handling, legal compliance,
+          and payout administration.
         </p>
         <p className="mt-2">
-          The tax deductibility of a donation is determined solely by the
-          tax-exempt status of the receiving Organization and the donor&apos;s
-          individual tax circumstances. It is the sole responsibility of the
-          donor and the participating Organization to determine whether a
-          contribution qualifies as a tax-deductible charitable donation under
-          applicable federal, state, and local tax laws.
+          Organization is responsible for its own accounting and financial
+          reporting obligations for campaign funds and for maintaining any
+          records required under applicable school, district, nonprofit, or
+          governmental rules.
         </p>
         <p className="mt-2">
-          Company facilitates payment processing through Stripe, Inc. Donors who
-          provide an email address at the time of donation may receive a
-          payment receipt directly from Stripe. This receipt confirms that a
-          payment was processed and does not constitute a charitable contribution
-          acknowledgment, tax receipt, or representation of tax deductibility.
-        </p>
-        <p className="mt-2">
-          Participating organizations that hold 501(c)(3) or other applicable
-          tax-exempt status are solely responsible for issuing any required
-          charitable contribution acknowledgments to donors in accordance with
-          IRS requirements, including written acknowledgments for donations of
-          $250 or more.
-        </p>
-        <p className="mt-2">
-          Company expressly disclaims any liability arising from a donor&apos;s
-          reliance on the tax deductibility of any donation made through its
-          platform. Donors and participating organizations are encouraged to
-          consult a qualified tax professional regarding their specific
-          circumstances.
+          Third-party contributor legal disclosures, including tax-deductibility notices,
+          are published on dedicated contributor landing pages and incorporated
+          into contributor interactions at checkout.
         </p>
       </section>
 
@@ -403,16 +383,38 @@ export function FundraisingServicesAgreementBody({
           11. INDEMNIFICATION / HOLD HARMLESS
         </h3>
         <p className="mt-2">
-          Organization agrees to defend, indemnify, and hold harmless Company and
-          its affiliates from any claims, damages, or liabilities arising from:
+          At Company&apos;s request, Organization agrees to defend, indemnify,
+          and hold harmless Company, its parent and affiliated entities, and all
+          of their respective officers, directors, managers, members,
+          shareholders, employees, contractors, agents, licensors, successors,
+          and assigns (collectively, the <strong>Indemnified Parties</strong>)
+          from and against any and all claims, demands, actions, proceedings,
+          investigations, losses, damages, liabilities, judgments, settlements,
+          fines, penalties, costs, and expenses (including reasonable
+          attorneys&apos; fees and litigation/arbitration costs) arising out of or
+          relating to:
         </p>
         <ul className="mt-1 list-outside list-disc pl-5">
-          <li>Participant actions or communications</li>
-          <li>Misuse of the platform</li>
-          <li>Violation of laws or policies</li>
-          <li>Misrepresentation of eligibility</li>
-          <li>Disputes regarding funds or fundraising activities</li>
+          <li>Organization&apos;s or any participant&apos;s breach or alleged breach of this Agreement</li>
+          <li>Any act, omission, negligence, willful misconduct, or unlawful conduct by Organization, Organizer, participants, or Organization-authorized users</li>
+          <li>Campaign communications, contact uploads, messaging activity, fundraising solicitations, or use of campaign funds</li>
+          <li>Violation of law, regulation, school/district policy, or third-party rights (including privacy, publicity, consumer-protection, and messaging laws)</li>
+          <li>Inaccuracy, falsity, or misrepresentation in Organization-provided data, eligibility, authority, or compliance representations</li>
+          <li>Disputes, complaints, chargebacks, reversals, refunds, or claims connected to Organization campaigns or participant activity</li>
         </ul>
+        <p className="mt-2">
+          Organization may not settle any indemnified matter, admit fault on
+          behalf of any Indemnified Party, or create obligations for any
+          Indemnified Party without Company&apos;s prior written consent.
+          Company may assume the exclusive defense and control of any matter
+          otherwise subject to indemnification, and Organization agrees to
+          cooperate fully in that defense.
+        </p>
+        <p className="mt-2">
+          These indemnification obligations are in addition to any other rights
+          or remedies available to Company and survive suspension or termination
+          of this Agreement.
+        </p>
       </section>
 
       <section>

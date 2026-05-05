@@ -31,16 +31,24 @@ export default function TermsPage() {
         </Link>
       </p>
       <p className="mt-4 text-xs text-slate-500">
-        Last updated: April 25, 2026. This page is the published{" "}
+        Last updated: May 5, 2026. This page is the published{" "}
         <strong>Fundraising Services Agreement</strong> of Heart and Hustle
         Fundraising LLC (the &quot;Company&quot;). It serves as the{" "}
         <strong>terms of service</strong> for use of our platform and program.
         Document version{" "}
         <span className="font-mono">{FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION}</span>
         . Approved organizations also execute a signed copy with a W-9 for
-        payouts. Personal data practices are in our separate{" "}
+        payouts. Organization and participant data practices are in our separate{" "}
         <Link href="/privacy" className="text-hh-primary underline">
           Privacy policy
+        </Link>
+        . Donor-facing policies are published at{" "}
+        <Link href="/donor-privacy" className="text-hh-primary underline">
+          Donor privacy policy
+        </Link>{" "}
+        and{" "}
+        <Link href="/donor-terms" className="text-hh-primary underline">
+          Donor terms
         </Link>
         . Participant SMS disclosures (opt-in, frequency, STOP/HELP):{" "}
         <Link href="/sms-reminders" className="text-hh-primary underline">

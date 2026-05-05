@@ -72,6 +72,7 @@ export default function CoachTabsLayout() {
       }}
     >
       <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
+      <Tabs.Screen name="teams" options={{ title: "Teams" }} />
       <Tabs.Screen name="text" options={{ title: "Text" }} />
       <Tabs.Screen name="reminders" options={{ title: "Reminders" }} />
       <Tabs.Screen name="donations" options={{ title: "Donations" }} />

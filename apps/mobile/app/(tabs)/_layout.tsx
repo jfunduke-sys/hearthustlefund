@@ -76,6 +76,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
       <Tabs.Screen name="messages" options={{ title: "Send Messages" }} />
+      <Tabs.Screen name="teams" options={{ title: "Teams" }} />
     </Tabs>
   );
 }
