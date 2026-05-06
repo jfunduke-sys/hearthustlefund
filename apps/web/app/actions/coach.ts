@@ -709,5 +709,12 @@ export async function setCoachFundraiserGroupManager(input: {
   });
   if (insErr) throw new Error(insErr.message);
 
+  /** Place the manager’s athlete in this group (same as Step 3); avoids mismatched manager vs roster. */
+  const { error: placeErr } = await admin.from("fundraiser_group_members").upsert(
+    { athlete_id: ath.id, group_id: input.groupId },
+    { onConflict: "athlete_id" }
+  );
+  if (placeErr) throw new Error(placeErr.message);
+
   revalidatePath("/coach/dashboard");
 }

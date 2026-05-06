@@ -229,7 +229,9 @@ export default function CoachGroupsSetup({
               Step 2 · Names and managers
             </p>
             <p className="mt-1 text-sm text-slate-600">
-              Save each group name, then pick who leads that group in the app.
+              Save each group name, then pick who leads that group in the app. Saving a
+              manager also places that participant in this group (Step 3 updates to
+              match).
             </p>
           </div>
           <ul className="space-y-3">
