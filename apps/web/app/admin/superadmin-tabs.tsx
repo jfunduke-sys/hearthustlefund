@@ -169,7 +169,7 @@ Use the same Organizer email + password in the app if you want your own donation
 ${groupsBlock.trim() ? `${groupsBlock.trim()}\n` : ""}5) While the campaign runs
 Desktop dashboard for totals, roster, and exports. Mobile app for what participants use day to day.
 
-After the campaign, our team will reach out about payout steps (W-9 and similar). You can export donation history from the dashboard anytime.
+After the campaign, our team will reach out about payout steps. You can export donation history from the dashboard anytime.
 
 Links
 Organizer login: ${coachLoginUrl}
