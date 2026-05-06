@@ -484,10 +484,14 @@ export default function NewFundraiserClient({ initialCode }: Props) {
 
                 {usesCampaignGroupsFromIntake ? (
                   <p className="rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2 text-xs leading-relaxed text-amber-950">
-                    Your intake requested <strong>teams or groups</strong> with group
-                    managers. This fundraiser will be flagged for that flow; you will
-                    set up group names, participant placement, and managers on the
-                    dashboard once that step is available.
+                    You requested this fundraiser include{" "}
+                    <strong>teams or groups</strong> with assigned managers. After you
+                    finish this setup and your campaign is active, open your{" "}
+                    <strong>Organizer Dashboard</strong> on this site to create groups,
+                    assign participants, and designate managers under{" "}
+                    <strong>Teams / groups for this campaign</strong>. If you change your
+                    mind, you can turn teams and groups off there too (that clears group
+                    setup).
                   </p>
                 ) : null}
 
