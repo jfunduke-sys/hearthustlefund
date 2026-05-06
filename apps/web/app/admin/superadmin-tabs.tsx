@@ -107,7 +107,7 @@ type CodeModalPayload = {
   activityName?: string | null;
   startDate?: string | null;
   endDate?: string | null;
-  /** From intake: Organizer asked for sub-teams / group managers. */
+  /** From intake: Organizer asked for sub-teams / group managers (optional context). */
   wantsCampaignGroups?: boolean;
 };
 
@@ -134,13 +134,6 @@ function buildCoachLaunchEmail(payload: CodeModalPayload) {
     payload.startDate && payload.endDate
       ? `Fundraiser dates: ${formatDisplayDate(payload.startDate)} to ${formatDisplayDate(payload.endDate)}\n`
       : "";
-  const groupsBlock =
-    payload.wantsCampaignGroups === true
-      ? `
-Teams / groups (you requested this on intake)
-On Organizer Dashboard → Teams / groups for this campaign: turn the feature on, set how many groups you need, name each group, assign every participant to a group, and pick one group manager per group (they must have joined this campaign in the app first). Managers get a Teams tab in the app for their group’s scoreboard.
-`
-      : "";
 
   return `Subject: ${appName} — you're approved. Your setup code is inside.
 
@@ -162,11 +155,12 @@ Confirm details, goals, and dates, then activate so your participant join code i
 
 3) Tell participants how to join
 On the dashboard, open "Invite message for participants" → Copy full message → send it (text, email, or team channel). It has app links and the team join code.
+   • Optional: Add yourself as a participant — use the same Organizer email + password in the app if you want your own donation link on the roster. Do not use the team join code for Organizer login.
 
-4) Optional: add yourself as a participant
-Use the same Organizer email + password in the app if you want your own donation link on the roster. Do not use the team join code for Organizer login.
+4) Teams/Groups (optional)
+On Organizer Dashboard → Teams / groups for this campaign, use the toggle to turn this on or leave it off for one combined roster. When it is on: set how many groups you need, name each group, assign every participant to a group, and pick one group manager per group (they must have joined this campaign in the app first). Managers get a Teams tab in the app for their group scoreboard.
 
-${groupsBlock.trim() ? `${groupsBlock.trim()}\n` : ""}5) While the campaign runs
+5) While the campaign runs
 Desktop dashboard for totals, roster, and exports. Mobile app for what participants use day to day.
 
 After the campaign, our team will reach out about payout steps. You can export donation history from the dashboard anytime.
@@ -773,9 +767,9 @@ export function SuperadminTabs({
           <DialogHeader>
             <DialogTitle>Fundraiser code generated</DialogTitle>
             <DialogDescription>
-              Copy the email below and send it to the Organizer. It matches what
-              they need for first login, dashboard setup, participants, and—if
-              they asked for it on intake—teams/groups.
+              Copy the email below and send it to the Organizer. It covers first
+              login, campaign setup, inviting participants, optional teams/groups,
+              and day-to-day use.
             </DialogDescription>
           </DialogHeader>
           <p className="rounded-md bg-slate-100 p-4 text-center font-mono text-lg">
