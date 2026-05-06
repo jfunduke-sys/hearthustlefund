@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { RefreshCw } from "lucide-react";
 import type { Athlete } from "@heart-and-hustle/shared";
 import {
   replaceCoachFundraiserGroupShells,
@@ -60,6 +61,17 @@ export default function CoachGroupsSetup({
   const [replaceOpen, setReplaceOpen] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [nameDraft, setNameDraft] = useState<Record<string, string>>({});
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function refreshParticipantList() {
+    setMsg(null);
+    setRefreshing(true);
+    try {
+      await router.refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   useEffect(() => {
     setNameDraft((prev) => {
@@ -110,18 +122,38 @@ export default function CoachGroupsSetup({
 
   return (
     <div className="space-y-5">
-      <div>
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-          Roster setup
-        </p>
-        <h3 className="mt-1 text-lg font-semibold text-hh-dark">
-          Groups, managers, and placements
-        </h3>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          Set how many groups you need, name them, assign a manager per group, then
-          place each participant. Managers must already use the app on this campaign.
-          Replacing the group count clears names, placements, and managers.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+            Roster setup
+          </p>
+          <h3 className="mt-1 text-lg font-semibold text-hh-dark">
+            Groups, managers, and placements
+          </h3>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            Set how many groups you need, name them, assign a manager per group, then
+            place each participant. Managers must already use the app on this campaign.
+            Replacing the group count clears names, placements, and managers.
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Someone just joined? Tap Refresh list to load the latest roster before you
+            assign groups.
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="inline-flex shrink-0 gap-1.5 self-start sm:mt-6"
+          disabled={refreshing || pending}
+          onClick={() => void refreshParticipantList()}
+        >
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+            aria-hidden
+          />
+          {refreshing ? "Refreshing…" : "Refresh list"}
+        </Button>
       </div>
 
       {msg ? (
