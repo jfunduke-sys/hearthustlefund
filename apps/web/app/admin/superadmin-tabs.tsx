@@ -449,13 +449,14 @@ export function SuperadminTabs({
                     <TableHead>Organizer email</TableHead>
                     <TableHead>Est. participants</TableHead>
                     <TableHead>Campaign</TableHead>
+                    <TableHead className="text-right">Launch email</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {approvedRows.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={10}
                         className="py-10 text-center text-slate-500"
                       >
                         No approved requests yet.
@@ -496,6 +497,31 @@ export function SuperadminTabs({
                             </Button>
                           ) : (
                             <span className="text-slate-500">Not redeemed yet</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {code?.code ? (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setCodeModal({
+                                  code: code.code,
+                                  coachEmail: r.admin_email,
+                                  schoolName: r.school_name,
+                                  activityName: r.sport_club_activity,
+                                  startDate: r.fundraiser_start_date,
+                                  endDate: r.fundraiser_end_date,
+                                  wantsCampaignGroups:
+                                    r.wants_campaign_groups === true,
+                                })
+                              }
+                            >
+                              Open
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-slate-400">No code</span>
                           )}
                         </TableCell>
                       </TableRow>
