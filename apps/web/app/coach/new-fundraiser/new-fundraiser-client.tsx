@@ -334,11 +334,6 @@ export default function NewFundraiserClient({ initialCode }: Props) {
     }
   }
 
-  const base =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : process.env.NEXT_PUBLIC_APP_URL || "";
-
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto max-w-lg">
@@ -382,13 +377,12 @@ export default function NewFundraiserClient({ initialCode }: Props) {
                   participants.
                 </p>
                 <p className="text-sm text-slate-600">
-                  <strong>Participants</strong> use the <strong>mobile app</strong> with
-                  this code (Team code tab). Point them to{" "}
-                  <span className="font-medium">{base}/join</span> if they need
-                  download instructions—not for signup on the web.
-                </p>
-                <p className="break-all rounded-md bg-slate-100 p-3 font-mono text-xs text-slate-700">
-                  Optional link: {base}/join/{doneInfo.slug}
+                  <strong>Participants</strong> must use the{" "}
+                  <strong>mobile app</strong> with this code:{" "}
+                  <span className="font-mono font-semibold tracking-wider text-slate-900">
+                    {doneInfo.joinCode}
+                  </span>{" "}
+                  to participate in this fundraising campaign.
                 </p>
                 <Button variant="outline" asChild>
                   <Link href="/coach/dashboard">Back to dashboard</Link>
