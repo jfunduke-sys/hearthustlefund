@@ -205,6 +205,13 @@ export default function CoachDashboardClient({
   const [usesCampaignGroupsLocal, setUsesCampaignGroupsLocal] = useState(
     () => fundraiser.uses_campaign_groups === true
   );
+  const [campaignStructureExpanded, setCampaignStructureExpanded] = useState(
+    () =>
+      !(
+        fundraiser.uses_campaign_groups === true &&
+        (groupsSetup?.groups?.length ?? 0) > 0
+      )
+  );
   const [groupsOffConfirmOpen, setGroupsOffConfirmOpen] = useState(false);
   const [groupsMsg, setGroupsMsg] = useState<string | null>(null);
 
@@ -216,6 +223,12 @@ export default function CoachDashboardClient({
   useEffect(() => {
     setUsesCampaignGroupsLocal(fundraiser.uses_campaign_groups === true);
   }, [fundraiser.id, fundraiser.uses_campaign_groups]);
+  useEffect(() => {
+    const hasEstablishedGroups =
+      fundraiser.uses_campaign_groups === true &&
+      (groupsSetup?.groups?.length ?? 0) > 0;
+    setCampaignStructureExpanded(!hasEstablishedGroups);
+  }, [fundraiser.id, fundraiser.uses_campaign_groups, groupsSetup?.groups?.length]);
   const baseUrl =
     typeof window !== "undefined"
       ? window.location.origin
@@ -240,6 +253,13 @@ export default function CoachDashboardClient({
     (a, b) =>
       (raisedByAthlete[b.id] ?? 0) - (raisedByAthlete[a.id] ?? 0)
   );
+  const groupCount = groupsSetup?.groups?.length ?? 0;
+  const assignedCount = useMemo(() => {
+    if (!groupsSetup) return 0;
+    return Object.values(groupsSetup.memberGroupByAthleteId).filter(
+      (groupId) => typeof groupId === "string" && groupId.length > 0
+    ).length;
+  }, [groupsSetup]);
 
   const analytics = useMemo(() => {
     const donationCount = donationsTotalCount;
@@ -632,18 +652,47 @@ More tips will show inside the app once you're in. Thanks!`;
 
         <Card className="border-slate-200/90 shadow-md ring-1 ring-slate-900/5">
           <CardHeader className="space-y-1 border-b border-slate-100 bg-slate-50/60 pb-4 pt-5">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-              Campaign structure
-            </p>
-            <CardTitle className="text-lg font-semibold text-hh-dark">
-              Teams / groups for this campaign
-            </CardTitle>
-            <p className="text-sm leading-relaxed text-slate-600">
-              Choose one. You can change this later, but turning groups off deletes
-              group names, manager picks, and who was in which group.
-            </p>
+            <button
+              type="button"
+              onClick={() => setCampaignStructureExpanded((v) => !v)}
+              className="flex w-full items-start justify-between gap-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-hh-primary/40"
+              aria-expanded={campaignStructureExpanded}
+              aria-controls="campaign-structure-content"
+            >
+              <span className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                  Campaign structure
+                </p>
+                <CardTitle className="text-lg font-semibold text-hh-dark">
+                  Teams / groups for this campaign
+                </CardTitle>
+                <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                  Choose one. You can change this later, but turning groups off deletes
+                  group names, manager picks, and who was in which group.
+                </p>
+                {!campaignStructureExpanded && usesCampaignGroupsLocal && groupCount > 0 ? (
+                  <p className="mt-2 text-xs font-medium text-slate-500">
+                    {groupCount} group{groupCount === 1 ? "" : "s"} configured ·{" "}
+                    {assignedCount} assigned
+                  </p>
+                ) : null}
+              </span>
+              <span
+                className={cn(
+                  "mt-1 shrink-0 text-slate-500 transition-transform",
+                  campaignStructureExpanded ? "rotate-180" : ""
+                )}
+                aria-hidden
+              >
+                ▼
+              </span>
+            </button>
           </CardHeader>
-          <CardContent className="space-y-4 pb-6 pt-5">
+          {campaignStructureExpanded ? (
+            <CardContent
+              id="campaign-structure-content"
+              className="space-y-4 pb-6 pt-5"
+            >
             <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
               <button
                 type="button"
@@ -772,7 +821,8 @@ More tips will show inside the app once you're in. Thanks!`;
                 />
               </div>
             ) : null}
-          </CardContent>
+            </CardContent>
+          ) : null}
         </Card>
 
         <Dialog open={groupsOffConfirmOpen} onOpenChange={setGroupsOffConfirmOpen}>
