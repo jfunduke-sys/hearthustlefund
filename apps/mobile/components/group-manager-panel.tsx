@@ -103,9 +103,9 @@ export default function GroupManagerPanel({ fundraiserId, title }: Props) {
       >
         <Text style={styles.h1}>{title ?? "Group manager"}</Text>
         <Text style={styles.body}>
-          Groups are enabled but nothing is configured yet, or your account cannot
-          see this scoreboard yet. Confirm the Lead Organizer created groups on the
-          web and assigned you as a manager.
+          Groups are enabled but no scoreboard rows loaded yet. Ask your Lead
+          Organizer to create groups on the web dashboard, then pull to refresh. If
+          groups already exist and this persists, try signing out and back in.
         </Text>
       </ScrollView>
     );
