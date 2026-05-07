@@ -120,10 +120,7 @@ export default function GroupManagerPanel({ fundraiserId, title }: Props) {
       }
     >
       <Text style={styles.h1}>{title ?? "Group manager"}</Text>
-      <Text style={styles.sub}>
-        Scoreboard shows each team&apos;s total only. Detailed stats below are for
-        your group.
-      </Text>
+      <Text style={styles.sub}>The scoreboard shows team totals only.</Text>
 
       {err ? (
         <Text style={styles.errBox} selectable>
@@ -140,14 +137,6 @@ export default function GroupManagerPanel({ fundraiserId, title }: Props) {
       ))}
       {scoreboard.length === 0 ? (
         <Text style={styles.muted}>No groups yet.</Text>
-      ) : null}
-
-      {scoreboard.length > 0 && !summary ? (
-        <Text style={styles.noteBox}>
-          You can see the campaign scoreboard. To see{" "}
-          <Text style={{ fontWeight: "700" }}>your group’s</Text> roster and detailed
-          stats, the Lead Organizer must assign you as a group manager on the web.
-        </Text>
       ) : null}
 
       {summary ? (
@@ -191,11 +180,7 @@ export default function GroupManagerPanel({ fundraiserId, title }: Props) {
             </View>
           ))}
         </>
-      ) : scoreboard.length > 0 ? null : (
-        <Text style={styles.muted}>
-          No manager summary loaded (assignment or permissions).
-        </Text>
-      )}
+      ) : null}
     </ScrollView>
   );
 }
@@ -273,16 +258,4 @@ const styles = StyleSheet.create({
   },
   rosterName: { fontSize: 15, fontWeight: "700", color: "#1A1A2E" },
   rosterMeta: { fontSize: 13, color: "#64748b", marginTop: 4 },
-  noteBox: {
-    backgroundColor: "#fffbeb",
-    borderColor: "#fcd34d",
-    borderWidth: 1,
-    padding: 12,
-    borderRadius: 10,
-    fontSize: 14,
-    color: "#92400e",
-    lineHeight: 20,
-    marginTop: 8,
-    marginBottom: 8,
-  },
 });
