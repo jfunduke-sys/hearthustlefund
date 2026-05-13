@@ -35,11 +35,48 @@ export async function verifyAndSetCoachActivationCookie(
     return { ok: false, error: "That fundraiser code was not found." };
   }
   if (row.used) {
-    return {
-      ok: false,
-      error:
-        "This code has already been used. Sign in with your email and password, then open your dashboard.",
-    };
+    const assignedUsed = row.assigned_to_email?.trim().toLowerCase();
+    if (!assignedUsed || assignedUsed !== email) {
+      return {
+        ok: false,
+        error:
+          "This code has already been used. Sign in with the email the code was sent to, then open your dashboard.",
+      };
+    }
+    const { data: frUsed } = await admin
+      .from("fundraisers")
+      .select("id, coach_id")
+      .eq("code_used", row.code)
+      .maybeSingle();
+    if (!frUsed?.coach_id) {
+      return {
+        ok: false,
+        error:
+          "This code has already been used. Sign in with your email and password, then open your dashboard.",
+      };
+    }
+    const { data: coachWrap } = await admin.auth.admin.getUserById(
+      frUsed.coach_id
+    );
+    const coachEmail = coachWrap.user?.email?.toLowerCase().trim();
+    if (coachEmail !== assignedUsed) {
+      return {
+        ok: false,
+        error:
+          "This code is tied to a different organizer account. Contact Heart & Hustle support.",
+      };
+    }
+    const exp = Date.now() + ACTIVATION_TTL_SEC * 1000;
+    const token = signCoachActivationToken({ email, code, exp });
+    const jar = cookies();
+    jar.set(COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: ACTIVATION_TTL_SEC,
+      path: "/",
+    });
+    return { ok: true };
   }
   if (row.expires_at && new Date(row.expires_at) < new Date()) {
     return { ok: false, error: "This code has expired. Contact Heart & Hustle for a new one." };

@@ -1,5 +1,8 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizeFundraiserSetupCode } from "@heart-and-hustle/shared";
 import {
   COOKIE_NAME,
   verifyCoachActivationToken,
@@ -21,6 +24,19 @@ export default async function NewFundraiserPage() {
     user.email.toLowerCase().trim() === act.email
   ) {
     initialCode = act.code;
+    const codeNorm = normalizeFundraiserSetupCode(act.code);
+    if (codeNorm) {
+      const admin = createAdminClient();
+      const { data: fr } = await admin
+        .from("fundraisers")
+        .select("id")
+        .eq("coach_id", user.id)
+        .eq("code_used", codeNorm)
+        .maybeSingle();
+      if (fr) {
+        redirect("/coach/dashboard");
+      }
+    }
   }
 
   return <NewFundraiserClient initialCode={initialCode} />;

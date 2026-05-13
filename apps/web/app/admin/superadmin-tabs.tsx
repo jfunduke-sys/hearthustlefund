@@ -222,6 +222,65 @@ export function SuperadminTabs({
     [fundraisers]
   );
 
+  const campaignSupportRows = useMemo(() => {
+    type Row = {
+      key: string;
+      scope: string;
+      school: string;
+      team: string;
+      organizer: string;
+      code: string | null;
+      statusLine: string;
+      createHref: string | null;
+      editHref: string | null;
+    };
+    const rows: Row[] = [];
+    const coveredFrIds = new Set<string>();
+
+    for (const { request: r, code, fundraiser } of approvedRows) {
+      const cc = code?.code?.trim() || null;
+      const fr =
+        fundraiser ??
+        (cc
+          ? fundraisers.find(
+              (x) => x.code_used === cc && x.status === "active"
+            ) ?? null
+          : null);
+      if (fr?.id) coveredFrIds.add(fr.id);
+
+      rows.push({
+        key: `ap-${r.id}`,
+        scope: "Approved intake",
+        school: r.school_name,
+        team: fr?.team_name ?? (r.sport_club_activity?.trim() || "—"),
+        organizer: r.admin_email ?? "—",
+        code: cc,
+        statusLine: fr ? "Campaign active" : cc ? "Code not used yet" : "No code",
+        createHref:
+          cc && !fr
+            ? `/admin/campaign-support/create?code=${encodeURIComponent(cc)}`
+            : null,
+        editHref: fr?.id ? `/admin/campaign-support/f/${fr.id}` : null,
+      });
+    }
+
+    for (const fr of activeFundraisers) {
+      if (coveredFrIds.has(fr.id)) continue;
+      rows.push({
+        key: `ac-${fr.id}`,
+        scope: "Active (no intake row)",
+        school: fr.school_name,
+        team: fr.team_name,
+        organizer: "—",
+        code: fr.code_used ?? null,
+        statusLine: "Campaign active",
+        createHref: null,
+        editHref: `/admin/campaign-support/f/${fr.id}`,
+      });
+    }
+    return rows;
+  }, [approvedRows, fundraisers, activeFundraisers]);
+
   const closedFundraisers = useMemo(
     () =>
       fundraisers.filter(
@@ -263,6 +322,7 @@ export function SuperadminTabs({
           <TabsTrigger value="program-agreement">Program agreement</TabsTrigger>
           <TabsTrigger value="open-requests">Open requests</TabsTrigger>
           <TabsTrigger value="approved">Approved fundraisers</TabsTrigger>
+          <TabsTrigger value="campaign-support">Campaign support</TabsTrigger>
           <TabsTrigger value="active">Active fundraisers</TabsTrigger>
           <TabsTrigger value="closed">Closed fundraisers</TabsTrigger>
         </TabsList>
@@ -557,6 +617,86 @@ export function SuperadminTabs({
                       </TableCell>
                     </TableRow>
                   ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="campaign-support" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Campaign support</CardTitle>
+              <p className="text-sm text-slate-600">
+                Provision or edit live campaigns and teams/groups for approved intakes
+                and other active fundraisers. Creating a campaign marks the HH code used
+                and invites the organizer if they do not already have an account.
+              </p>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Scope</TableHead>
+                    <TableHead>School</TableHead>
+                    <TableHead>Team / program</TableHead>
+                    <TableHead>Organizer email</TableHead>
+                    <TableHead>HH code</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {campaignSupportRows.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={7}
+                        className="py-10 text-center text-slate-500"
+                      >
+                        No approved intakes or extra active campaigns.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    campaignSupportRows.map((row) => (
+                      <TableRow key={row.key}>
+                        <TableCell className="text-xs text-slate-600">
+                          {row.scope}
+                        </TableCell>
+                        <TableCell className="font-medium">{row.school}</TableCell>
+                        <TableCell>{row.team}</TableCell>
+                        <TableCell className="text-sm">{row.organizer}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {row.code ?? "—"}
+                        </TableCell>
+                        <TableCell className="text-sm">{row.statusLine}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex flex-col items-end gap-1 sm:flex-row sm:justify-end">
+                            {row.createHref ? (
+                              <Button size="sm" variant="default" asChild>
+                                <Link href={row.createHref}>Create campaign</Link>
+                              </Button>
+                            ) : null}
+                            {row.editHref ? (
+                              <Button size="sm" variant="outline" asChild>
+                                <Link href={row.editHref}>Edit campaign</Link>
+                              </Button>
+                            ) : null}
+                            {row.code ? (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 text-xs"
+                                onClick={() => copyCode(row.code!)}
+                              >
+                                Copy code
+                              </Button>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>

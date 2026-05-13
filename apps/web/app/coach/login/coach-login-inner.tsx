@@ -103,14 +103,30 @@ export default function CoachLoginInner() {
       typeof window !== "undefined" ? window.location.origin : "";
 
     if (existingAccountMode) {
-      const { error: signErr } = await supabase.auth.signInWithPassword({
-        email: actEmail.trim(),
-        password: actPassword,
-      });
+      const { data: signData, error: signErr } =
+        await supabase.auth.signInWithPassword({
+          email: actEmail.trim(),
+          password: actPassword,
+        });
       if (signErr) {
         setLoading(false);
         setActivationError(signErr.message);
         return;
+      }
+      const uid = signData.user?.id;
+      const codeNorm = normalizeFundraiserSetupCode(actCode);
+      if (uid) {
+        const { data: existingFr } = await supabase
+          .from("fundraisers")
+          .select("id")
+          .eq("coach_id", uid)
+          .eq("code_used", codeNorm)
+          .maybeSingle();
+        if (existingFr) {
+          setLoading(false);
+          window.location.assign("/coach/dashboard");
+          return;
+        }
       }
       const re = await verifyAndSetCoachActivationCookie(
         actEmail,
@@ -167,6 +183,14 @@ export default function CoachLoginInner() {
     }
 
     if (data.session) {
+      const codeNorm = normalizeFundraiserSetupCode(actCode);
+      const { data: existingFr } = await supabase
+        .from("fundraisers")
+        .select("id")
+        .eq("coach_id", data.session.user.id)
+        .eq("code_used", codeNorm)
+        .maybeSingle();
+
       const re = await verifyAndSetCoachActivationCookie(
         actEmail,
         normalizeFundraiserSetupCode(actCode)
@@ -176,6 +200,13 @@ export default function CoachLoginInner() {
         setLoading(false);
         return;
       }
+
+      if (existingFr) {
+        setLoading(false);
+        window.location.assign("/coach/dashboard");
+        return;
+      }
+
       try {
         sessionStorage.setItem(
           "hh_pending_activation_email",
@@ -200,6 +231,17 @@ export default function CoachLoginInner() {
         password: actPassword,
       });
     if (!signInAfter && retry.session) {
+      const codeNorm2 = normalizeFundraiserSetupCode(actCode);
+      const { data: existingFr2 } = await supabase
+        .from("fundraisers")
+        .select("id")
+        .eq("coach_id", retry.session.user.id)
+        .eq("code_used", codeNorm2)
+        .maybeSingle();
+      if (existingFr2) {
+        window.location.assign("/coach/dashboard");
+        return;
+      }
       const re = await verifyAndSetCoachActivationCookie(
         actEmail,
         normalizeFundraiserSetupCode(actCode)

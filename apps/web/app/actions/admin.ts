@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-async function assertSuperAdmin() {
+export async function assertSuperAdmin() {
   const supabase = createClient();
   const {
     data: { user },

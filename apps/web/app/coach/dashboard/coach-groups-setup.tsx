@@ -10,6 +10,12 @@ import {
   setCoachFundraiserGroupManager,
   setCoachFundraiserParticipantGroup,
 } from "@/app/actions/coach";
+import {
+  supportRenameFundraiserGroup,
+  supportReplaceFundraiserGroupShells,
+  supportSetFundraiserGroupManager,
+  supportSetFundraiserParticipantGroup,
+} from "@/app/actions/campaign-support";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +50,8 @@ type Props = {
   /** group id → manager auth user id */
   managerUserIdByGroupId: Record<string, string | null>;
   athletes: Pick<Athlete, "id" | "full_name" | "user_id">[];
+  /** When true, mutations use SuperAdmin campaign-support server actions. */
+  useCampaignSupportActions?: boolean;
 };
 
 export default function CoachGroupsSetup({
@@ -52,6 +60,7 @@ export default function CoachGroupsSetup({
   memberGroupByAthleteId,
   managerUserIdByGroupId,
   athletes,
+  useCampaignSupportActions = false,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -108,10 +117,17 @@ export default function CoachGroupsSetup({
     setMsg(null);
     startTransition(async () => {
       try {
-        await replaceCoachFundraiserGroupShells({
-          fundraiserId,
-          groupCount: n,
-        });
+        if (useCampaignSupportActions) {
+          await supportReplaceFundraiserGroupShells({
+            fundraiserId,
+            groupCount: n,
+          });
+        } else {
+          await replaceCoachFundraiserGroupShells({
+            fundraiserId,
+            groupCount: n,
+          });
+        }
         setReplaceOpen(false);
         router.refresh();
       } catch (e: unknown) {
@@ -261,11 +277,19 @@ export default function CoachGroupsSetup({
                         setMsg(null);
                         startTransition(async () => {
                           try {
-                            await renameCoachFundraiserGroup({
-                              fundraiserId,
-                              groupId: g.id,
-                              name: nm,
-                            });
+                            if (useCampaignSupportActions) {
+                              await supportRenameFundraiserGroup({
+                                fundraiserId,
+                                groupId: g.id,
+                                name: nm,
+                              });
+                            } else {
+                              await renameCoachFundraiserGroup({
+                                fundraiserId,
+                                groupId: g.id,
+                                name: nm,
+                              });
+                            }
                             router.refresh();
                           } catch (e: unknown) {
                             setMsg(
@@ -291,11 +315,19 @@ export default function CoachGroupsSetup({
                       setMsg(null);
                       startTransition(async () => {
                         try {
-                          await setCoachFundraiserGroupManager({
-                            fundraiserId,
-                            groupId: g.id,
-                            managerUserId: uid,
-                          });
+                          if (useCampaignSupportActions) {
+                            await supportSetFundraiserGroupManager({
+                              fundraiserId,
+                              groupId: g.id,
+                              managerUserId: uid,
+                            });
+                          } else {
+                            await setCoachFundraiserGroupManager({
+                              fundraiserId,
+                              groupId: g.id,
+                              managerUserId: uid,
+                            });
+                          }
                           router.refresh();
                         } catch (err: unknown) {
                           setMsg(
@@ -355,11 +387,19 @@ export default function CoachGroupsSetup({
                           setMsg(null);
                           startTransition(async () => {
                             try {
-                              await setCoachFundraiserParticipantGroup({
-                                fundraiserId,
-                                athleteId: a.id,
-                                groupId: gid,
-                              });
+                              if (useCampaignSupportActions) {
+                                await supportSetFundraiserParticipantGroup({
+                                  fundraiserId,
+                                  athleteId: a.id,
+                                  groupId: gid,
+                                });
+                              } else {
+                                await setCoachFundraiserParticipantGroup({
+                                  fundraiserId,
+                                  athleteId: a.id,
+                                  groupId: gid,
+                                });
+                              }
                               router.refresh();
                             } catch (err: unknown) {
                               setMsg(
