@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  collectParticipantUserIdsForFundraiser,
+  deleteParticipantAuthUsersAfterCloseout,
+} from "@/lib/participant-auth-closeout";
 
 export async function assertSuperAdmin() {
   const supabase = createClient();
@@ -134,6 +138,11 @@ export async function setFundraiserStatus(
   if (error) throw new Error(error.message);
 
   if (status === "completed" || status === "cancelled") {
+    const participantUserIds = await collectParticipantUserIdsForFundraiser(
+      admin,
+      fundraiserId
+    );
+
     // Campaign-scoped participant access: unlink participant auth identities
     // when closeout is finalized by SuperAdmin.
     const { error: unlinkErr } = await admin
@@ -157,6 +166,8 @@ export async function setFundraiserStatus(
         .in("athlete_id", athleteIds);
       if (contactErr) throw new Error(contactErr.message);
     }
+
+    await deleteParticipantAuthUsersAfterCloseout(admin, participantUserIds);
   }
 
   revalidatePath("/admin");
