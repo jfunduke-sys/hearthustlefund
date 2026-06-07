@@ -18,7 +18,7 @@ export async function collectParticipantUserIdsForFundraiser(
     const id = row.user_id as string | null;
     if (id) ids.add(id);
   }
-  return [...ids];
+  return Array.from(ids);
 }
 
 /**
@@ -32,7 +32,7 @@ export async function deleteParticipantAuthUsersAfterCloseout(
 ): Promise<void> {
   if (participantUserIds.length === 0) return;
 
-  const candidates = [...new Set(participantUserIds)];
+  const candidates = Array.from(new Set(participantUserIds));
   const superadminEmail = process.env.SUPERADMIN_EMAIL?.toLowerCase().trim();
 
   const { data: coachRows, error: coachErr } = await admin
@@ -53,13 +53,13 @@ export async function deleteParticipantAuthUsersAfterCloseout(
     .not("user_id", "is", null);
   if (linkErr) throw new Error(linkErr.message);
 
-  const linkedFundraiserIds = [
-    ...new Set(
+  const linkedFundraiserIds = Array.from(
+    new Set(
       (athleteLinks ?? [])
         .map((r) => r.fundraiser_id as string)
         .filter(Boolean)
-    ),
-  ];
+    )
+  );
 
   const activeFundraiserIds = new Set<string>();
   if (linkedFundraiserIds.length > 0) {
@@ -90,13 +90,13 @@ export async function deleteParticipantAuthUsersAfterCloseout(
     .in("user_id", candidates);
   if (mgrErr) throw new Error(mgrErr.message);
 
-  const managerFundraiserIds = [
-    ...new Set(
+  const managerFundraiserIds = Array.from(
+    new Set(
       (managerRows ?? [])
         .map((r) => r.fundraiser_id as string)
         .filter(Boolean)
-    ),
-  ];
+    )
+  );
 
   const activeManagerFundraiserIds = new Set<string>();
   if (managerFundraiserIds.length > 0) {
