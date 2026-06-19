@@ -502,20 +502,8 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
     );
   }
 
-  return (
-    <View style={styles.container}>
-      {showTenGoalConfetti ? (
-        <View style={styles.confettiLayer} pointerEvents="none">
-          <DonationConfetti
-            count={52}
-            origin={{ x: width - 24, y: 10 }}
-            explosionSpeed={460}
-            fallSpeed={3200}
-            fadeOut
-            colors={["#C0392B", "#e74c3c", "#F39C12", "#fcd34d", "#1A1A2E", "#94a3b8"]}
-          />
-        </View>
-      ) : null}
+  const listHeader = (
+    <>
       {variant === "coach" && coachNeedsParticipant ? (
         <Text style={styles.coachBanner}>
           Add yourself as a participant on your campaign from the Dashboard tab.
@@ -581,9 +569,45 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
         Messages once per contact — tap Send each time.
       </Text>
       {status ? <Text style={styles.status}>{status}</Text> : null}
+    </>
+  );
+
+  const listFooter = (
+    <Pressable
+      style={styles.btn}
+      onPress={() => void saveAndSend()}
+      disabled={sending || messagingMeta.phase !== "active"}
+      accessibilityRole="button"
+      accessibilityLabel="Send to Contacts"
+    >
+      {sending ? (
+        <ActivityIndicator color="#fff" />
+      ) : (
+        <Text style={styles.btnText}>Send to Contacts</Text>
+      )}
+    </Pressable>
+  );
+
+  return (
+    <View style={styles.container}>
+      {showTenGoalConfetti ? (
+        <View style={styles.confettiLayer} pointerEvents="none">
+          <DonationConfetti
+            count={52}
+            origin={{ x: width - 24, y: 10 }}
+            explosionSpeed={460}
+            fallSpeed={3200}
+            fadeOut
+            colors={["#C0392B", "#e74c3c", "#F39C12", "#fcd34d", "#1A1A2E", "#94a3b8"]}
+          />
+        </View>
+      ) : null}
       <FlatList
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
         data={rows}
         keyExtractor={(item) => item.id}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -591,6 +615,8 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
             tintColor="#C0392B"
           />
         }
+        ListHeaderComponent={listHeader}
+        ListFooterComponent={listFooter}
         renderItem={({ item }) => {
           const on = Boolean(selected[item.id]);
           return (
@@ -618,10 +644,10 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
                   accessibilityState={{ checked: on }}
                 >
                   <View style={styles.rowMain}>
-                    <Text style={styles.name} numberOfLines={1}>
+                    <Text style={styles.name} numberOfLines={2}>
                       {item.name}
                     </Text>
-                    <Text style={styles.phone} numberOfLines={1}>
+                    <Text style={styles.phone} numberOfLines={2}>
                       {item.phone}
                     </Text>
                   </View>
@@ -641,23 +667,18 @@ export default function FundraisingContactsScreen({ variant = "athlete" }: Props
           </Text>
         }
       />
-      <Pressable
-        style={styles.btn}
-        onPress={() => void saveAndSend()}
-        disabled={sending || messagingMeta.phase !== "active"}
-      >
-        {sending ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.btnText}>Send to Contacts</Text>
-        )}
-      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 12, paddingBottom: 12 },
+  container: { flex: 1 },
+  list: { flex: 1 },
+  listContent: {
+    flexGrow: 1,
+    paddingHorizontal: 12,
+    paddingBottom: 24,
+  },
   confettiLayer: { ...StyleSheet.absoluteFillObject, zIndex: 30, elevation: 8 },
   center: { flex: 1, justifyContent: "center" },
   windowBanner: {
@@ -789,7 +810,8 @@ const styles = StyleSheet.create({
   },
   muted: { textAlign: "center", color: "#94a3b8", marginTop: 24 },
   btn: {
-    marginTop: 8,
+    marginTop: 12,
+    marginBottom: 8,
     backgroundColor: "#C0392B",
     paddingVertical: 14,
     borderRadius: 12,
