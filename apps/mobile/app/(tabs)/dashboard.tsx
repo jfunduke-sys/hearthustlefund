@@ -31,6 +31,7 @@ import {
   SMS_REMINDER_CONSENT_CHECKBOX_COPY,
   SMS_REMINDER_PUBLIC_INFO_PATH,
 } from "@heart-and-hustle/shared";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DonationConfetti } from "../../components/donation-confetti";
 import {
   fetchAthleteViaWebApi,
@@ -160,6 +161,7 @@ function ProgressBarGradient({ pct }: { pct: number }) {
 export default function DashboardScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [data, setData] = useState<Row | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -668,7 +670,10 @@ export default function DashboardScreen() {
   return (
     <View style={styles.root}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[
+          styles.container,
+          { paddingBottom: 56 + insets.bottom },
+        ]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />
         }
@@ -745,26 +750,29 @@ export default function DashboardScreen() {
           <ProgressBarGradient pct={teamPct} />
         </View>
 
-        <Text style={styles.section}>Your Donations</Text>
-        {data.allDonations.length === 0 ? (
-          <Text style={styles.muted}>No donations yet — share your link!</Text>
-        ) : (
-          data.allDonations.map((d) => (
-            <View key={d.id} style={styles.donationRow}>
-              <Text style={styles.donationDate}>
-                {formatDisplayDateTime(d.created_at)}
-              </Text>
-              <Text style={styles.donationName}>
-                {d.anonymous ? "Anonymous" : d.donor_name ?? "Supporter"}
-              </Text>
-              <Text style={styles.donationAmt}>
-                ${Number(d.amount).toFixed(2)}
-              </Text>
-            </View>
-          ))
-        )}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.section}>Your Donations</Text>
+          {data.allDonations.length === 0 ? (
+            <Text style={styles.muted}>No donations yet — share your link!</Text>
+          ) : (
+            data.allDonations.map((d) => (
+              <View key={d.id} style={styles.donationRow}>
+                <Text style={styles.donationDate}>
+                  {formatDisplayDateTime(d.created_at)}
+                </Text>
+                <Text style={styles.donationName}>
+                  {d.anonymous ? "Anonymous" : d.donor_name ?? "Supporter"}
+                </Text>
+                <Text style={styles.donationAmt}>
+                  ${Number(d.amount).toFixed(2)}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
 
-        <Text style={[styles.section, { marginTop: 20 }]}>Reminder Texts</Text>
+        <View style={styles.sectionBlock}>
+        <Text style={styles.section}>Reminder Texts</Text>
         <Text style={styles.sectionHint}>
           People you already texted who have not donated yet — select them by
           tapping their contact (✓), then send a follow-up text. Swipe left on
@@ -846,6 +854,7 @@ export default function DashboardScreen() {
             </Text>
           )}
         </Pressable>
+        </View>
 
         <Pressable
           style={({ pressed }) => [
@@ -1144,7 +1153,7 @@ const styles = StyleSheet.create({
     zIndex: 50,
     elevation: 10,
   },
-  container: { padding: 20, paddingBottom: 48 },
+  container: { padding: 20 },
   headerRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -1370,18 +1379,20 @@ const styles = StyleSheet.create({
     marginTop: 8,
     overflow: "hidden",
   },
+  sectionBlock: {
+    marginTop: 28,
+  },
   section: {
-    marginTop: 8,
     fontWeight: "700",
     color: "#1A1A2E",
-    marginBottom: 4,
+    marginBottom: 10,
     fontSize: 17,
   },
   sectionHint: {
     fontSize: 13,
     color: "#475569",
-    marginBottom: 10,
-    lineHeight: 18,
+    marginBottom: 12,
+    lineHeight: 20,
   },
   donationRow: {
     paddingVertical: 10,
