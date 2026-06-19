@@ -71,6 +71,8 @@ export default function PrivacyPage() {
           The service may send optional reminder texts only when a user opts in to the
           SMS program terms. Message cadence, STOP/HELP instructions, and consent language
           are published at <Link href="/sms-reminders" className="text-hh-primary underline">SMS reminders</Link>.
+          Mobile phone numbers collected for SMS opt-in are not shared with third parties
+          or affiliates for marketing or promotional purposes.
         </p>
 
         <h2 className="text-lg font-semibold text-hh-dark">Retention</h2>

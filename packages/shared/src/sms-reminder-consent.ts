@@ -31,29 +31,31 @@ export const SMS_REMINDER_PUBLIC_INFO_PATH = "/sms-reminders" as const;
 export const SMS_REMINDER_A2P_MESSAGE_FLOW_TEMPLATE = `Automated fundraising REMINDER texts (from ${PLATFORM.displayName} / Twilio) — how users opt in
 
 WHO RECEIVES THESE MESSAGES
-Only users who optionally opt in separately from account signup: they save a verified U.S. mobile and check the standalone consent checkbox in one of our opt-in flows (mobile app Dashboard → “Your Contact Info,” or—for internal testing only—the confirmation step after completing web signup). We do not purchase or import phone lists.
+Only users who optionally opt in separately from account signup: they save a U.S. mobile and check the standalone consent checkbox in the Heart & Hustle mobile app (Dashboard → "Your Contact Info"). We do not purchase or import phone lists.
 
 SEPARATION FROM ACCOUNT / JOIN (required for carrier compliance)
 Creating an account, joining a team, and fundraising do not require a mobile number or agreement to automated reminder SMS. Participants get full access without texts. Opting into reminders is a deliberate second step after the membership transaction succeeds.
 
-OPT-IN PATH (step by step)
-1) User downloads the ${PLATFORM.shortName} mobile app and joins a team using the 7-character team code from their coach (and creates an email + password login), OR joins via limited web onboarding where offered.
-2) Account creation collects name, email, password, team context only—no automated reminder SMS consent and no reminder phone on that same screen.
-3) After the account exists, the user may optionally open Dashboard → “Your Contact Info” and enter a 10-digit U.S. mobile for campaign reminders. On the internal web join success page, the same optional step may appear only after “Create account & join” completes successfully.
-4) To receive reminders, the user checks the consent box (exact wording is versioned on our public SMS program page below) and saves. If they do not want texts, they skip this step or leave the box unchecked—doing so does not affect their account.
-5) Reminders are sent only while the user’s fundraiser campaign is ACTIVE (between published start and end dates). Approximate frequency: about every three (3) days during the campaign, plus one message on the last campaign day. These are operational reminders to support an existing fundraiser the user joined — not third‑party marketing.
+OPT-IN PATH (step by step — verify at public URL below)
+1) User downloads Heart & Hustle from the App Store (https://apps.apple.com/us/app/heart-hustle/id6763072369) or Google Play (https://play.google.com/store/apps/details?id=com.hearthustlefund.app).
+2) User joins a team with the 7-character code from their coach and creates email + password. Signup has NO SMS checkbox and NO reminder phone field.
+3) After login, user opens Dashboard → "Your Contact Info."
+4) User optionally enters a U.S. mobile number, checks the unchecked-by-default consent checkbox (exact wording on program page), and taps Save. If they do not want texts, they skip this step.
+5) Reminders are sent only while the user's fundraiser campaign is ACTIVE. Frequency: about every three (3) days during the campaign, plus one message on the last campaign day.
 
-PUBLIC DISCLOSURES (reviewer-accessible)
-Replace BASE_URL with our live website, then verify these URLs load without login:
-- Program description + consent wording mirror: BASE_URL${SMS_REMINDER_PUBLIC_INFO_PATH}
+PUBLIC DISCLOSURES (reviewer-accessible — no login required)
+Replace BASE_URL with https://www.hearthustlefund.com then verify these URLs load:
+- Full opt-in workflow, consent wording, and in-app screen example: BASE_URL${SMS_REMINDER_PUBLIC_INFO_PATH}
 - Terms of service: BASE_URL/terms
 - Privacy policy: BASE_URL/privacy
 
-OPT‑OUT AND HELP
-- Reply STOP to cancel further reminder texts from us.
-- Reply HELP for supported help wording.
-- User may also turn off reminders in the app by removing consent / clearing the saved reminder number in account settings as described on the program page above.
+MOBILE DATA: No mobile information obtained for SMS opt-in is shared with third parties or affiliates for marketing or promotional purposes.
 
-OTHER MESSAGES (participant-initiated, separate from automated reminders)
-Participants may compose and send fundraising texts manually from their own device to contacts they choose. Those are user-initiated; this campaign registration covers only automated reminder texts sent by the platform/Twilio on the schedule above.`;
+OPT-OUT AND HELP
+- Reply STOP to cancel further reminder texts from us.
+- Reply HELP for help.
+- User may also turn off reminders in the app under Your Contact Info.
+
+OTHER MESSAGES (NOT part of this campaign)
+Participants may compose fundraising texts manually from their own device to contacts they choose. Those are user-initiated; this campaign registration covers only automated reminder texts sent by the platform/Twilio on the schedule above.`;
 
