@@ -66,14 +66,35 @@ export default function PrivacyPage() {
           systems; we do not ingest the entire address book by default.
         </p>
 
-        <h2 className="text-lg font-semibold text-hh-dark">SMS reminders</h2>
+        <h2 className="text-lg font-semibold text-hh-dark">SMS reminders (A2P)</h2>
         <p>
-          The service may send optional reminder texts only when a user opts in to the
-          SMS program terms. Message cadence, STOP/HELP instructions, and consent language
-          are published at <Link href="/sms-reminders" className="text-hh-primary underline">SMS reminders</Link>.
-          Mobile phone numbers collected for SMS opt-in are not shared with third parties
-          or affiliates for marketing or promotional purposes.
+          Heart and Hustle Fundraising LLC may send <strong>optional</strong> automated
+          fundraiser reminder text messages only when a participant explicitly opts in
+          inside the mobile app. Program details and consent language are published at{" "}
+          <Link href="/sms-reminders" className="text-hh-primary underline">
+            SMS reminders
+          </Link>
+          .
         </p>
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <strong>Message frequency:</strong> during an active campaign, about every
+            three (3) days, plus one message on the final campaign day.
+          </li>
+          <li>
+            <strong>Message and data rates may apply.</strong>
+          </li>
+          <li>
+            <strong>Opt-out:</strong> reply <strong>STOP</strong> to cancel; reply{" "}
+            <strong>HELP</strong> for help; or disable reminders in the app under Your
+            Contact Info.
+          </li>
+          <li>
+            <strong>Mobile number sharing:</strong> mobile phone numbers and opt-in data
+            collected for this SMS program are <strong>not</strong> shared with third
+            parties or affiliates for marketing or promotional purposes.
+          </li>
+        </ul>
 
         <h2 className="text-lg font-semibold text-hh-dark">Retention</h2>
         <p>

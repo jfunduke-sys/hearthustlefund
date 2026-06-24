@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SmsOptInScreenshots } from "@/components/sms-opt-in-screenshots";
 import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { BRAND } from "@/lib/brand";
 import {
@@ -22,43 +23,80 @@ export const metadata: Metadata = {
 function OptInScreenMockup() {
   return (
     <div
-      className="mx-auto max-w-sm rounded-2xl border border-slate-300 bg-white p-4 shadow-md"
-      aria-label="Example of the in-app SMS opt-in screen"
+      id="opt-in-screen"
+      className="mx-auto max-w-sm scroll-mt-24 rounded-2xl border-2 border-slate-300 bg-white p-4 shadow-md"
+      aria-label="Hosted reproduction of the in-app SMS opt-in screen for carrier review"
     >
       <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-        In-app example · Dashboard → Your Contact Info
+        Hosted opt-in screen (mobile app · Dashboard → Your Contact Info)
+      </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-slate-600">
+        The live opt-in requires app login. This public page reproduces the exact
+        consent UI for A2P review. Checkbox is <strong>unchecked by default</strong>.
       </p>
       <p className="mt-3 text-sm font-bold text-hh-dark">Your Contact Info</p>
-      <p className="mt-2 text-xs leading-relaxed text-slate-600">
-        Optional US mobile for campaign reminders. Check the agreement box before
-        Save.
-      </p>
-      <div
-        className="mt-3 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-400"
-        aria-hidden
-      >
-        Mobile Number
-      </div>
+      <label htmlFor="sms-opt-in-phone-demo" className="mt-3 block text-xs font-semibold text-slate-600">
+        US mobile (optional)
+      </label>
+      <input
+        id="sms-opt-in-phone-demo"
+        type="tel"
+        readOnly
+        placeholder="10-digit mobile"
+        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-400"
+        aria-label="Phone number field (demonstration only — opt-in occurs in the mobile app)"
+      />
       <div className="mt-3 flex items-start gap-3">
-        <div
-          className="mt-0.5 h-5 w-5 shrink-0 rounded border-2 border-slate-400 bg-white"
-          aria-hidden
+        <input
+          type="checkbox"
+          readOnly
+          checked={false}
+          className="mt-1 h-4 w-4 shrink-0 rounded border-slate-400"
+          aria-label="SMS consent checkbox (unchecked by default)"
         />
         <p className="text-xs leading-relaxed text-slate-700">
-          {SMS_REMINDER_CONSENT_CHECKBOX_COPY} See Terms, Privacy, and SMS program
-          page.
+          {SMS_REMINDER_CONSENT_CHECKBOX_COPY} See{" "}
+          <Link
+            href="/terms"
+            className="font-semibold text-hh-primary underline underline-offset-2"
+          >
+            Terms and Conditions
+          </Link>
+          ,{" "}
+          <Link
+            href="/privacy"
+            className="font-semibold text-hh-primary underline underline-offset-2"
+          >
+            Privacy Policy
+          </Link>
+          , and our{" "}
+          <Link
+            href="/sms-reminders"
+            className="font-semibold text-hh-primary underline underline-offset-2"
+          >
+            SMS program page
+          </Link>
+          .
         </p>
       </div>
-      <p className="mt-1 text-[11px] italic text-slate-500">
-        Checkbox is unchecked by default. User must check it before Save enables
-        reminders.
+      <p className="mt-3 text-xs leading-relaxed text-slate-600">
+        <strong>Message frequency:</strong> about every three (3) days during an
+        active fundraiser, plus one message on the final campaign day.{" "}
+        <strong>Message and data rates may apply.</strong>
       </p>
-      <div
-        className="mt-4 rounded-lg bg-hh-primary px-4 py-2.5 text-center text-sm font-bold text-white"
-        aria-hidden
+      <button
+        type="button"
+        disabled
+        className="mt-4 w-full rounded-lg bg-hh-primary px-4 py-2.5 text-center text-sm font-bold text-white opacity-90"
       >
         Save
-      </div>
+      </button>
+      <p className="mt-3 text-[11px] italic text-slate-500">
+        Demonstration only — participants opt in in the {PLATFORM.shortName} iOS/Android
+        app after account creation.
+      </p>
+      {/* Optional PNGs in apps/web/public/sms-opt-in/ */}
+      <SmsOptInScreenshots />
     </div>
   );
 }
@@ -166,14 +204,14 @@ export default function SmsRemindersInfoPage() {
             This A2P campaign covers <strong>platform-sent reminder texts only</strong>{" "}
             (not participant-composed texts from the device Messages app):
           </p>
-          <ul className="list-disc space-y-2 pl-5 font-mono text-xs sm:text-sm">
+          <ul className="list-disc space-y-2 pl-5 text-xs sm:text-sm">
             <li>
-              H&amp;H: 3 awaiting donation — open app, Send reminders. Lincoln
-              Basketball
+              Heart &amp; Hustle: 3 awaiting donation — open app, Send reminders.
+              Lincoln Basketball. Reply STOP to cancel.
             </li>
             <li>
-              H&amp;H: Resend your link (Lincoln Basketball) — open the app to text
-              supporters.
+              Heart &amp; Hustle: Resend your link (Lincoln Basketball) — open the
+              app to text supporters. Reply STOP to cancel.
             </li>
           </ul>
         </section>
