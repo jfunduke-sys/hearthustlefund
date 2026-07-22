@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
+import { Great_Vibes } from "next/font/google";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION,
@@ -12,6 +13,16 @@ import {
 } from "@heart-and-hustle/shared";
 import type { OrganizationAgreement } from "@heart-and-hustle/shared";
 import { AgreementPrintControls } from "./agreement-print-controls";
+import {
+  DEFAULT_HH_COUNTERSIGNER_NAME,
+  DEFAULT_HH_COUNTERSIGNER_TITLE,
+} from "../hh-countersign-defaults";
+
+const signatureFont = Great_Vibes({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 function formatDateOnly(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -46,13 +57,22 @@ const pfrReg =
 function SignatureLine({
   label,
   value,
+  script,
 }: {
   label: string;
   value?: string | null;
+  /** Script-style signature look (print-friendly). */
+  script?: boolean;
 }) {
   return (
     <div className="mt-4">
-      <div className="min-h-[1.75rem] border-b border-slate-400 pb-1 text-sm text-slate-900">
+      <div
+        className={
+          script
+            ? `${signatureFont.className} min-h-[2.5rem] border-b border-slate-400 pb-1 text-3xl leading-none text-slate-900`
+            : "min-h-[1.75rem] border-b border-slate-400 pb-1 text-sm text-slate-900"
+        }
+      >
         {value || "\u00A0"}
       </div>
       <div className="mt-1 text-xs uppercase tracking-wide text-slate-500">
@@ -79,9 +99,13 @@ export default async function OrganizationAgreementPage({
   const a = data as OrganizationAgreement;
 
   const signedDate = a.signed_at ? formatDisplayDateTime(a.signed_at) : "—";
+  const counterName =
+    a.countersigned_by?.trim() || DEFAULT_HH_COUNTERSIGNER_NAME;
+  const counterTitle =
+    a.countersigned_title?.trim() || DEFAULT_HH_COUNTERSIGNER_TITLE;
   const counterDate = a.countersigned_at
     ? formatDisplayDateTime(a.countersigned_at)
-    : null;
+    : formatDisplayDateTime(new Date().toISOString());
 
   const budget = computeAgreementBudget(a.estimated_target_gross);
   const hasGross = budget.targetGross > 0;
@@ -241,8 +265,12 @@ export default async function OrganizationAgreementPage({
               <p className="text-sm font-bold text-hh-dark">
                 ORGANIZATION / ORGANIZER
               </p>
-              <SignatureLine label="Signature (typed)" value={a.signer_name} />
-              <SignatureLine label="Name" value={a.signer_name} />
+              <SignatureLine
+                label="Signature (electronic)"
+                value={a.signer_name}
+                script
+              />
+              <SignatureLine label="Printed name" value={a.signer_name} />
               <SignatureLine label="Title" value={a.signer_title} />
               <SignatureLine label="Organization" value={a.organization_name} />
               <SignatureLine label="School / program" value={a.school_name} />
@@ -262,14 +290,18 @@ export default async function OrganizationAgreementPage({
               <p className="text-sm font-bold text-hh-dark">
                 HEART AND HUSTLE FUNDRAISING LLC
               </p>
-              <SignatureLine label="Signature" value={a.countersigned_by} />
-              <SignatureLine label="Name" value={a.countersigned_by} />
-              <SignatureLine label="Title" value={a.countersigned_title} />
+              <SignatureLine
+                label="Signature (electronic)"
+                value={counterName}
+                script
+              />
+              <SignatureLine label="Printed name" value={counterName} />
+              <SignatureLine label="Title" value={counterTitle} />
               <SignatureLine label="Date signed" value={counterDate} />
               {!a.countersigned_at ? (
                 <p className="mt-2 text-[11px] text-slate-500 print:hidden">
-                  Record the Heart &amp; Hustle countersignature above, then
-                  print.
+                  Defaults to {DEFAULT_HH_COUNTERSIGNER_NAME}. Print / Save as
+                  PDF will record the countersignature automatically.
                 </p>
               ) : null}
             </div>
