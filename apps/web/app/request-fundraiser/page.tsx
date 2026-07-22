@@ -568,54 +568,61 @@ export default function RequestFundraiserPage() {
                     launching my campaign.
                   </Label>
                 </div>
-                <div className="space-y-4 rounded-xl border border-hh-primary/30 bg-hh-primary/5 p-4">
-                  <div>
-                    <p className="text-base font-semibold text-hh-dark">
+                <div className="space-y-5 rounded-xl border border-hh-primary/25 bg-gradient-to-b from-hh-primary/[0.06] to-white p-5 sm:p-6">
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                      Electronic signature
+                    </p>
+                    <p className="text-base font-semibold text-hh-dark sm:text-lg">
                       Sign the Fundraising Services Agreement
                     </p>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-700">
-                      Please read the full{" "}
+                    <p className="text-sm leading-relaxed text-slate-700">
+                      Read the{" "}
                       <Link
                         href="/terms"
                         target="_blank"
                         rel="noreferrer"
                         className="font-semibold text-hh-primary underline underline-offset-2"
                       >
-                        Fundraising Services Agreement (Terms of service)
+                        Fundraising Services Agreement
                       </Link>
-                      . As the Organizer (coach or program lead) for{" "}
-                      <strong>this campaign</strong>, type your name below to
-                      sign. Each team/campaign files its own agreement.
+                      , then sign below as the Organizer for this campaign. Each
+                      team files its own agreement.
                     </p>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+
+                  <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
                     <div className="space-y-2">
-                      <Label htmlFor="signer_name" className="text-base">
-                        Full legal name (electronic signature)
+                      <Label htmlFor="signer_name" className="text-sm font-semibold text-hh-dark">
+                        Full legal name
                       </Label>
                       <Input
                         id="signer_name"
                         name="signer_name"
                         required
                         autoComplete="name"
-                        placeholder="Type your full legal name"
-                        className="h-12 text-base"
+                        placeholder="First and last name"
+                        className="h-12 border-0 border-b border-slate-300 bg-transparent px-0 text-lg italic text-hh-dark shadow-none placeholder:text-sm placeholder:not-italic placeholder:text-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
                       />
+                      <p className="text-xs text-slate-500">
+                        This typed name is your electronic signature.
+                      </p>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="signer_title" className="text-base">
-                        Your title / role
+                      <Label htmlFor="signer_title" className="text-sm font-semibold text-hh-dark">
+                        Title / role
                       </Label>
                       <Input
                         id="signer_title"
                         name="signer_title"
                         required
-                        placeholder="e.g. Coach, Organizer, Athletic Director"
-                        className="h-12 text-base"
+                        placeholder="Coach, Organizer, AD…"
+                        className="h-11 text-base placeholder:text-sm placeholder:text-slate-400"
                       />
                     </div>
                   </div>
-                  <div className="flex items-start gap-3">
+
+                  <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white/80 p-3.5">
                     <Checkbox
                       id="agree_contract"
                       checked={agreeContract}
@@ -626,15 +633,15 @@ export default function RequestFundraiserPage() {
                     />
                     <Label
                       htmlFor="agree_contract"
-                      className="text-sm font-normal leading-relaxed"
+                      className="text-sm font-normal leading-relaxed text-slate-700"
                     >
                       {ORGANIZATION_AGREEMENT_ESIGN_CONSENT}
                     </Label>
                   </div>
                   <p className="text-xs leading-relaxed text-slate-600">
                     Heart &amp; Hustle will countersign and may also collect a W-9
-                    before your campaign launches. A signed PDF copy is generated
-                    for our state fundraiser registration records.
+                    before your campaign launches. A signed PDF is generated for
+                    state fundraiser registration records.
                   </p>
                 </div>
                 {error ? (
