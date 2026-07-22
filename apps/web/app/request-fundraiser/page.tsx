@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { submitFundraiserRequest } from "@/app/actions/request-fundraiser";
+import { ORGANIZATION_AGREEMENT_ESIGN_CONSENT } from "@heart-and-hustle/shared";
 import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { BRAND } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,13 @@ function validateRequestForm(fd: FormData): string | null {
     return "Enter a valid estimated number of participants (at least 1).";
   }
 
+  const goalRaw = trimOrEmpty(fd.get("estimated_goal")).replace(/[$,]/g, "");
+  if (!goalRaw) return "Estimated fundraising goal is required.";
+  const goalNum = Number(goalRaw);
+  if (Number.isNaN(goalNum) || goalNum <= 0) {
+    return "Enter a valid estimated fundraising goal (total dollars).";
+  }
+
   const startRaw = trimOrEmpty(fd.get("fundraiser_start_date"));
   const endRaw = trimOrEmpty(fd.get("fundraiser_end_date"));
   if (!startRaw) return "Proposed fundraiser start date is required.";
@@ -84,6 +92,11 @@ function validateRequestForm(fd: FormData): string | null {
   if (!startD || !endD) return "Enter valid fundraiser dates.";
   if (endD < startD) {
     return "End date must be on or after the start date.";
+  }
+
+  const district = trimOrEmpty(fd.get("school_district"));
+  if (!district) {
+    return "School district or organization is required.";
   }
 
   const kick = trimOrEmpty(fd.get("kickoff_setup_preference"));
@@ -96,6 +109,15 @@ function validateRequestForm(fd: FormData): string | null {
     return "Please choose whether you want to divide the campaign into teams or groups.";
   }
 
+  const signerName = trimOrEmpty(fd.get("signer_name"));
+  if (!signerName) {
+    return "Type your full legal name to sign the Fundraising Services Agreement.";
+  }
+  const signerTitle = trimOrEmpty(fd.get("signer_title"));
+  if (!signerTitle) {
+    return "Enter your title or role (e.g. Athletic Director, Booster President).";
+  }
+
   return null;
 }
 
@@ -104,6 +126,7 @@ export default function RequestFundraiserPage() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ack, setAck] = useState(false);
+  const [agreeContract, setAgreeContract] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -111,6 +134,12 @@ export default function RequestFundraiserPage() {
     if (!ack) {
       setError(
         "Please confirm the verification and paperwork acknowledgment below."
+      );
+      return;
+    }
+    if (!agreeContract) {
+      setError(
+        "Please type your name and check the box to sign the Fundraising Services Agreement."
       );
       return;
     }
@@ -123,51 +152,42 @@ export default function RequestFundraiserPage() {
       return;
     }
 
-    const schoolStreet = trimOrEmpty(fd.get("school_street"));
-    const schoolCity = trimOrEmpty(fd.get("school_city"));
-    const schoolState = trimOrEmpty(fd.get("school_state"));
-    const schoolZip = trimOrEmpty(fd.get("school_zip"));
-    const schoolAddress = `${schoolStreet}, ${schoolCity}, ${schoolState} ${schoolZip}`;
-    const estNum = parseInt(trimOrEmpty(fd.get("estimated_athletes")), 10);
-    const wantsGroups = trimOrEmpty(fd.get("wants_campaign_groups")) === "yes";
-    const adminFirst = trimOrEmpty(fd.get("admin_first_name"));
-    const adminLast = trimOrEmpty(fd.get("admin_last_name"));
-    const adminFull = [adminFirst, adminLast].filter(Boolean).join(" ");
-    const notesRaw = trimOrEmpty(fd.get("notes"));
-
     setLoading(true);
-    const supabase = createClient();
-    const { error: insertError } = await supabase.from("school_requests").insert({
+    const result = await submitFundraiserRequest({
       school_name: trimOrEmpty(fd.get("school_name")),
       school_district: trimOrEmpty(fd.get("school_district")),
-      school_street: schoolStreet,
-      school_city: schoolCity,
-      school_state: schoolState,
-      school_zip: schoolZip,
-      school_address: schoolAddress,
+      school_street: trimOrEmpty(fd.get("school_street")),
+      school_city: trimOrEmpty(fd.get("school_city")),
+      school_state: trimOrEmpty(fd.get("school_state")),
+      school_zip: trimOrEmpty(fd.get("school_zip")),
       sport_club_activity: trimOrEmpty(fd.get("sport_club_activity")),
-      admin_name: adminFull,
-      admin_first_name: adminFirst,
-      admin_last_name: adminLast,
+      admin_first_name: trimOrEmpty(fd.get("admin_first_name")),
+      admin_last_name: trimOrEmpty(fd.get("admin_last_name")),
       admin_email: trimOrEmpty(fd.get("admin_email")),
       admin_phone: trimOrEmpty(fd.get("admin_phone")),
-      estimated_athletes: estNum,
-      wants_campaign_groups: wantsGroups,
+      estimated_athletes: parseInt(trimOrEmpty(fd.get("estimated_athletes")), 10),
+      estimated_goal: Number(
+        trimOrEmpty(fd.get("estimated_goal")).replace(/[$,]/g, "")
+      ),
+      wants_campaign_groups:
+        trimOrEmpty(fd.get("wants_campaign_groups")) === "yes",
       fundraiser_start_date: trimOrEmpty(fd.get("fundraiser_start_date")),
       fundraiser_end_date: trimOrEmpty(fd.get("fundraiser_end_date")),
       kickoff_setup_preference: trimOrEmpty(fd.get("kickoff_setup_preference")),
-      notes: notesRaw || null,
-      status: "pending",
+      notes: trimOrEmpty(fd.get("notes")) || null,
+      signer_name: trimOrEmpty(fd.get("signer_name")),
+      signer_title: trimOrEmpty(fd.get("signer_title")),
     });
 
     setLoading(false);
-    if (insertError) {
-      setError(insertError.message);
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
     setDone(true);
     form.reset();
     setAck(false);
+    setAgreeContract(false);
   }
 
   return (
@@ -213,14 +233,18 @@ export default function RequestFundraiserPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="school_district" className="text-base">
-                    School District{" "}
-                    <span className="font-normal text-slate-500">(optional)</span>
+                    School District or Organization
                   </Label>
                   <Input
                     id="school_district"
                     name="school_district"
+                    required
                     className="h-12 text-base"
                   />
+                  <p className="text-xs text-slate-500">
+                    If a booster club or private school has no district, enter
+                    your organization&apos;s name.
+                  </p>
                 </div>
                 <div className="space-y-3">
                   <p className="text-base font-semibold text-hh-dark">
@@ -449,6 +473,27 @@ export default function RequestFundraiserPage() {
                     className="h-12 text-base"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="estimated_goal" className="text-base">
+                    Estimated Fundraising Goal (total $)
+                  </Label>
+                  <Input
+                    id="estimated_goal"
+                    name="estimated_goal"
+                    type="number"
+                    min={1}
+                    step="1"
+                    inputMode="numeric"
+                    required
+                    placeholder="e.g. 10000"
+                    className="h-12 text-base"
+                  />
+                  <p className="text-xs text-slate-500">
+                    Your best estimate of the total dollars this program aims to
+                    raise. Used only to complete the required budget in your
+                    state fundraising agreement — it is not a commitment.
+                  </p>
+                </div>
                 <fieldset className="space-y-3">
                   <legend className="sr-only">
                     Teams or groups for this campaign
@@ -523,19 +568,75 @@ export default function RequestFundraiserPage() {
                     launching my campaign.
                   </Label>
                 </div>
-                <p className="text-xs leading-relaxed text-slate-600">
-                  The full <strong>Fundraising Services Agreement</strong> (same
-                  as our{" "}
-                  <Link
-                    href="/terms"
-                    className="font-semibold text-hh-primary underline underline-offset-2"
-                  >
-                    Terms of service
-                  </Link>
-                  ) is available to read anytime. Heart &amp; Hustle will work
-                  with your school or organization to collect signed agreements
-                  and a W-9 outside this form.
-                </p>
+                <div className="space-y-4 rounded-xl border border-hh-primary/30 bg-hh-primary/5 p-4">
+                  <div>
+                    <p className="text-base font-semibold text-hh-dark">
+                      Sign the Fundraising Services Agreement
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-slate-700">
+                      Please read the full{" "}
+                      <Link
+                        href="/terms"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-hh-primary underline underline-offset-2"
+                      >
+                        Fundraising Services Agreement (Terms of service)
+                      </Link>
+                      . As the Organizer (coach or program lead) for{" "}
+                      <strong>this campaign</strong>, type your name below to
+                      sign. Each team/campaign files its own agreement.
+                    </p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="signer_name" className="text-base">
+                        Full legal name (electronic signature)
+                      </Label>
+                      <Input
+                        id="signer_name"
+                        name="signer_name"
+                        required
+                        autoComplete="name"
+                        placeholder="Type your full legal name"
+                        className="h-12 text-base"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signer_title" className="text-base">
+                        Your title / role
+                      </Label>
+                      <Input
+                        id="signer_title"
+                        name="signer_title"
+                        required
+                        placeholder="e.g. Coach, Organizer, Athletic Director"
+                        className="h-12 text-base"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="agree_contract"
+                      checked={agreeContract}
+                      onCheckedChange={(v: boolean | "indeterminate") =>
+                        setAgreeContract(v === true)
+                      }
+                      className="mt-1"
+                    />
+                    <Label
+                      htmlFor="agree_contract"
+                      className="text-sm font-normal leading-relaxed"
+                    >
+                      {ORGANIZATION_AGREEMENT_ESIGN_CONSENT}
+                    </Label>
+                  </div>
+                  <p className="text-xs leading-relaxed text-slate-600">
+                    Heart &amp; Hustle will countersign and may also collect a W-9
+                    before your campaign launches. A signed PDF copy is generated
+                    for our state fundraiser registration records.
+                  </p>
+                </div>
                 {error ? (
                   <p className="text-sm text-red-600" role="alert">
                     {error}

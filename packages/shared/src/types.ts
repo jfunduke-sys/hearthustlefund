@@ -27,6 +27,8 @@ export interface SchoolRequest {
   admin_email: string;
   admin_phone: string;
   estimated_athletes: number | null;
+  /** Good-faith estimated fundraising goal (total gross $) from intake. */
+  estimated_goal?: number | null;
   /**
    * Intake: whether the program wants to split the campaign into teams/groups
    * with group managers after approval (Head Organizer completes group setup on the web).
@@ -54,6 +56,12 @@ export interface SchoolRequest {
   fsa_intake_version?: string | null;
   /** When the submitter acknowledged the FSA on intake (ISO timestamp). */
   fsa_intake_acknowledged_at?: string | null;
+  /** The signed Fundraising Services Agreement for this campaign request. */
+  organization_agreement_id?: string | null;
+  /** Typed electronic signature (full legal name) captured on this submission (audit). */
+  signer_name?: string | null;
+  /** Signer title/role captured on this submission (audit). */
+  signer_title?: string | null;
   created_at: string;
 }
 

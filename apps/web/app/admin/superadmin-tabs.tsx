@@ -345,11 +345,10 @@ export function SuperadminTabs({
                 <strong className="font-semibold">Reminder:</strong> Before you
                 approve a request, confirm you have a{" "}
                 <strong className="font-semibold">W-9</strong> on file from the
-                school or district (tax ID for payments). The{" "}
-                <strong>Fundraising Services Agreement</strong> is published as
-                Terms of service on the website; use the{" "}
-                <strong>Program agreement</strong> tab here to print, copy, or
-                export for wet signatures (DocuSign later if you prefer).
+                school or district (tax ID for payments). Open the request to
+                view the <strong>signed campaign agreement</strong>, countersign
+                for Heart &amp; Hustle, and print/save the PDF for state filing
+                before the campaign starts.
               </div>
             </CardHeader>
             <CardContent className="overflow-x-auto">
@@ -502,6 +501,7 @@ export function SuperadminTabs({
                     <TableHead>HH start code</TableHead>
                     <TableHead>Organizer email</TableHead>
                     <TableHead>Est. participants</TableHead>
+                    <TableHead>Contract</TableHead>
                     <TableHead>Campaign</TableHead>
                     <TableHead className="text-right">Launch email</TableHead>
                   </TableRow>
@@ -510,7 +510,7 @@ export function SuperadminTabs({
                   {approvedRows.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={10}
+                        colSpan={11}
                         className="py-10 text-center text-slate-500"
                       >
                         No approved requests yet.
@@ -542,6 +542,21 @@ export function SuperadminTabs({
                         </TableCell>
                         <TableCell className="text-sm">{r.admin_email}</TableCell>
                         <TableCell>{r.estimated_athletes ?? "—"}</TableCell>
+                        <TableCell>
+                          {r.organization_agreement_id ? (
+                            <Button variant="link" className="h-auto p-0" asChild>
+                              <Link
+                                href={`/admin/organization-agreement/${r.organization_agreement_id}`}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                PDF
+                              </Link>
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-slate-400">—</span>
+                          )}
+                        </TableCell>
                         <TableCell>
                           {fundraiser ? (
                             <Button variant="link" className="h-auto p-0" asChild>
@@ -1138,6 +1153,48 @@ export function SuperadminTabs({
                   !viewOpen.fundraiser_terms_acknowledged_at
                     ? "— (none; current intake uses a single paperwork acknowledgment only)"
                     : null}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">
+                  Signed agreement (this campaign)
+                </dt>
+                <dd className="space-y-1 text-slate-800">
+                  {viewOpen.organization_agreement_id ? (
+                    <>
+                      <p>
+                        Signed by{" "}
+                        <strong>{viewOpen.signer_name || "—"}</strong>
+                        {viewOpen.signer_title
+                          ? `, ${viewOpen.signer_title}`
+                          : ""}
+                        .
+                        {viewOpen.estimated_goal != null ? (
+                          <>
+                            {" "}
+                            Est. goal:{" "}
+                            <strong>
+                              $
+                              {Number(viewOpen.estimated_goal).toLocaleString(
+                                "en-US"
+                              )}
+                            </strong>
+                            .
+                          </>
+                        ) : null}
+                      </p>
+                      <Link
+                        href={`/admin/organization-agreement/${viewOpen.organization_agreement_id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-hh-primary underline underline-offset-2"
+                      >
+                        Open signed agreement (print / save as PDF) →
+                      </Link>
+                    </>
+                  ) : (
+                    "— (no signed agreement linked; older request predates e-signature)"
+                  )}
                 </dd>
               </div>
               <div className="flex gap-4 border-t border-slate-200 pt-3 text-xs text-slate-600">

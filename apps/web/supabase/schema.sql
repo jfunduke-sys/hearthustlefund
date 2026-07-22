@@ -19,6 +19,9 @@ create table if not exists public.school_requests (
   admin_email text not null,
   admin_phone text not null,
   estimated_athletes int,
+  -- Good-faith estimated fundraising goal (total gross $) from intake; seeds the
+  -- organization agreement's estimated_target_gross (225 ILCS 460/7(b) budget).
+  estimated_goal numeric(12, 2),
   fundraiser_start_date date,
   fundraiser_end_date date,
   -- Intake: hh_rep_in_person | self_run
@@ -548,3 +551,43 @@ alter table public.school_requests
   add column if not exists wants_campaign_groups boolean not null default false;
 alter table public.fundraisers
   add column if not exists uses_campaign_groups boolean not null default false;
+
+-- One signed Fundraising Services Agreement per campaign (see
+-- migrations/add_organization_agreements.sql). Organizer e-signs on intake.
+create table if not exists public.organization_agreements (
+  id uuid primary key default gen_random_uuid(),
+  organization_name text not null,
+  school_state text,
+  school_name text,
+  sport_club_activity text,
+  campaign_start_date date,
+  campaign_end_date date,
+  school_request_id uuid references public.school_requests (id),
+  agreement_version text not null,
+  signer_name text not null,
+  signer_title text,
+  signer_email text,
+  signed_at timestamptz not null default now(),
+  signed_ip text,
+  signed_user_agent text,
+  countersigned_by text,
+  countersigned_title text,
+  countersigned_at timestamptz,
+  -- Estimated target GROSS for this campaign (225 ILCS 460/7(b)).
+  estimated_target_gross numeric(12, 2),
+  created_at timestamptz default now()
+);
+alter table public.organization_agreements enable row level security;
+alter table public.organization_agreements
+  add column if not exists school_name text,
+  add column if not exists sport_club_activity text,
+  add column if not exists campaign_start_date date,
+  add column if not exists campaign_end_date date,
+  add column if not exists school_request_id uuid references public.school_requests (id),
+  add column if not exists estimated_target_gross numeric(12, 2);
+alter table public.organization_agreements drop column if exists org_key;
+alter table public.school_requests
+  add column if not exists organization_agreement_id uuid references public.organization_agreements (id),
+  add column if not exists signer_name text,
+  add column if not exists signer_title text,
+  add column if not exists estimated_goal numeric(12, 2);

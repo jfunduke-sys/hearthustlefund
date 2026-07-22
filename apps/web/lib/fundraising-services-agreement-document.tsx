@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 
 /** Bump when the document body text changes (SuperAdmin + public /terms). */
-export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "10" as const;
+export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "12" as const;
 
 type Props = {
   pfrReg: string;
@@ -632,6 +632,109 @@ export function FundraisingServicesAgreementBody({
           To complete enrollment, the Organization will provide the information
           and signatures (including a W-9 and this Agreement as applicable)
           required by Company.
+        </p>
+      </section>
+
+      <section>
+        <h3 className="text-base font-semibold text-hh-dark print:font-bold">
+          24. STATUTORY DISCLOSURES (225 ILCS 460/7)
+        </h3>
+        <p className="mt-2">
+          These disclosures are made to satisfy the Illinois Solicitation for
+          Charity Act. Where a dollar amount, target, or campaign window is
+          required, the campaign-specific estimates are stated in{" "}
+          <strong>Exhibit A — Estimated Budget &amp; Term</strong>, which is
+          based on the Organizer&apos;s own good-faith estimate provided at
+          signing and forms part of this Agreement.
+        </p>
+
+        <h4 className="mt-4 text-sm font-semibold text-slate-800 print:font-bold">
+          (a) Methods of Fundraising
+        </h4>
+        <p className="mt-1">
+          Fundraising is conducted through Company&apos;s digital,
+          peer-to-peer fundraising platform. Participants affiliated with the
+          Organization share personalized donation links and messages with their
+          own contacts by text, email, and social media; contributions are made
+          online by payment card and processed electronically through Stripe,
+          Inc. Company does not conduct door-to-door, telephone, or in-person
+          cash solicitation on the Organization&apos;s behalf.
+        </p>
+
+        <h4 className="mt-4 text-sm font-semibold text-slate-800 print:font-bold">
+          (b) Geographic Scope
+        </h4>
+        <p className="mt-1">
+          Fundraising campaigns are organized and administered from within the
+          State of Illinois for Illinois-based organizations. Because
+          solicitation occurs online, contributions may be received from donors
+          located throughout the United States.
+        </p>
+
+        <h4 className="mt-4 text-sm font-semibold text-slate-800 print:font-bold">
+          (c) Duration
+        </h4>
+        <p className="mt-1">
+          This Agreement covers a <strong>single fundraising campaign</strong>{" "}
+          for the team, club, or activity identified in Exhibit A. The contract
+          term is the campaign window stated in Exhibit A (proposed start date
+          through proposed end date). Either party may terminate earlier as
+          provided in Section 12. A separate written agreement is required for
+          each additional campaign. Company files a true and correct copy of
+          each active contract with the Illinois Attorney General as required
+          by law, including at annual re-registration.
+        </p>
+
+        <h4 className="mt-4 text-sm font-semibold text-slate-800 print:font-bold">
+          (d) Compensation; Commissions, Salaries &amp; Fees
+        </h4>
+        <p className="mt-1">
+          Company&apos;s only compensation under this Agreement is a{" "}
+          <strong>service fee equal to ten percent (10%) of the gross funds
+          raised</strong> through the Organization&apos;s campaign(s), computed
+          as 10% of gross contributions and retained at payout as described in
+          Section 3. All payment-processing fees are paid by Company out of its
+          10% service fee and are not charged to the Organization. Company does
+          not use, employ, or pay outside solicitors, agents, or commissioned
+          salespeople for the Organization&apos;s campaigns; participants are
+          unpaid volunteers of the Organization and receive no commission,
+          salary, or fee from Company. No other commissions, salaries, or fees
+          are charged by Company or its agents or employees in connection with
+          this Agreement.
+        </p>
+
+        <h4 className="mt-4 text-sm font-semibold text-slate-800 print:font-bold">
+          (e) Interested-Party &amp; Vendor Disclosure
+        </h4>
+        <p className="mt-1">
+          Neither Company nor its principals, agents, employees, solicitors, or
+          members of their families own an interest in, manage, or act as a
+          supplier or vendor of fundraising goods or services purchased for the
+          Organization&apos;s campaigns. Payment processing is provided by
+          Stripe, Inc., an unaffiliated third party, at Stripe&apos;s standard
+          rates, which Company pays from its service fee.
+        </p>
+
+        <h4 className="mt-4 text-sm font-semibold text-slate-800 print:font-bold">
+          (f) Educational Program Services
+        </h4>
+        <p className="mt-1">
+          Company does not provide educational program services or disseminate
+          educational materials as part of its fundraising for the Organization.
+          If Company ever proposes to do so, it will first obtain the
+          Organization&apos;s written approval.
+        </p>
+
+        <h4 className="mt-4 text-sm font-semibold text-slate-800 print:font-bold">
+          (g) Recordkeeping &amp; Accountability
+        </h4>
+        <p className="mt-1">
+          Company maintains transaction, payout, and campaign records for each
+          fundraiser as described in Sections 7 and 8 and will account to the
+          Organization for funds raised and disbursed. A true and correct copy
+          of this Agreement is kept on file by both Company and the Organization
+          during its term and for at least three (3) years after the related
+          solicitation terminates, consistent with 225 ILCS 460/7.
         </p>
       </section>
     </section>
