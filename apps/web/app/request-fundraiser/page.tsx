@@ -76,8 +76,11 @@ function validateRequestForm(fd: FormData): string | null {
     return "Enter a valid estimated number of participants (at least 1).";
   }
 
-  const goalRaw = trimOrEmpty(fd.get("estimated_goal")).replace(/[$,]/g, "");
+  const goalRaw = trimOrEmpty(fd.get("estimated_goal")).replace(/[$,\s]/g, "");
   if (!goalRaw) return "Estimated fundraising goal is required.";
+  if (!/^\d+(\.\d{1,2})?$/.test(goalRaw)) {
+    return "Enter a valid estimated fundraising goal (digits only, e.g. 5000).";
+  }
   const goalNum = Number(goalRaw);
   if (Number.isNaN(goalNum) || goalNum <= 0) {
     return "Enter a valid estimated fundraising goal (total dollars).";
@@ -167,7 +170,7 @@ export default function RequestFundraiserPage() {
       admin_phone: trimOrEmpty(fd.get("admin_phone")),
       estimated_athletes: parseInt(trimOrEmpty(fd.get("estimated_athletes")), 10),
       estimated_goal: Number(
-        trimOrEmpty(fd.get("estimated_goal")).replace(/[$,]/g, "")
+        trimOrEmpty(fd.get("estimated_goal")).replace(/[$,\s]/g, "")
       ),
       wants_campaign_groups:
         trimOrEmpty(fd.get("wants_campaign_groups")) === "yes",
@@ -480,18 +483,18 @@ export default function RequestFundraiserPage() {
                   <Input
                     id="estimated_goal"
                     name="estimated_goal"
-                    type="number"
-                    min={1}
-                    step="1"
-                    inputMode="numeric"
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
                     required
-                    placeholder="e.g. 10000"
+                    placeholder="e.g. 5000"
                     className="h-12 text-base"
                   />
                   <p className="text-xs text-slate-500">
                     Your best estimate of the total dollars this program aims to
-                    raise. Used only to complete the required budget in your
-                    state fundraising agreement — it is not a commitment.
+                    raise (whole dollars is fine). Used only for the required
+                    budget in your state fundraising agreement — it is not a
+                    commitment.
                   </p>
                 </div>
                 <fieldset className="space-y-3">

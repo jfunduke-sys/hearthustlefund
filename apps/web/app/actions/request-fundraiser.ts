@@ -58,6 +58,9 @@ function validate(input: FundraiserRequestInput): string | null {
     return "Enter a valid estimated number of participants (at least 1).";
   if (!Number.isFinite(input.estimated_goal) || input.estimated_goal <= 0)
     return "Enter a valid estimated fundraising goal (total dollars).";
+  // Reject non-finite / absurd values; keep dollars as submitted (2dp max).
+  if (input.estimated_goal > 1_000_000_000)
+    return "Estimated fundraising goal looks too large. Please check the amount.";
   if (!clean(input.fundraiser_start_date) || !clean(input.fundraiser_end_date))
     return "Fundraiser start and end dates are required.";
   if (clean(input.fundraiser_end_date) < clean(input.fundraiser_start_date))
