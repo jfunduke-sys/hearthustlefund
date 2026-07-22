@@ -100,7 +100,9 @@ export async function submitFundraiserRequest(
   const activity = clean(input.sport_club_activity);
   const startDate = clean(input.fundraiser_start_date);
   const endDate = clean(input.fundraiser_end_date);
-  const goal = Number.isFinite(input.estimated_goal) ? input.estimated_goal : null;
+  const goal = Number.isFinite(input.estimated_goal)
+    ? Math.round(Number(input.estimated_goal) * 100) / 100
+    : null;
 
   // One agreement per campaign request — always create a new signed contract.
   const { data: created, error: createErr } = await admin

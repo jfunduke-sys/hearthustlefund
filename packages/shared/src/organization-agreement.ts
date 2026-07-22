@@ -29,15 +29,17 @@ export interface AgreementBudget {
  * Computes the 225 ILCS 460/7(b) estimated budget from a target gross amount.
  * Payment-processing fees are borne by Company out of its service fee, so the
  * organization's only projected fundraising expense is the service fee.
+ *
+ * The target gross is never reduced — it is shown exactly as provided (coerced
+ * to a finite number; Postgres `numeric` often arrives as a string).
  */
 export function computeAgreementBudget(
-  targetGross: number | null | undefined,
+  targetGross: number | string | null | undefined,
   feeRate: number = FUNDRAISING_SERVICE_FEE_RATE
 ): AgreementBudget {
+  const parsed = Number(targetGross);
   const gross =
-    Number.isFinite(targetGross) && (targetGross ?? 0) > 0
-      ? (targetGross as number)
-      : 0;
+    Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) / 100 : 0;
   const serviceFee = Math.round(gross * feeRate * 100) / 100;
   const netToOrganization = Math.round((gross - serviceFee) * 100) / 100;
   return {
@@ -51,15 +53,18 @@ export function computeAgreementBudget(
 
 /** Formats a dollar amount for the agreement/exhibit (USD, no cents when whole). */
 export function formatAgreementCurrency(
-  amount: number | null | undefined
+  amount: number | string | null | undefined
 ): string {
-  if (amount == null || !Number.isFinite(amount)) return "—";
+  const n = Number(amount);
+  if (!Number.isFinite(n)) return "—";
+  const rounded = Math.round(n * 100) / 100;
+  const isWhole = Math.abs(rounded - Math.round(rounded)) < 1e-9;
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    minimumFractionDigits: isWhole ? 0 : 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(rounded);
 }
 
 export interface OrganizationAgreement {

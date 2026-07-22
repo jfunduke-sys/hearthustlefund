@@ -84,8 +84,7 @@ export default async function OrganizationAgreementPage({
     : null;
 
   const budget = computeAgreementBudget(a.estimated_target_gross);
-  const hasGross =
-    a.estimated_target_gross != null && a.estimated_target_gross > 0;
+  const hasGross = budget.targetGross > 0;
   const termStart = formatDateOnly(a.campaign_start_date);
   const termEnd = formatDateOnly(a.campaign_end_date);
   const campaignLabel = [a.school_name, a.sport_club_activity]
