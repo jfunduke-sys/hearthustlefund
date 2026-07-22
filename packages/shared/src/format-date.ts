@@ -26,7 +26,8 @@ export function formatDisplayDate(input: string | Date | null | undefined): stri
 }
 
 /**
- * Renders as "March 28, 2026, 3:45 PM" in the viewer's local timezone.
+ * Renders as "March 28, 2026, 3:45 PM CDT" in America/Chicago (Illinois).
+ * Avoids UTC/server-offset drift on SSR (e.g. Vercel).
  */
 export function formatDisplayDateTime(
   input: string | Date | null | undefined
@@ -40,5 +41,7 @@ export function formatDisplayDateTime(
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: "America/Chicago",
+    timeZoneName: "short",
   });
 }
