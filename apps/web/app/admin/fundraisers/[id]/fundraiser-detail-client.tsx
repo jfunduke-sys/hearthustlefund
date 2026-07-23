@@ -346,7 +346,7 @@ export function FundraiserDetailClient({
               {formatDisplayDate(schoolRequest.fundraiser_end_date)}
             </p>
             <p>
-              <strong>Kickoff (intake):</strong>{" "}
+              <strong>Launch support:</strong>{" "}
               {formatKickoffSetupPreference(
                 schoolRequest.kickoff_setup_preference
               )}
