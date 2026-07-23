@@ -66,10 +66,10 @@ function validate(input: FundraiserRequestInput): string | null {
   if (clean(input.fundraiser_end_date) < clean(input.fundraiser_start_date))
     return "End date must be on or after the start date.";
   if (
-    input.kickoff_setup_preference !== "hh_rep_in_person" &&
+    input.kickoff_setup_preference !== "virtual_setup" &&
     input.kickoff_setup_preference !== "self_run"
   )
-    return "Please choose how you'd like to run your fundraiser kickoff.";
+    return "Please choose how you'd like to prepare for your fundraiser launch.";
   if (!clean(input.signer_name))
     return "Type your full legal name to sign the Fundraising Services Agreement.";
   if (!clean(input.signer_title))

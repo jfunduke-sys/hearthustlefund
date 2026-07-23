@@ -1059,7 +1059,7 @@ export function SuperadminTabs({
               </div>
               <div>
                 <dt className="font-semibold text-slate-600">
-                  Fundraiser kickoff
+                  Launch support
                 </dt>
                 <dd>
                   {formatKickoffSetupPreference(

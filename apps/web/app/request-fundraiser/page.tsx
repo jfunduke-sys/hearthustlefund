@@ -103,8 +103,8 @@ function validateRequestForm(fd: FormData): string | null {
   }
 
   const kick = trimOrEmpty(fd.get("kickoff_setup_preference"));
-  if (kick !== "hh_rep_in_person" && kick !== "self_run") {
-    return "Please choose how you’d like to run your fundraiser kickoff.";
+  if (kick !== "virtual_setup" && kick !== "self_run") {
+    return "Please choose how you’d like to prepare for your fundraiser launch.";
   }
 
   const groupsChoice = trimOrEmpty(fd.get("wants_campaign_groups"));
@@ -355,33 +355,33 @@ export default function RequestFundraiserPage() {
                   </div>
                 </div>
                 <fieldset className="space-y-3">
-                  <legend className="sr-only">Fundraiser kickoff preference</legend>
+                  <legend className="sr-only">Fundraiser launch preference</legend>
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-                    Kickoff preference
+                    Launch support
                   </p>
                   <p className="text-base font-semibold text-hh-dark">
-                    Fundraiser Kickoff
+                    How would you like to get started?
                   </p>
                   <p className="text-sm text-slate-600">
-                    Choose one. This helps us schedule support if you want a
-                    Heart &amp; Hustle team member on-site.
+                    Choose one. Either option works — pick the support level that
+                    fits your team.
                   </p>
                   <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
                     <label className="flex cursor-pointer gap-3">
                       <input
                         type="radio"
                         name="kickoff_setup_preference"
-                        value="hh_rep_in_person"
+                        value="self_run"
                         required
                         className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
                       />
                       <span className="text-sm leading-snug text-slate-800">
                         <span className="font-semibold text-hh-dark">
-                          In-Person Kickoff With a Heart &amp; Hustle Rep
+                          Handle Our Own
                         </span>
                         <span className="mt-0.5 block text-slate-600">
-                          Schedule someone from our team to help set up and
-                          launch with your participants on-site.
+                          Your team sets up and launches the fundraiser. Heart
+                          &amp; Hustle is available for remote support as needed.
                         </span>
                       </span>
                     </label>
@@ -389,16 +389,17 @@ export default function RequestFundraiserPage() {
                       <input
                         type="radio"
                         name="kickoff_setup_preference"
-                        value="self_run"
+                        value="virtual_setup"
                         className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
                       />
                       <span className="text-sm leading-snug text-slate-800">
                         <span className="font-semibold text-hh-dark">
-                          We&apos;ll Handle Our Own Launch
+                          Virtual Setup Meeting
                         </span>
                         <span className="mt-0.5 block text-slate-600">
-                          Your staff launches and runs the fundraiser. Heart &amp;
-                          Hustle provides remote guidance and support as needed.
+                          Meet online with Heart &amp; Hustle before your
+                          campaign starts to set up the fundraiser and walk
+                          through a successful launch.
                         </span>
                       </span>
                     </label>

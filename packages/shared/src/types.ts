@@ -4,8 +4,12 @@ export type SchoolRequestStatus =
   | "approved"
   | "rejected";
 
-/** School request intake: who runs the on-site fundraiser kickoff. */
-export type KickoffSetupPreference = "hh_rep_in_person" | "self_run";
+/** School request intake: how the organizer wants to prepare for launch. */
+export type KickoffSetupPreference =
+  | "virtual_setup"
+  | "self_run"
+  /** @deprecated Legacy in-person option; retained for older requests. */
+  | "hh_rep_in_person";
 
 export type FundraiserStatus = "active" | "completed" | "cancelled";
 
@@ -69,11 +73,14 @@ export interface SchoolRequest {
 export function formatKickoffSetupPreference(
   p: KickoffSetupPreference | null | undefined
 ): string {
-  if (p === "hh_rep_in_person") {
-    return "In-person kickoff with a Heart & Hustle rep (on-site setup & launch)";
+  if (p === "virtual_setup") {
+    return "Virtual setup meeting (before campaign start)";
   }
   if (p === "self_run") {
-    return "We'll handle our own launch (staff-led; HH remote support as needed)";
+    return "Handle our own launch";
+  }
+  if (p === "hh_rep_in_person") {
+    return "In-person kickoff (legacy request)";
   }
   return "—";
 }
