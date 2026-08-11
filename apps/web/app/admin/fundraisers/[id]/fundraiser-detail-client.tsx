@@ -10,7 +10,9 @@ import type {
 } from "@heart-and-hustle/shared";
 import {
   formatDisplayDate,
+  formatFeeModelLabel,
   formatKickoffSetupPreference,
+  normalizeFeeModel,
   schoolRequestLeadDisplayName,
 } from "@heart-and-hustle/shared";
 import type {
@@ -18,6 +20,7 @@ import type {
   RevenueSplitSnapshot,
 } from "@/lib/admin-fundraiser-analytics";
 import {
+  setFundraiserFeeModel,
   setFundraiserStatus,
   updateFundraiserComplianceNotes,
 } from "@/app/actions/admin";
@@ -48,6 +51,8 @@ export function FundraiserDetailClient({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [notes, setNotes] = useState(initialNotes ?? "");
+  const feeModel = normalizeFeeModel(fundraiser.fee_model);
+  const isKeep100 = feeModel === "keep_100";
 
   return (
     <div className="space-y-8">
@@ -78,6 +83,9 @@ export function FundraiserDetailClient({
         </h1>
         <p className="mt-1 text-sm text-slate-600">
           Status: <strong>{fundraiser.status}</strong>
+          {" · "}
+          Fee model:{" "}
+          <strong>{formatFeeModelLabel(feeModel)}</strong>
           {fundraiser.join_code ? (
             <>
               {" "}
@@ -158,54 +166,151 @@ export function FundraiserDetailClient({
         </CardContent>
       </Card>
 
+      <Card className="border-amber-200/80 bg-amber-50/40">
+        <CardHeader>
+          <CardTitle>Fee model (SuperAdmin test / Winter prep)</CardTitle>
+          <p className="text-sm font-normal text-slate-600">
+            Default is <strong>90/10</strong> for all live Fall campaigns. Switch
+            only a dedicated test fundraiser to <strong>Keep 100%</strong> so
+            real 90/10 campaigns are undisturbed.
+          </p>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant={feeModel === "split_90_10" ? "default" : "outline"}
+            disabled={pending || feeModel === "split_90_10"}
+            onClick={() =>
+              startTransition(async () => {
+                await setFundraiserFeeModel(fundraiser.id, "split_90_10");
+                router.refresh();
+              })
+            }
+          >
+            Use 90/10
+          </Button>
+          <Button
+            type="button"
+            variant={feeModel === "keep_100" ? "default" : "outline"}
+            disabled={pending || feeModel === "keep_100"}
+            onClick={() =>
+              startTransition(async () => {
+                await setFundraiserFeeModel(fundraiser.id, "keep_100");
+                router.refresh();
+              })
+            }
+          >
+            Use Keep 100%
+          </Button>
+          {isKeep100 ? (
+            <p className="w-full text-sm text-amber-950">
+              Donate links for this campaign now show Electronic Payment Fee +
+              optional Heart &amp; Hustle Support.
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
+
       <Card className="border-hh-primary/20">
         <CardHeader>
-          <CardTitle>Campaign revenue (90% / 10%)</CardTitle>
+          <CardTitle>
+            {isKeep100
+              ? "Campaign revenue (Keep 100%)"
+              : "Campaign revenue (90% / 10%)"}
+          </CardTitle>
           <p className="text-sm font-normal text-slate-600">
-            Four-line summary matching the SuperAdmin closed fundraisers table.
-            Stripe fees in net revenue are the sum of known{" "}
-            <span className="font-mono">stripe_fee_cents</span> on donations only.
+            {isKeep100
+              ? "Organization receives stated donations when fees are covered (or stated minus Electronic Payment Fee when deducted). Heart & Hustle revenue is Electronic Payment Fees + optional Support, minus Stripe processing."
+              : "Four-line summary matching the SuperAdmin closed fundraisers table. Stripe fees in net revenue are the sum of known stripe_fee_cents on donations only."}
           </p>
         </CardHeader>
         <CardContent>
           <dl className="grid gap-5 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <dt className="text-sm font-medium text-slate-700">
-                Total gross of campaign
+                {isKeep100
+                  ? "Organization net (payout basis)"
+                  : "Total gross of campaign"}
               </dt>
               <dd className="mt-1 text-2xl font-bold tabular-nums text-hh-dark">
-                ${analytics.grossRaised.toFixed(2)}
+                $
+                {(isKeep100
+                  ? revenueSplit.programCut
+                  : analytics.grossRaised
+                ).toFixed(2)}
               </dd>
-              <p className="mt-1 text-xs text-slate-500">
-                Sum of recorded donation amounts (see Payments below).
-              </p>
+              {isKeep100 ? (
+                <p className="mt-1 text-xs text-slate-500">
+                  Stated donations: ${revenueSplit.statedDonations.toFixed(2)} ·
+                  Total donor payments: $
+                  {revenueSplit.totalDonorPayments.toFixed(2)}
+                </p>
+              ) : (
+                <p className="mt-1 text-xs text-slate-500">
+                  Sum of recorded donation amounts (see Payments below).
+                </p>
+              )}
             </div>
-            <div>
-              <dt className="text-sm font-medium text-slate-700">
-                Program cut (90% of gross)
-              </dt>
-              <dd className="mt-1 text-xl font-semibold tabular-nums text-hh-dark">
-                ${revenueSplit.programCut.toFixed(2)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-slate-700">
-                H&amp;H cut (10% of gross)
-              </dt>
-              <dd className="mt-1 text-xl font-semibold tabular-nums text-hh-dark">
-                ${revenueSplit.hhCut.toFixed(2)}
-              </dd>
-            </div>
+            {isKeep100 ? (
+              <>
+                <div>
+                  <dt className="text-sm font-medium text-slate-700">
+                    Electronic Payment Fees (total)
+                  </dt>
+                  <dd className="mt-1 text-xl font-semibold tabular-nums text-hh-dark">
+                    ${revenueSplit.electronicPaymentFees.toFixed(2)}
+                  </dd>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Covered: ${revenueSplit.epfDonorCovered.toFixed(2)} · From
+                    donation: $
+                    {revenueSplit.epfDeductedFromDonation.toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-slate-700">
+                    Heart &amp; Hustle Support
+                  </dt>
+                  <dd className="mt-1 text-xl font-semibold tabular-nums text-hh-dark">
+                    ${revenueSplit.hhSupportTotal.toFixed(2)}
+                  </dd>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Opted in: {revenueSplit.supportOptInCount} · Declined:{" "}
+                    {revenueSplit.supportDeclinedCount}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <dt className="text-sm font-medium text-slate-700">
+                    Program cut (90% of gross)
+                  </dt>
+                  <dd className="mt-1 text-xl font-semibold tabular-nums text-hh-dark">
+                    ${revenueSplit.programCut.toFixed(2)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-slate-700">
+                    H&amp;H cut (10% of gross)
+                  </dt>
+                  <dd className="mt-1 text-xl font-semibold tabular-nums text-hh-dark">
+                    ${revenueSplit.hhCut.toFixed(2)}
+                  </dd>
+                </div>
+              </>
+            )}
             <div className="sm:col-span-2">
               <dt className="text-sm font-medium text-slate-700">
-                Net revenue (H&amp;H&apos;s 10% cut minus Stripe fees)
+                {isKeep100
+                  ? "Net H&H revenue (EPF + Support − Stripe fees)"
+                  : "Net revenue (H&H's 10% cut minus Stripe fees)"}
               </dt>
               <dd className="mt-1 text-xl font-semibold tabular-nums text-emerald-800">
                 ${revenueSplit.netHhRevenue.toFixed(2)}
               </dd>
               <p className="mt-1 text-xs text-slate-500">
-                Stripe fees deducted here: ${revenueSplit.stripeFeesDollars.toFixed(2)}{" "}
-                (known fees only).
+                Stripe fees deducted here: $
+                {revenueSplit.stripeFeesDollars.toFixed(2)} (known fees only).
               </p>
             </div>
           </dl>

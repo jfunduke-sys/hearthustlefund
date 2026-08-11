@@ -137,6 +137,12 @@ export interface Fundraiser {
    * at fundraiser creation when applicable.
    */
   uses_campaign_groups?: boolean | null;
+  /**
+   * Pricing model for this campaign.
+   * - split_90_10 (default): existing 90% org / 10% H&H
+   * - keep_100: no 10% commission; Electronic Payment Fee + optional H&H Support
+   */
+  fee_model?: import("./fee-model").FeeModel | null;
   created_at: string;
 }
 
@@ -161,7 +167,19 @@ export interface Donation {
   stripe_payment_id: string;
   /** Stripe processing fee in cents when known (from balance transaction). */
   stripe_fee_cents?: number | null;
+  /**
+   * Amount credited to the organization (team progress / payout basis).
+   * 90/10: equals total charged. keep_100: org allocation after fee mode.
+   */
   amount: number;
+  /** Donor-selected gift (keep_100); often equals amount for 90/10. */
+  stated_donation_amount?: number | null;
+  electronic_payment_fee_amount?: number | null;
+  fee_payment_mode?: import("./fee-model").FeePaymentMode | null;
+  hh_support_amount?: number | null;
+  total_charged_amount?: number | null;
+  checkout_payment_method?: import("./fee-model").CheckoutPaymentMethod | null;
+  fee_model?: import("./fee-model").FeeModel | null;
   donor_name: string | null;
   donor_email: string | null;
   donor_phone: string | null;

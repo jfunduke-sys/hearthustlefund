@@ -863,7 +863,8 @@ export function SuperadminTabs({
                     const pack = byFundraiser.get(f.id);
                     const rev = computeRevenueSplitFromDonations(
                       a.grossRaised,
-                      pack?.donations ?? []
+                      pack?.donations ?? [],
+                      f.fee_model
                     );
                     return (
                       <TableRow key={f.id}>

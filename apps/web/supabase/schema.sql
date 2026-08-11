@@ -75,6 +75,8 @@ create table if not exists public.fundraisers (
 );
 
 alter table public.fundraisers add column if not exists join_code text;
+alter table public.fundraisers
+  add column if not exists fee_model text not null default 'split_90_10';
 create unique index if not exists fundraisers_join_code_uq
   on public.fundraisers (join_code)
   where join_code is not null;
@@ -108,6 +110,15 @@ create table if not exists public.donations (
   anonymous boolean default false,
   created_at timestamptz default now()
 );
+
+alter table public.donations
+  add column if not exists fee_model text,
+  add column if not exists stated_donation_amount numeric(10, 2),
+  add column if not exists electronic_payment_fee_amount numeric(10, 2),
+  add column if not exists fee_payment_mode text,
+  add column if not exists hh_support_amount numeric(10, 2),
+  add column if not exists total_charged_amount numeric(10, 2),
+  add column if not exists checkout_payment_method text;
 
 -- 6. athlete_contacts — only selected contacts are stored server-side (dedupe per athlete via phone_normalized)
 create table if not exists public.athlete_contacts (

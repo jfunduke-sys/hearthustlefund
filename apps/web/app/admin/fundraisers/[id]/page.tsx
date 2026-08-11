@@ -68,7 +68,8 @@ export default async function AdminFundraiserDetailPage({
   );
   const revenueSplit = computeRevenueSplitFromDonations(
     analytics.grossRaised,
-    donationList
+    donationList,
+    f.fee_model
   );
 
   const stripe = process.env.STRIPE_SECRET_KEY

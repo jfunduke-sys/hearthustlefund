@@ -104,17 +104,50 @@ export async function recordDonationFromCheckoutSession(
   const donorEmail = (md.donor_email || "").trim() || null;
   const donorPhone = (md.donor_phone || "").trim() || null;
 
-  const { error: insErr } = await admin.from("donations").insert({
+  const feeModel = (md.fee_model || "split_90_10").trim();
+  const orgAllocationCents = Number(
+    md.org_allocation_cents || md.amount_cents || amountCents
+  );
+  const statedCents = Number(md.stated_donation_cents || orgAllocationCents);
+  const epfCents = Number(md.electronic_payment_fee_cents || 0);
+  const supportCents = Number(md.hh_support_cents || 0);
+  const totalChargedCents = Number(
+    md.total_charged_cents || session.amount_total || amountCents
+  );
+  const feePaymentMode = (md.fee_payment_mode || "").trim() || null;
+  const checkoutMethod = (md.checkout_payment_method || "").trim() || null;
+
+  const orgDollars = (Number.isFinite(orgAllocationCents) ? orgAllocationCents : amountCents) / 100;
+
+  const insertRow: Record<string, unknown> = {
     fundraiser_id: fundraiserId,
     athlete_id: athleteId,
     stripe_payment_id: paymentId,
     stripe_fee_cents: feeCents,
-    amount: amountCents / 100,
+    amount: orgDollars,
     donor_name: anonymous ? null : donorName,
     donor_email: donorEmail,
     donor_phone: donorPhone,
     anonymous,
-  });
+  };
+
+  if (feeModel === "keep_100") {
+    insertRow.fee_model = "keep_100";
+    insertRow.stated_donation_amount = statedCents / 100;
+    insertRow.electronic_payment_fee_amount = epfCents / 100;
+    insertRow.fee_payment_mode = feePaymentMode;
+    insertRow.hh_support_amount = supportCents / 100;
+    insertRow.total_charged_amount = totalChargedCents / 100;
+    insertRow.checkout_payment_method = checkoutMethod;
+  } else {
+    insertRow.fee_model = "split_90_10";
+    insertRow.stated_donation_amount = orgDollars;
+    insertRow.total_charged_amount = orgDollars;
+    insertRow.electronic_payment_fee_amount = 0;
+    insertRow.hh_support_amount = 0;
+  }
+
+  const { error: insErr } = await admin.from("donations").insert(insertRow);
 
   if (insErr) {
     return { inserted: false, skipped: false, error: insErr.message };

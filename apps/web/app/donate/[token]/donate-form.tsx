@@ -13,10 +13,15 @@ import type { Athlete, Fundraiser } from "@heart-and-hustle/shared";
 import {
   type CampaignDayBanner,
   type CampaignWindowPhase,
+  type CheckoutPaymentMethod,
+  type FeePaymentMode,
   campaignDonationsBlockedMessage,
+  computeKeep100Checkout,
   effectiveAthleteGoalForDonorPage,
   formatDisplayDate,
   getDefaultDonorPageAboutText,
+  normalizeFeeModel,
+  suggestedHhSupportDollars,
 } from "@heart-and-hustle/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,6 +109,15 @@ export default function DonateForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Keep 100% options (ignored for 90/10 fundraisers)
+  const feeModel = normalizeFeeModel(fundraiser.fee_model);
+  const isKeep100 = feeModel === "keep_100";
+  const [coverFee, setCoverFee] = useState(true);
+  const [paymentMethod, setPaymentMethod] =
+    useState<CheckoutPaymentMethod>("card");
+  const [hhSupportOptIn, setHhSupportOptIn] = useState(false);
+  const [hhSupportAmount, setHhSupportAmount] = useState("");
+
   function scrollToDonateSection() {
     document
       .getElementById("donate-section")
@@ -140,6 +154,29 @@ export default function DonateForm({
       return Number.isFinite(v) ? v : NaN;
     }
     return amountChoice;
+  }
+
+  const statedDonation = dollarsToCharge();
+  const keep100Preview =
+    isKeep100 && Number.isFinite(statedDonation) && statedDonation > 0
+      ? computeKeep100Checkout({
+          statedDonation,
+          feeMode: (coverFee
+            ? "donor_covered"
+            : "deducted_from_donation") as FeePaymentMode,
+          paymentMethod,
+          hhSupportDollars: hhSupportOptIn
+            ? Number(hhSupportAmount) || suggestedHhSupportDollars(statedDonation)
+            : 0,
+        })
+      : null;
+
+  function onStatedAmountChosen(dollars: number) {
+    if (!hhSupportOptIn) {
+      setHhSupportAmount(String(suggestedHhSupportDollars(dollars)));
+    } else if (!hhSupportAmount) {
+      setHhSupportAmount(String(suggestedHhSupportDollars(dollars)));
+    }
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -180,6 +217,12 @@ export default function DonateForm({
 
     setLoading(true);
     try {
+      const feePaymentMode: FeePaymentMode = coverFee
+        ? "donor_covered"
+        : "deducted_from_donation";
+      const supportDollars = hhSupportOptIn
+        ? Math.max(0, Number(hhSupportAmount) || 0)
+        : 0;
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -192,6 +235,13 @@ export default function DonateForm({
           athlete_id: athlete.id,
           fundraiser_id: fundraiser.id,
           token: athlete.unique_link_token,
+          ...(isKeep100
+            ? {
+                feePaymentMode,
+                paymentMethod,
+                hhSupportDollars: supportDollars,
+              }
+            : {}),
         }),
       });
       const body = await res.json();
@@ -378,6 +428,7 @@ export default function DonateForm({
                     onClick={() => {
                       setAmountChoice(tier.amount);
                       setCustomAmount("");
+                      onStatedAmountChosen(tier.amount);
                     }}
                     className={`rounded-xl border-2 p-4 text-left transition ${
                       selected
@@ -415,6 +466,7 @@ export default function DonateForm({
                       onClick={() => {
                         setAmountChoice(amount);
                         setCustomAmount("");
+                        onStatedAmountChosen(amount);
                       }}
                       className={`shrink-0 rounded-lg border-2 px-3 py-2 text-sm font-bold tabular-nums transition ${
                         selected
@@ -451,6 +503,8 @@ export default function DonateForm({
                     onChange={(e) => {
                       setAmountChoice("other");
                       setCustomAmount(e.target.value);
+                      const v = parseFloat(e.target.value);
+                      if (Number.isFinite(v) && v > 0) onStatedAmountChosen(v);
                     }}
                     onFocus={() => setAmountChoice("other")}
                     className="h-9"
@@ -522,6 +576,194 @@ export default function DonateForm({
               </div>
             </div>
 
+            {isKeep100 && Number.isFinite(statedDonation) && statedDonation > 0 ? (
+              <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                    Keep 100% checkout
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    This program keeps the full stated donation when you cover
+                    the Electronic Payment Fee. There is no 10% fundraising
+                    commission.
+                  </p>
+                </div>
+
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-semibold text-hh-dark">
+                    How will you pay?
+                  </legend>
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-3">
+                    <input
+                      type="radio"
+                      name="pay_method"
+                      className="mt-1 accent-hh-primary"
+                      checked={paymentMethod === "card"}
+                      onChange={() => setPaymentMethod("card")}
+                    />
+                    <span className="text-sm text-slate-800">
+                      <span className="font-semibold">Card</span>
+                      <span className="mt-0.5 block text-slate-600">
+                        Electronic Payment Fee: 3.9% + $0.30
+                      </span>
+                    </span>
+                  </label>
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-3">
+                    <input
+                      type="radio"
+                      name="pay_method"
+                      className="mt-1 accent-hh-primary"
+                      checked={paymentMethod === "us_bank_account"}
+                      onChange={() => setPaymentMethod("us_bank_account")}
+                    />
+                    <span className="text-sm text-slate-800">
+                      <span className="font-semibold">Bank account (ACH)</span>
+                      <span className="mt-0.5 block text-slate-600">
+                        Electronic Payment Fee: 1%
+                      </span>
+                    </span>
+                  </label>
+                </fieldset>
+
+                <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50/80 p-3">
+                  <Checkbox
+                    id="cover_fee"
+                    checked={coverFee}
+                    onCheckedChange={(v: boolean | "indeterminate") =>
+                      setCoverFee(v === true)
+                    }
+                    className="mt-0.5"
+                  />
+                  <Label
+                    htmlFor="cover_fee"
+                    className="text-sm font-normal leading-snug text-slate-800"
+                  >
+                    <span className="font-semibold text-hh-dark">
+                      Help our team receive the full amount
+                    </span>{" "}
+                    by covering the Electronic Payment Fee
+                    {keep100Preview
+                      ? ` ($${keep100Preview.electronicPaymentFee.toFixed(2)})`
+                      : ""}
+                    .
+                    {!coverFee ? (
+                      <span className="mt-1 block text-xs text-amber-900">
+                        Fee will be deducted from your donation. The organization
+                        receives $
+                        {keep100Preview
+                          ? keep100Preview.orgAllocation.toFixed(2)
+                          : "—"}
+                        .
+                      </span>
+                    ) : null}
+                  </Label>
+                </div>
+
+                <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-3">
+                  <div>
+                    <p className="text-sm font-semibold text-hh-dark">
+                      Support Heart &amp; Hustle — Optional
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                      Your optional contribution helps Heart &amp; Hustle maintain
+                      and improve the fundraising platform for teams and programs.
+                      This is separate from your donation to the organization.
+                    </p>
+                    <p className="mt-2 text-sm text-slate-700">
+                      Suggested:{" "}
+                      <strong>
+                        5% ($
+                        {suggestedHhSupportDollars(statedDonation).toFixed(2)})
+                      </strong>
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="hh_support"
+                      checked={hhSupportOptIn}
+                      onCheckedChange={(v: boolean | "indeterminate") => {
+                        const on = v === true;
+                        setHhSupportOptIn(on);
+                        if (on && !hhSupportAmount) {
+                          setHhSupportAmount(
+                            String(suggestedHhSupportDollars(statedDonation))
+                          );
+                        }
+                      }}
+                      className="mt-1"
+                    />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <Label
+                        htmlFor="hh_support"
+                        className="text-sm font-normal text-slate-800"
+                      >
+                        Add support for Heart &amp; Hustle
+                      </Label>
+                      {hhSupportOptIn ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-slate-600">
+                            $
+                          </span>
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            value={hhSupportAmount}
+                            onChange={(e) => setHhSupportAmount(e.target.value)}
+                            className="h-10 max-w-[8rem]"
+                            aria-label="Heart and Hustle support amount"
+                          />
+                          <button
+                            type="button"
+                            className="text-xs font-medium text-hh-primary underline"
+                            onClick={() =>
+                              setHhSupportAmount(
+                                String(suggestedHhSupportDollars(statedDonation))
+                              )
+                            }
+                          >
+                            Reset to 5%
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                {keep100Preview ? (
+                  <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">
+                    <div className="flex justify-between gap-3 py-1">
+                      <span>Donation to organization</span>
+                      <span className="font-semibold tabular-nums">
+                        ${keep100Preview.orgAllocation.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-3 py-1">
+                      <span>Electronic Payment Fee</span>
+                      <span className="tabular-nums">
+                        {coverFee
+                          ? `$${keep100Preview.electronicPaymentFee.toFixed(2)}`
+                          : `$${keep100Preview.electronicPaymentFee.toFixed(2)} (from donation)`}
+                      </span>
+                    </div>
+                    {keep100Preview.hhSupport > 0 ? (
+                      <div className="flex justify-between gap-3 py-1">
+                        <span>Heart &amp; Hustle Support</span>
+                        <span className="tabular-nums">
+                          ${keep100Preview.hhSupport.toFixed(2)}
+                        </span>
+                      </div>
+                    ) : null}
+                    <div className="mt-1 flex justify-between gap-3 border-t border-slate-100 pt-2 font-semibold">
+                      <span>Total you pay</span>
+                      <span className="tabular-nums text-hh-dark">
+                        ${keep100Preview.totalCharged.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             {error ? (
               <p className="text-sm text-red-600" role="alert">
                 {error}
@@ -537,6 +779,9 @@ export default function DonateForm({
               {loading
                 ? "Redirecting to secure checkout…"
                 : (() => {
+                    if (isKeep100 && keep100Preview) {
+                      return `Continue — pay $${keep100Preview.totalCharged.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    }
                     const d = dollarsToCharge();
                     return Number.isFinite(d)
                       ? `Continue with $${d.toLocaleString()} donation`

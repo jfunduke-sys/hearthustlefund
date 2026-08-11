@@ -188,3 +188,26 @@ export async function updateFundraiserComplianceNotes(
   revalidatePath("/admin");
   revalidatePath(`/admin/fundraisers/${fundraiserId}`);
 }
+
+/**
+ * SuperAdmin-only: switch a fundraiser between 90/10 and Keep 100%.
+ * Default for all campaigns remains split_90_10 until Winter go-live.
+ * Use Keep 100% only on dedicated test fundraisers while Fall campaigns run.
+ */
+export async function setFundraiserFeeModel(
+  fundraiserId: string,
+  feeModel: "split_90_10" | "keep_100"
+) {
+  await assertSuperAdmin();
+  if (feeModel !== "split_90_10" && feeModel !== "keep_100") {
+    throw new Error("Invalid fee model.");
+  }
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("fundraisers")
+    .update({ fee_model: feeModel })
+    .eq("id", fundraiserId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath(`/admin/fundraisers/${fundraiserId}`);
+}
