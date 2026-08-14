@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@heart-and-hustle/shared"],
+  experimental: {
+    // Enables apps/web/instrumentation.ts (in-process daily jobs on Railway).
+    instrumentationHook: true,
+  },
   images: {
     remotePatterns: [
       {
