@@ -6,8 +6,9 @@ import { getSessionUser } from "../../lib/auth-user";
 import { subscribeSessionPresence } from "../../lib/auth-session-listener";
 import { supabase } from "../../lib/supabase";
 import { isCoachAccount } from "../../lib/coach-account";
+import { getParticipantCampaignAccess } from "../../lib/participant-campaign-access";
 
-type Branch = "pending" | "coach" | "athlete";
+type Branch = "pending" | "coach" | "athlete" | "blocked";
 
 export default function TabsLayout() {
   const [ready, setReady] = useState(false);
@@ -28,15 +29,29 @@ export default function TabsLayout() {
       setBranch("pending");
       return;
     }
+    let cancelled = false;
     void (async () => {
       const user = await getSessionUser();
       if (!user) {
-        setBranch("athlete");
+        if (!cancelled) setBranch("athlete");
         return;
       }
       const coach = await isCoachAccount(user.id);
-      setBranch(coach ? "coach" : "athlete");
+      if (coach) {
+        if (!cancelled) setBranch("coach");
+        return;
+      }
+      const access = await getParticipantCampaignAccess(user.id);
+      if (!access.allowed) {
+        await supabase.auth.signOut({ scope: "local" });
+        if (!cancelled) setBranch("blocked");
+        return;
+      }
+      if (!cancelled) setBranch("athlete");
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [ready, session]);
 
   if (!ready) {
@@ -47,7 +62,7 @@ export default function TabsLayout() {
     );
   }
 
-  if (!session) {
+  if (!session || branch === "blocked") {
     return <Redirect href="/" />;
   }
 

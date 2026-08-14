@@ -1,4 +1,5 @@
 import type { createAdminClient } from "@/lib/supabase/admin";
+import { isFundraiserOpenForParticipantAccess } from "@heart-and-hustle/shared";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
@@ -65,12 +66,14 @@ export async function deleteParticipantAuthUsersAfterCloseout(
   if (linkedFundraiserIds.length > 0) {
     const { data: activeFr, error: frErr } = await admin
       .from("fundraisers")
-      .select("id")
+      .select("id, status, start_date, end_date")
       .in("id", linkedFundraiserIds)
       .eq("status", "active");
     if (frErr) throw new Error(frErr.message);
     for (const row of activeFr ?? []) {
-      activeFundraiserIds.add(row.id as string);
+      if (isFundraiserOpenForParticipantAccess(row)) {
+        activeFundraiserIds.add(row.id as string);
+      }
     }
   }
 
@@ -102,12 +105,14 @@ export async function deleteParticipantAuthUsersAfterCloseout(
   if (managerFundraiserIds.length > 0) {
     const { data: activeMgrFr, error: mgrFrErr } = await admin
       .from("fundraisers")
-      .select("id")
+      .select("id, status, start_date, end_date")
       .in("id", managerFundraiserIds)
       .eq("status", "active");
     if (mgrFrErr) throw new Error(mgrFrErr.message);
     for (const row of activeMgrFr ?? []) {
-      activeManagerFundraiserIds.add(row.id as string);
+      if (isFundraiserOpenForParticipantAccess(row)) {
+        activeManagerFundraiserIds.add(row.id as string);
+      }
     }
   }
 

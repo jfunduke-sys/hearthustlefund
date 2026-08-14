@@ -4,6 +4,10 @@ import {
   isValidJoinCodeLookupSegment,
   segmentToStoredJoinCode,
 } from "@/lib/join-code";
+import {
+  isFundraiserOpenForParticipantAccess,
+  PARTICIPANT_CAMPAIGN_ENDED_MESSAGE,
+} from "@heart-and-hustle/shared";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +20,7 @@ export async function GET(
   const base = admin
     .from("fundraisers")
     .select(
-      "id, school_name, team_name, school_logo_url, team_logo_url, unique_slug, join_code, status"
+      "id, school_name, team_name, school_logo_url, team_logo_url, unique_slug, join_code, status, start_date, end_date"
     )
     .eq("status", "active");
 
@@ -31,6 +35,13 @@ export async function GET(
   }
   if (!data) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (!isFundraiserOpenForParticipantAccess(data)) {
+    return NextResponse.json(
+      { error: PARTICIPANT_CAMPAIGN_ENDED_MESSAGE },
+      { status: 404 }
+    );
   }
 
   return NextResponse.json(data);

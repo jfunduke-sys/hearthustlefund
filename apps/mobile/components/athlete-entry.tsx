@@ -15,7 +15,7 @@ import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getApiBase, supabase } from "../lib/supabase";
-import { getPostAuthHrefForCurrentUser } from "../lib/post-auth-route";
+import { assertPostSignInAccess } from "../lib/participant-campaign-access";
 import {
   TEAM_JOIN_CHARSET,
   TEAM_JOIN_CODE_LENGTH,
@@ -205,7 +205,11 @@ export default function AthleteEntry({
       if (!data.session) {
         throw new Error("Session did not start. Try again.");
       }
-      router.replace(await getPostAuthHrefForCurrentUser());
+      const access = await assertPostSignInAccess(data.session.user.id);
+      if (!access.ok) {
+        throw new Error(access.error || "Sign in not allowed.");
+      }
+      router.replace(access.href);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Sign in failed";
       const low = msg.toLowerCase();

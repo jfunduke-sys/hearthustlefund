@@ -59,6 +59,30 @@ export function isCampaignWindowActiveForDonations(
   return isCampaignWindowActiveForOutreach(startDateStr, endDateStr, now);
 }
 
+/**
+ * Participants may use the app only while the campaign is still open:
+ * fundraiser status is active AND today is on/before the end date (Central Time).
+ * Organizers keep coach login after the campaign ends.
+ */
+export function isFundraiserOpenForParticipantAccess(
+  fundraiser: {
+    status?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
+  },
+  now?: Date
+): boolean {
+  if ((fundraiser.status ?? "active") !== "active") return false;
+  const start = String(fundraiser.start_date ?? "");
+  const end = String(fundraiser.end_date ?? "");
+  if (!start || !end) return false;
+  return getCampaignWindowPhase(start, end, now) !== "after_end";
+}
+
+export const PARTICIPANT_CAMPAIGN_ENDED_MESSAGE =
+  "This fundraising campaign has ended. Participant login is no longer available. Organizers can still sign in with their Organizer account.";
+
+
 /** Whole calendar days between two YYYY-MM-DD strings (b − a). */
 export function calendarDaysBetweenYMD(a: string, b: string): number {
   const na = normalizeDateOnly(a);
