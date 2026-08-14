@@ -23,13 +23,11 @@ export default function CoachForgotPasswordPage() {
 
     try {
       const supabase = createClient();
-      const configuredBase = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
-      const origin = typeof window !== "undefined" ? window.location.origin : "";
-      const redirectBase = configuredBase || origin;
+      const origin = window.location.origin.replace(/\/$/, "");
       const { error: resetErr } = await supabase.auth.resetPasswordForEmail(
         email.trim(),
         {
-          redirectTo: `${redirectBase}/coach/reset-password`,
+          redirectTo: `${origin}/coach/reset-password`,
         }
       );
       if (resetErr) {
