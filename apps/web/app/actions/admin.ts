@@ -3,10 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  collectParticipantUserIdsForFundraiser,
-  deleteParticipantAuthUsersAfterCloseout,
-} from "@/lib/participant-auth-closeout";
+import { revokeParticipantAccessForFundraiser } from "@/lib/participant-auth-closeout";
 
 export async function assertSuperAdmin() {
   const supabase = createClient();
@@ -133,41 +130,17 @@ export async function setFundraiserStatus(
     .update({
       status,
       closed_at: status === "active" ? null : closedAt,
+      ...(status === "active" ? { participant_access_revoked_at: null } : {}),
     })
     .eq("id", fundraiserId);
   if (error) throw new Error(error.message);
 
   if (status === "completed" || status === "cancelled") {
-    const participantUserIds = await collectParticipantUserIdsForFundraiser(
-      admin,
-      fundraiserId
-    );
-
-    // Campaign-scoped participant access: unlink participant auth identities
-    // when closeout is finalized by SuperAdmin.
-    const { error: unlinkErr } = await admin
-      .from("athletes")
-      .update({ user_id: null })
-      .eq("fundraiser_id", fundraiserId);
-    if (unlinkErr) throw new Error(unlinkErr.message);
-
-    // Minimize retained outreach data post-closeout while preserving financial
-    // and compliance records.
-    const { data: athleteRows, error: athleteErr } = await admin
-      .from("athletes")
-      .select("id")
-      .eq("fundraiser_id", fundraiserId);
-    if (athleteErr) throw new Error(athleteErr.message);
-    const athleteIds = (athleteRows ?? []).map((r) => r.id as string);
-    if (athleteIds.length > 0) {
-      const { error: contactErr } = await admin
-        .from("athlete_contacts")
-        .delete()
-        .in("athlete_id", athleteIds);
-      if (contactErr) throw new Error(contactErr.message);
-    }
-
-    await deleteParticipantAuthUsersAfterCloseout(admin, participantUserIds);
+    // Campaign-scoped participant access: unlink auth, purge contacts, delete
+    // orphaned Auth users. Idempotent if the daily grace cron already ran.
+    await revokeParticipantAccessForFundraiser(admin, fundraiserId, {
+      deleteContacts: true,
+    });
   }
 
   revalidatePath("/admin");

@@ -255,6 +255,12 @@ export default function CampaignSupportFundraiserClient({
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
+            <p className="text-xs text-slate-500">
+              Extending this date keeps participant app logins working (access
+              follows the live end date, plus one calendar day grace). Extend
+              before the day after grace ends — after automatic login revoke,
+              athletes must re-join with the team code.
+            </p>
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label>School logo URL</Label>

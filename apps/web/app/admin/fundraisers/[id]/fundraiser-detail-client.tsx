@@ -504,9 +504,13 @@ export function FundraiserDetailClient({
           <CardTitle>Fundraiser status</CardTitle>
           <p className="text-sm font-normal text-slate-600">
             Use closeout when payout and reconciliation are complete. Closeout
-            (completed/cancelled) removes participant campaign app access for this
-            fundraiser while retaining required legal and financial records.
-            Reactivate only if you need to correct a mistake.
+            (completed/cancelled) removes participant campaign app access and
+            outreach contacts for this fundraiser while retaining required legal
+            and financial records. If you do not close out, participant logins are
+            revoked automatically one calendar day after the end date (Central
+            Time). Extending the end date in Campaign Support before that revoke
+            keeps participant logins working. Reactivate only if you need to
+            correct a mistake.
           </p>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">

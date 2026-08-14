@@ -23,6 +23,54 @@ export async function collectParticipantUserIdsForFundraiser(
 }
 
 /**
+ * Unlink athlete auth for a fundraiser, optionally purge contacts, delete orphaned
+ * participant Auth users, and stamp `participant_access_revoked_at`.
+ * Does not change fundraiser status (cron uses this without marking completed).
+ */
+export async function revokeParticipantAccessForFundraiser(
+  admin: AdminClient,
+  fundraiserId: string,
+  options?: { deleteContacts?: boolean }
+): Promise<{ participantUserCount: number }> {
+  const participantUserIds = await collectParticipantUserIdsForFundraiser(
+    admin,
+    fundraiserId
+  );
+
+  const { error: unlinkErr } = await admin
+    .from("athletes")
+    .update({ user_id: null })
+    .eq("fundraiser_id", fundraiserId);
+  if (unlinkErr) throw new Error(unlinkErr.message);
+
+  if (options?.deleteContacts) {
+    const { data: athleteRows, error: athleteErr } = await admin
+      .from("athletes")
+      .select("id")
+      .eq("fundraiser_id", fundraiserId);
+    if (athleteErr) throw new Error(athleteErr.message);
+    const athleteIds = (athleteRows ?? []).map((r) => r.id as string);
+    if (athleteIds.length > 0) {
+      const { error: contactErr } = await admin
+        .from("athlete_contacts")
+        .delete()
+        .in("athlete_id", athleteIds);
+      if (contactErr) throw new Error(contactErr.message);
+    }
+  }
+
+  await deleteParticipantAuthUsersAfterCloseout(admin, participantUserIds);
+
+  const { error: stampErr } = await admin
+    .from("fundraisers")
+    .update({ participant_access_revoked_at: new Date().toISOString() })
+    .eq("id", fundraiserId);
+  if (stampErr) throw new Error(stampErr.message);
+
+  return { participantUserCount: participantUserIds.length };
+}
+
+/**
  * Deletes Supabase Auth users who were participants on a closed fundraiser and
  * have no remaining active campaign ties (coach, group manager, or athlete on
  * another active fundraiser). Lets the same email register fresh next campaign.

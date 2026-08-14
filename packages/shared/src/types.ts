@@ -129,6 +129,11 @@ export interface Fundraiser {
   admin_compliance_notes?: string | null;
   /** Set when the fundraiser is closed (completed or cancelled). */
   closed_at?: string | null;
+  /**
+   * When participant auth was unlinked/deleted after end+grace (cron) or
+   * SuperAdmin closeout. Idempotency for auto-revoke; not a substitute for status.
+   */
+  participant_access_revoked_at?: string | null;
   /** Optional copy for public donate page (“About this fundraiser”). */
   donor_page_about?: string | null;
   /**

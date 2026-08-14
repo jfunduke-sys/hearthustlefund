@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/campaign-reminder-sms",
       "schedule": "30 15 * * *"
+    },
+    {
+      "path": "/api/cron/participant-access-revoke",
+      "schedule": "0 16 * * *"
     }
   ]
 }

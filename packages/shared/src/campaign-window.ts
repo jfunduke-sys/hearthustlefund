@@ -60,9 +60,53 @@ export function isCampaignWindowActiveForDonations(
 }
 
 /**
- * Participants may use the app only while the campaign is still open:
- * fundraiser status is active AND today is on/before the end date (Central Time).
+ * Calendar days after `end_date` that participants may still use the app.
+ * Extending `end_date` (before auth cleanup) extends this window automatically
+ * because access is computed from the live end date.
+ */
+export const PARTICIPANT_ACCESS_GRACE_DAYS_AFTER_END = 1;
+
+/** Add whole calendar days to a YYYY-MM-DD string (UTC date arithmetic). */
+export function addCalendarDaysYMD(ymd: string, days: number): string {
+  const n = normalizeDateOnly(ymd);
+  const [y, m, d] = n.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + days));
+  const yy = dt.getUTCFullYear();
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getUTCDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+}
+
+/** Last calendar day (Central) participants may still sign in for this end date. */
+export function participantAccessThroughYMD(endDateStr: string): string {
+  return addCalendarDaysYMD(
+    endDateStr,
+    PARTICIPANT_ACCESS_GRACE_DAYS_AFTER_END
+  );
+}
+
+/**
+ * True when Central “today” is after the participant grace window for `end_date`.
+ * Used by the daily cron that revokes participant auth if SuperAdmin has not
+ * closed out yet.
+ */
+export function isPastParticipantAccessGrace(
+  endDateStr: string,
+  now: Date = new Date(),
+  timeZone: string = CAMPAIGN_CALENDAR_TIME_ZONE
+): boolean {
+  const end = normalizeDateOnly(endDateStr);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(end)) return false;
+  const today = calendarDateInTimeZone(now, timeZone);
+  return today > participantAccessThroughYMD(end);
+}
+
+/**
+ * Participants may use the app while fundraiser status is active and Central
+ * “today” is on/before end_date + 1 day (≈24h grace after the last campaign day).
  * Organizers keep coach login after the campaign ends.
+ * Access always follows the current `end_date`, so extending a campaign before
+ * auth cleanup keeps participant logins working.
  */
 export function isFundraiserOpenForParticipantAccess(
   fundraiser: {
@@ -73,10 +117,12 @@ export function isFundraiserOpenForParticipantAccess(
   now?: Date
 ): boolean {
   if ((fundraiser.status ?? "active") !== "active") return false;
-  const start = String(fundraiser.start_date ?? "");
   const end = String(fundraiser.end_date ?? "");
-  if (!start || !end) return false;
-  return getCampaignWindowPhase(start, end, now) !== "after_end";
+  if (!end) return false;
+  const endNorm = normalizeDateOnly(end);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(endNorm)) return false;
+  const today = calendarDateInTimeZone(now ?? new Date());
+  return today <= participantAccessThroughYMD(endNorm);
 }
 
 export const PARTICIPANT_CAMPAIGN_ENDED_MESSAGE =

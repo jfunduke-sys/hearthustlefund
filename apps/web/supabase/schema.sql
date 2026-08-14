@@ -70,6 +70,7 @@ create table if not exists public.fundraisers (
   join_code text,
   admin_compliance_notes text,
   closed_at timestamptz,
+  participant_access_revoked_at timestamptz,
   donor_page_about text,
   created_at timestamptz default now()
 );
@@ -77,6 +78,8 @@ create table if not exists public.fundraisers (
 alter table public.fundraisers add column if not exists join_code text;
 alter table public.fundraisers
   add column if not exists fee_model text not null default 'split_90_10';
+alter table public.fundraisers
+  add column if not exists participant_access_revoked_at timestamptz;
 create unique index if not exists fundraisers_join_code_uq
   on public.fundraisers (join_code)
   where join_code is not null;
