@@ -5,12 +5,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { NEW_PASSWORD_REQUIREMENT_COPY } from "@heart-and-hustle/shared";
 import { BRAND } from "@/lib/brand";
-import { establishPasswordRecoverySession } from "@/lib/auth-recovery-session";
+import {
+  establishPasswordRecoverySession,
+  type PasswordRecoveryClient,
+} from "@/lib/auth-recovery-session";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { createClient } from "@/lib/supabase/client";
 
 type Props = {
   title: string;
@@ -32,9 +34,9 @@ export function ResetPasswordForm({
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [supabase, setSupabase] = useState<ReturnType<
-    typeof createClient
-  > | null>(null);
+  const [supabase, setSupabase] = useState<PasswordRecoveryClient | null>(
+    null
+  );
 
   useEffect(() => {
     let cancelled = false;

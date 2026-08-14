@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { BRAND } from "@/lib/brand";
-import { createClient } from "@/lib/supabase/client";
+import { createRecoveryClient } from "@/lib/supabase/recovery-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ export default function CoachForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const supabase = createClient();
+      const supabase = createRecoveryClient();
       const origin = window.location.origin.replace(/\/$/, "");
       const { error: resetErr } = await supabase.auth.resetPasswordForEmail(
         email.trim(),
