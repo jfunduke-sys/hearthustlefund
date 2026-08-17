@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION } from "@/lib/fundraising-services-agreement-document";
+import { isFeeModel, type FeeModel } from "@heart-and-hustle/shared";
 
 export type FundraiserRequestInput = {
   school_name: string;
@@ -23,6 +24,7 @@ export type FundraiserRequestInput = {
   fundraiser_start_date: string;
   fundraiser_end_date: string;
   kickoff_setup_preference: string;
+  fee_model: FeeModel;
   notes: string | null;
   /** Typed electronic signature (full legal name) — organizer/coach. */
   signer_name: string;
@@ -70,6 +72,8 @@ function validate(input: FundraiserRequestInput): string | null {
     input.kickoff_setup_preference !== "self_run"
   )
     return "Please choose how you'd like to prepare for your fundraiser launch.";
+  if (!isFeeModel(input.fee_model))
+    return "Please choose a fundraising structure: 90/10 split or 100% back.";
   if (!clean(input.signer_name))
     return "Type your full legal name to sign the Fundraising Services Agreement.";
   if (!clean(input.signer_title))
@@ -125,6 +129,7 @@ export async function submitFundraiserRequest(
       signed_ip: ip,
       signed_user_agent: userAgent,
       estimated_target_gross: goal,
+      fee_model: input.fee_model,
     })
     .select("id")
     .single();
@@ -175,6 +180,7 @@ export async function submitFundraiserRequest(
       signer_title: clean(input.signer_title) || null,
       fsa_intake_version: version,
       fsa_intake_acknowledged_at: now,
+      fee_model: input.fee_model,
     })
     .select("id")
     .single();

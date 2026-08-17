@@ -109,6 +109,22 @@ export function computeKeep100Checkout(input: {
 }
 
 export function formatFeeModelLabel(model: FeeModel | null | undefined): string {
-  if (model === "keep_100") return "Keep 100%";
-  return "90/10";
+  if (model === "keep_100") return "100% back";
+  return "90/10 split";
 }
+
+/** Short request-form / contract labels for the two campaign fee structures. */
+export const FEE_STRUCTURE_REQUEST_COPY = {
+  split_90_10: {
+    title: "90/10 split",
+    summary:
+      "Your program receives 90% of every donation. Heart & Hustle keeps 10% as its service fee and takes care of payment processing from that share—not the donor, and not out of your 90%.",
+  },
+  keep_100: {
+    title: "100% back",
+    summary:
+      "Your program receives 100% of the stated donation. Donors pay a separate Electronic Payment Fee (card: 3.9% + $0.30; bank transfer: 1%) so processing is not taken from your gift.",
+  },
+  donorTip:
+    "At checkout, Heart & Hustle will also ask donors for an optional contribution to help us provide a safe, secure fundraising platform.",
+} as const;

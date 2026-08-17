@@ -66,6 +66,11 @@ export interface SchoolRequest {
   signer_name?: string | null;
   /** Signer title/role captured on this submission (audit). */
   signer_title?: string | null;
+  /**
+   * Fee structure chosen on intake and locked into the signed agreement:
+   * split_90_10 | keep_100.
+   */
+  fee_model?: import("./fee-model").FeeModel | null;
   created_at: string;
 }
 

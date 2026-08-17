@@ -15,6 +15,7 @@ import {
   formatDisplayDate,
   formatDisplayDateTime,
   formatKickoffSetupPreference,
+  formatFeeModelLabel,
   schoolRequestLeadDisplayName,
 } from "@heart-and-hustle/shared";
 import {
@@ -360,6 +361,7 @@ export function SuperadminTabs({
                     <TableHead>Lead contact</TableHead>
                     <TableHead>Proposed start</TableHead>
                     <TableHead>Proposed end</TableHead>
+                    <TableHead>Structure</TableHead>
                     <TableHead>Organizer email</TableHead>
                     <TableHead>Submitted</TableHead>
                     <TableHead>Status</TableHead>
@@ -370,7 +372,7 @@ export function SuperadminTabs({
                   {openRequests.length === 0 && !requestsFetchError ? (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={10}
                         className="py-10 text-center text-slate-500"
                       >
                         No open requests.
@@ -393,6 +395,9 @@ export function SuperadminTabs({
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-sm">
                         {formatDisplayDate(r.fundraiser_end_date)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-sm">
+                        {formatFeeModelLabel(r.fee_model)}
                       </TableCell>
                       <TableCell>{r.admin_email}</TableCell>
                       <TableCell>
@@ -1057,6 +1062,12 @@ export function SuperadminTabs({
                   {formatDisplayDate(viewOpen.fundraiser_start_date)} –{" "}
                   {formatDisplayDate(viewOpen.fundraiser_end_date)}
                 </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-600">
+                  Fundraising structure
+                </dt>
+                <dd>{formatFeeModelLabel(viewOpen.fee_model)}</dd>
               </div>
               <div>
                 <dt className="font-semibold text-slate-600">

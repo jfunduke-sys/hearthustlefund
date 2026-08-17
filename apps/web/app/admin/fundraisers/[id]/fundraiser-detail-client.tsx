@@ -54,6 +54,11 @@ export function FundraiserDetailClient({
   const [feeModelError, setFeeModelError] = useState<string | null>(null);
   const feeModel = normalizeFeeModel(fundraiser.fee_model);
   const isKeep100 = feeModel === "keep_100";
+  const intakeVersion = Number(schoolRequest?.fsa_intake_version);
+  const feeModelLocked =
+    !!schoolRequest &&
+    Number.isFinite(intakeVersion) &&
+    intakeVersion >= 13;
 
   return (
     <div className="space-y-8">
@@ -171,16 +176,26 @@ export function FundraiserDetailClient({
         <CardHeader>
           <CardTitle>Fee model (SuperAdmin test / Winter prep)</CardTitle>
           <p className="text-sm font-normal text-slate-600">
-            Default is <strong>90/10</strong> for all live Fall campaigns. Switch
-            only a dedicated test fundraiser to <strong>Keep 100%</strong> so
-            real 90/10 campaigns are undisturbed.
+            {feeModelLocked ? (
+              <>
+                Locked from the fundraiser request and the signed agreement (
+                {formatFeeModelLabel(feeModel)}). It cannot be changed after the
+                campaign starts.
+              </>
+            ) : (
+              <>
+                Default is <strong>90/10</strong> for campaigns without a request
+                choice. New requests pick 90/10 or 100% back on the form; that
+                choice is locked when the campaign starts.
+              </>
+            )}
           </p>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-3">
           <Button
             type="button"
             variant={feeModel === "split_90_10" ? "default" : "outline"}
-            disabled={pending || feeModel === "split_90_10"}
+            disabled={pending || feeModel === "split_90_10" || feeModelLocked}
             onClick={() =>
               startTransition(async () => {
                 setFeeModelError(null);
@@ -200,7 +215,7 @@ export function FundraiserDetailClient({
           <Button
             type="button"
             variant={feeModel === "keep_100" ? "default" : "outline"}
-            disabled={pending || feeModel === "keep_100"}
+            disabled={pending || feeModel === "keep_100" || feeModelLocked}
             onClick={() =>
               startTransition(async () => {
                 setFeeModelError(null);
@@ -215,7 +230,7 @@ export function FundraiserDetailClient({
               })
             }
           >
-            Use Keep 100%
+            Use 100% back
           </Button>
           {feeModelError ? (
             <p className="w-full text-sm text-red-700" role="alert">

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { assertSuperAdmin } from "@/app/actions/admin";
 import { allocateUniqueJoinCode } from "@/lib/join-code";
+import { feeModelForFundraiserCode } from "@/lib/fee-model-from-request";
 import { normalizeFundraiserSetupCode } from "@heart-and-hustle/shared";
 
 function slugifyPart(s: string) {
@@ -293,6 +294,7 @@ export async function supportCreateFundraiserFromCode(input: {
   );
   const join_code = await allocateUniqueJoinCode(admin);
   const about = input.donor_page_about?.trim() || null;
+  const fee_model = await feeModelForFundraiserCode(admin, codeRow.code);
 
   const { data: inserted, error: insErr } = await admin
     .from("fundraisers")
@@ -310,6 +312,7 @@ export async function supportCreateFundraiserFromCode(input: {
       end_date: input.end_date,
       donor_page_about: about,
       uses_campaign_groups: input.uses_campaign_groups === true,
+      fee_model,
       status: "active",
       unique_slug,
       join_code,

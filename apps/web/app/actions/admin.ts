@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revokeParticipantAccessForFundraiser } from "@/lib/participant-auth-closeout";
+import { isFeeModel } from "@heart-and-hustle/shared";
 
 export async function assertSuperAdmin() {
   const supabase = createClient();
@@ -176,6 +177,38 @@ export async function setFundraiserFeeModel(
     throw new Error("Invalid fee model.");
   }
   const admin = createAdminClient();
+
+  const { data: fr, error: frErr } = await admin
+    .from("fundraisers")
+    .select("id, code_used")
+    .eq("id", fundraiserId)
+    .maybeSingle();
+  if (frErr || !fr) throw new Error("Fundraiser not found.");
+
+  if (fr.code_used) {
+    const { data: codeRow } = await admin
+      .from("fundraiser_codes")
+      .select("school_request_id")
+      .eq("code", fr.code_used)
+      .maybeSingle();
+    if (codeRow?.school_request_id) {
+      const { data: sr } = await admin
+        .from("school_requests")
+        .select("fee_model, fsa_intake_version")
+        .eq("id", codeRow.school_request_id)
+        .maybeSingle();
+      const intakeVersion = Number(sr?.fsa_intake_version);
+      if (
+        isFeeModel(sr?.fee_model) &&
+        Number.isFinite(intakeVersion) &&
+        intakeVersion >= 13
+      ) {
+        throw new Error(
+          "This campaign’s fee structure was chosen on the request form and locked into the signed agreement. It cannot be changed after the campaign starts."
+        );
+      }
+    }
+  }
   const { error } = await admin
     .from("fundraisers")
     .update({ fee_model: feeModel })

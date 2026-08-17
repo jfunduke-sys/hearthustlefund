@@ -107,7 +107,10 @@ export default async function OrganizationAgreementPage({
     ? formatDisplayDateTime(a.countersigned_at)
     : formatDisplayDateTime(new Date().toISOString());
 
-  const budget = computeAgreementBudget(a.estimated_target_gross);
+  const budget = computeAgreementBudget(
+    a.estimated_target_gross,
+    a.fee_model ?? undefined
+  );
   const hasGross = budget.targetGross > 0;
   const termStart = formatDateOnly(a.campaign_start_date);
   const termEnd = formatDateOnly(a.campaign_end_date);
@@ -147,6 +150,7 @@ export default async function OrganizationAgreementPage({
           <FundraisingServicesAgreementBody
             pfrReg={pfrReg}
             privacyPolicyHref="/privacy"
+            feeModel={a.fee_model}
           />
         </div>
 
@@ -158,9 +162,22 @@ export default async function OrganizationAgreementPage({
             Required by the Illinois Solicitation for Charity Act (225 ILCS
             460/7(b)). Figures below are a good-faith estimate for{" "}
             <strong>this campaign</strong> based on the Organizer&apos;s
-            submitted fundraising goal. Company is compensated by a service fee
-            of {budget.serviceFeePercentLabel} of gross funds raised; the
-            Organization receives {budget.netPercentLabel}.
+            submitted fundraising goal.{" "}
+            {a.fee_model === "keep_100" ? (
+              <>
+                Structure: <strong>100% back</strong>. Organization receives
+                100% of each stated donation. Donors may pay a separate
+                Electronic Payment Fee and may add an optional contribution to
+                Company at checkout.
+              </>
+            ) : (
+              <>
+                Structure: <strong>90/10 split</strong>. Company is compensated
+                by a service fee of {budget.serviceFeePercentLabel} of gross
+                funds raised; the Organization receives {budget.netPercentLabel}.
+                Payment processing is paid by Company from its service fee.
+              </>
+            )}
           </p>
 
           {!hasGross ? (
@@ -198,9 +215,9 @@ export default async function OrganizationAgreementPage({
               </tr>
               <tr className="border-b border-slate-200">
                 <td className="py-2 pr-4 text-slate-600">
-                  Projected fundraising expenses — Company service fee (
-                  {budget.serviceFeePercentLabel}, inclusive of all payment
-                  processing)
+                  {a.fee_model === "keep_100"
+                    ? "Projected fundraising expenses — no percentage retained from stated donations (donor-paid Electronic Payment Fee and optional Company contribution are separate)"
+                    : `Projected fundraising expenses — Company service fee (${budget.serviceFeePercentLabel}, inclusive of all payment processing)`}
                 </td>
                 <td className="py-2 text-right font-semibold text-slate-900">
                   {hasGross ? formatAgreementCurrency(budget.serviceFee) : "—"}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { submitFundraiserRequest } from "@/app/actions/request-fundraiser";
-import { ORGANIZATION_AGREEMENT_ESIGN_CONSENT } from "@heart-and-hustle/shared";
+import { ORGANIZATION_AGREEMENT_ESIGN_CONSENT, FEE_STRUCTURE_REQUEST_COPY } from "@heart-and-hustle/shared";
 import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { BRAND } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
@@ -112,6 +112,11 @@ function validateRequestForm(fd: FormData): string | null {
     return "Please choose whether you want to divide the campaign into teams or groups.";
   }
 
+  const feeModel = trimOrEmpty(fd.get("fee_model"));
+  if (feeModel !== "split_90_10" && feeModel !== "keep_100") {
+    return "Please choose a fundraising structure: 90/10 split or 100% back.";
+  }
+
   const signerName = trimOrEmpty(fd.get("signer_name"));
   if (!signerName) {
     return "Type your full legal name to sign the Fundraising Services Agreement.";
@@ -177,6 +182,10 @@ export default function RequestFundraiserPage() {
       fundraiser_start_date: trimOrEmpty(fd.get("fundraiser_start_date")),
       fundraiser_end_date: trimOrEmpty(fd.get("fundraiser_end_date")),
       kickoff_setup_preference: trimOrEmpty(fd.get("kickoff_setup_preference")),
+      fee_model:
+        trimOrEmpty(fd.get("fee_model")) === "keep_100"
+          ? "keep_100"
+          : "split_90_10",
       notes: trimOrEmpty(fd.get("notes")) || null,
       signer_name: trimOrEmpty(fd.get("signer_name")),
       signer_title: trimOrEmpty(fd.get("signer_title")),
@@ -498,6 +507,58 @@ export default function RequestFundraiserPage() {
                     commitment.
                   </p>
                 </div>
+                <fieldset className="space-y-3">
+                  <legend className="sr-only">Fundraising structure</legend>
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                    Fundraising structure
+                  </p>
+                  <p className="text-base font-semibold text-hh-dark">
+                    How should this campaign be structured?
+                  </p>
+                  <p className="text-sm leading-relaxed text-slate-600">
+                    Choose one. This is locked into your signed agreement for
+                    this campaign and cannot be changed after you start.
+                  </p>
+                  <div className="space-y-3">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                      <input
+                        type="radio"
+                        name="fee_model"
+                        value="split_90_10"
+                        required
+                        className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
+                      />
+                      <span>
+                        <span className="block text-sm font-semibold text-hh-dark">
+                          {FEE_STRUCTURE_REQUEST_COPY.split_90_10.title}
+                        </span>
+                        <span className="mt-1 block text-sm leading-relaxed text-slate-600">
+                          {FEE_STRUCTURE_REQUEST_COPY.split_90_10.summary}
+                        </span>
+                      </span>
+                    </label>
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                      <input
+                        type="radio"
+                        name="fee_model"
+                        value="keep_100"
+                        required
+                        className="mt-1 h-4 w-4 shrink-0 accent-hh-primary"
+                      />
+                      <span>
+                        <span className="block text-sm font-semibold text-hh-dark">
+                          {FEE_STRUCTURE_REQUEST_COPY.keep_100.title}
+                        </span>
+                        <span className="mt-1 block text-sm leading-relaxed text-slate-600">
+                          {FEE_STRUCTURE_REQUEST_COPY.keep_100.summary}
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                  <p className="text-sm leading-relaxed text-slate-600">
+                    {FEE_STRUCTURE_REQUEST_COPY.donorTip}
+                  </p>
+                </fieldset>
                 <fieldset className="space-y-3">
                   <legend className="sr-only">
                     Teams or groups for this campaign

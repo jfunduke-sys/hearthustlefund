@@ -35,8 +35,16 @@ export interface AgreementBudget {
  */
 export function computeAgreementBudget(
   targetGross: number | string | null | undefined,
-  feeRate: number = FUNDRAISING_SERVICE_FEE_RATE
+  feeRateOrModel: number | import("./fee-model").FeeModel = FUNDRAISING_SERVICE_FEE_RATE
 ): AgreementBudget {
+  const feeRate =
+    feeRateOrModel === "keep_100"
+      ? 0
+      : feeRateOrModel === "split_90_10"
+        ? FUNDRAISING_SERVICE_FEE_RATE
+        : typeof feeRateOrModel === "number"
+          ? feeRateOrModel
+          : FUNDRAISING_SERVICE_FEE_RATE;
   const parsed = Number(targetGross);
   const gross =
     Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) / 100 : 0;
@@ -90,5 +98,10 @@ export interface OrganizationAgreement {
   countersigned_at: string | null;
   /** Estimated target gross for this campaign (225 ILCS 460/7(b)). */
   estimated_target_gross: number | null;
+  /**
+   * Fee structure chosen on the campaign request and printed in this contract.
+   * Cannot be changed after the campaign starts.
+   */
+  fee_model?: import("./fee-model").FeeModel | null;
   created_at: string;
 }
