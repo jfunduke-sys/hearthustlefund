@@ -18,7 +18,6 @@ import {
   campaignDonationsBlockedMessage,
   computeKeep100Checkout,
   effectiveAthleteGoalForDonorPage,
-  formatDisplayDate,
   getDefaultDonorPageAboutText,
   normalizeFeeModel,
   suggestedHhSupportDollars,
@@ -117,7 +116,7 @@ export default function DonateForm({
     useState<CheckoutPaymentMethod>("card");
   const [hhSupportOptIn, setHhSupportOptIn] = useState(true);
   const [hhSupportAmount, setHhSupportAmount] = useState(
-    String(suggestedHhSupportDollars(50))
+    suggestedHhSupportDollars(50).toFixed(2)
   );
 
   function scrollToDonateSection() {
@@ -174,7 +173,7 @@ export default function DonateForm({
       : null;
 
   function onStatedAmountChosen(dollars: number) {
-    setHhSupportAmount(String(suggestedHhSupportDollars(dollars)));
+    setHhSupportAmount(suggestedHhSupportDollars(dollars).toFixed(2));
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -268,36 +267,27 @@ export default function DonateForm({
         </Link>
 
         {/* Hero */}
-        <header className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-md shadow-slate-900/5">
-          <div className="border-b border-slate-100 bg-gradient-to-br from-hh-dark via-[#252540] to-slate-900 px-5 py-6 text-white">
-            <div className="flex items-start gap-4">
+        <header className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+          <div className="px-4 py-4 sm:px-5">
+            <div className="flex items-center gap-3">
               {teamOrSchoolLogoUrl ? (
-                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-white/95">
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
                   <Image
                     src={teamOrSchoolLogoUrl}
                     alt=""
                     fill
-                    className="object-contain p-1"
+                    className="object-contain p-0.5"
                     unoptimized
                   />
                 </div>
               ) : null}
-              <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-wider text-white/60">
-                  Support this participant
-                </p>
-                <h1 className="mt-1 text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">
-                  {athlete.full_name}
-                </h1>
-                <p className="mt-1 text-sm text-white/80">
-                  {fundraiser.team_name} · {fundraiser.school_name}
-                </p>
-                <p className="mt-2 text-xs text-white/55">
-                  Campaign {formatDisplayDate(fundraiser.start_date)} –{" "}
-                  {formatDisplayDate(fundraiser.end_date)} · Central Time
-                </p>
-              </div>
+              <p className="min-w-0 text-sm text-slate-600">
+                {fundraiser.team_name} · {fundraiser.school_name}
+              </p>
             </div>
+            <h1 className="mt-3 text-lg font-bold leading-snug tracking-tight text-hh-dark sm:text-xl">
+              Support {athlete.full_name} by making a donation below.
+            </h1>
           </div>
 
           {dayBanner ? (
@@ -416,7 +406,7 @@ export default function DonateForm({
           </p>
 
           <form className="mt-5 space-y-6" onSubmit={onSubmit}>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2">
               {DONATE_MAJOR_TIERS.map((tier) => {
                 const selected = amountChoice === tier.amount;
                 return (
@@ -428,23 +418,18 @@ export default function DonateForm({
                       setCustomAmount("");
                       onStatedAmountChosen(tier.amount);
                     }}
-                    className={`rounded-xl border-2 p-4 text-left transition ${
+                    className={`rounded-lg border-2 px-2.5 py-2.5 text-center transition ${
                       selected
-                        ? "border-hh-primary bg-red-50/40 ring-2 ring-hh-primary/20"
+                        ? "border-hh-primary bg-red-50/40 ring-1 ring-hh-primary/20"
                         : "border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-white"
                     }`}
                   >
-                    <p className="text-lg font-bold text-hh-dark">
+                    <p className="text-xs font-semibold text-hh-dark">
                       {tier.title}
                     </p>
-                    <p className="mt-0.5 text-2xl font-black tabular-nums text-hh-primary">
+                    <p className="mt-0.5 text-lg font-black tabular-nums text-hh-primary">
                       ${tier.amount.toLocaleString()}
                     </p>
-                    {tier.subtitle ? (
-                      <p className="mt-2 text-xs leading-snug text-slate-600">
-                        {tier.subtitle}
-                      </p>
-                    ) : null}
                   </button>
                 );
               })}
@@ -454,7 +439,7 @@ export default function DonateForm({
               <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                 Other amounts
               </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {DONATE_QUICK_AMOUNTS.map(({ amount, label }) => {
                   const selected = amountChoice === amount;
                   return (
@@ -466,9 +451,9 @@ export default function DonateForm({
                         setCustomAmount("");
                         onStatedAmountChosen(amount);
                       }}
-                      className={`shrink-0 rounded-lg border-2 px-3 py-2 text-sm font-bold tabular-nums transition ${
+                      className={`rounded-lg border-2 px-2 py-2 text-sm font-bold tabular-nums transition ${
                         selected
-                          ? "border-hh-primary bg-red-50/40 text-hh-dark ring-2 ring-hh-primary/20"
+                          ? "border-hh-primary bg-red-50/40 text-hh-dark ring-1 ring-hh-primary/20"
                           : "border-slate-200 bg-slate-50/80 text-slate-800 hover:border-slate-300 hover:bg-white"
                       }`}
                     >
@@ -482,38 +467,34 @@ export default function DonateForm({
                     setAmountChoice("other");
                     if (!customAmount) setCustomAmount("");
                   }}
-                  className={`shrink-0 rounded-lg border-2 px-3 py-2 text-sm font-bold transition ${
+                  className={`rounded-lg border-2 px-2 py-2 text-sm font-bold transition ${
                     amountChoice === "other"
-                      ? "border-hh-primary bg-red-50/40 text-hh-dark ring-2 ring-hh-primary/20"
+                      ? "border-hh-primary bg-red-50/40 text-hh-dark ring-1 ring-hh-primary/20"
                       : "border-slate-200 bg-slate-50/80 text-slate-800 hover:border-slate-300 hover:bg-white"
                   }`}
                 >
                   Custom
                 </button>
-                <div className="flex min-w-[7.5rem] flex-1 items-center gap-1 sm:max-w-[11rem]">
+              </div>
+              {amountChoice === "other" ? (
+                <div className="mt-2 flex max-w-[11rem] items-center gap-1">
                   <span className="text-sm font-semibold text-slate-600">$</span>
                   <Input
                     type="number"
                     min={MIN_DONATION_DOLLARS}
                     step="1"
-                    placeholder="Other"
-                    value={amountChoice === "other" ? customAmount : ""}
+                    placeholder={`${MIN_DONATION_DOLLARS}+`}
+                    value={customAmount}
                     onChange={(e) => {
-                      setAmountChoice("other");
                       setCustomAmount(e.target.value);
                       const v = parseFloat(e.target.value);
                       if (Number.isFinite(v) && v > 0) onStatedAmountChosen(v);
                     }}
-                    onFocus={() => setAmountChoice("other")}
                     className="h-9"
                     aria-label="Custom donation amount in dollars"
                   />
                 </div>
-              </div>
-              <p className="mt-1.5 text-xs text-slate-500">
-                Tap Custom or enter any whole-dollar amount (minimum $
-                {MIN_DONATION_DOLLARS}).
-              </p>
+              ) : null}
             </div>
 
             <div className="border-t border-slate-100 pt-5 space-y-4">
@@ -575,18 +556,7 @@ export default function DonateForm({
             </div>
 
             {isKeep100 && Number.isFinite(statedDonation) && statedDonation > 0 ? (
-              <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-                    Keep 100% checkout
-                  </p>
-                  <p className="mt-1 text-sm text-slate-600">
-                    This program keeps the full stated donation when you cover
-                    the Electronic Payment Fee. There is no 10% fundraising
-                    commission.
-                  </p>
-                </div>
-
+              <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3">
                 <fieldset className="space-y-2">
                   <legend className="text-sm font-semibold text-hh-dark">
                     How will you pay?
@@ -663,9 +633,9 @@ export default function DonateForm({
                       Support Heart &amp; Hustle
                     </p>
                     <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                      Your contribution helps Heart &amp; Hustle maintain
-                      and improve the fundraising platform for teams and programs.
-                      This is separate from your donation to the organization.
+                      Your optional contribution helps us provide a safe, secure
+                      fundraising platform that allows 100% of your donation to go
+                      directly to the organization.
                     </p>
                     <p className="mt-2 text-sm text-slate-700">
                       Suggested:{" "}
@@ -687,7 +657,7 @@ export default function DonateForm({
                         setHhSupportOptIn(on);
                         if (on) {
                           setHhSupportAmount(
-                            String(suggestedHhSupportDollars(statedDonation))
+                            suggestedHhSupportDollars(statedDonation).toFixed(2)
                           );
                         }
                       }}
@@ -710,6 +680,14 @@ export default function DonateForm({
                             inputMode="decimal"
                             value={hhSupportAmount}
                             onChange={(e) => setHhSupportAmount(e.target.value)}
+                            onBlur={() => {
+                              const n = Number(hhSupportAmount);
+                              setHhSupportAmount(
+                                Number.isFinite(n) && n >= 0
+                                  ? n.toFixed(2)
+                                  : "0.00"
+                              );
+                            }}
                             className="h-10 max-w-[8rem]"
                             aria-label="Heart and Hustle support amount"
                           />
@@ -718,7 +696,9 @@ export default function DonateForm({
                             className="text-xs font-medium text-hh-primary underline"
                             onClick={() =>
                               setHhSupportAmount(
-                                String(suggestedHhSupportDollars(statedDonation))
+                                suggestedHhSupportDollars(statedDonation).toFixed(
+                                  2
+                                )
                               )
                             }
                           >

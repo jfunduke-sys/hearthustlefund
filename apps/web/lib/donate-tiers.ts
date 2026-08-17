@@ -28,9 +28,10 @@ export const DONATE_MAJOR_TIERS: DonateTier[] = [
   },
 ];
 
-/** Compact row: $50 and $25 */
+/** Compact row under the named tiles */
 export const DONATE_QUICK_AMOUNTS: readonly { amount: number; label: string }[] =
   [
+    { amount: 75, label: "$75" },
     { amount: 50, label: "$50" },
     { amount: 25, label: "$25" },
   ];
