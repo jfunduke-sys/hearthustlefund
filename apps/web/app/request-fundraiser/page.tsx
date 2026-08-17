@@ -214,7 +214,7 @@ export default function RequestFundraiserPage() {
           <div className="relative h-full min-h-[12rem] lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] xl:top-[7.5rem] xl:h-[calc(100vh-7.5rem)]">
             <MarketingPhoto
               src="/marketing/hero-night.jpg"
-              alt="High school football under stadium lights"
+              alt="Athletic field under stadium lights at night"
               className="absolute inset-0"
               imageClassName="object-[center_30%] saturate-[.5] brightness-[.55]"
               priority

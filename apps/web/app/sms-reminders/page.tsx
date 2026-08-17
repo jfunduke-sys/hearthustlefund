@@ -113,7 +113,7 @@ export default function SmsRemindersInfoPage() {
       <section className="relative min-h-[16rem] overflow-hidden sm:min-h-[20rem]">
         <MarketingPhoto
           src="/marketing/football-field.jpg"
-          alt="High school football field"
+          alt="Empty soccer field at dusk"
           className="absolute inset-0"
           imageClassName="object-[center_40%] saturate-[.5] brightness-[.55]"
           priority

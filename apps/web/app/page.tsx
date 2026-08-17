@@ -32,7 +32,7 @@ export default function HomePage() {
         <section className="relative min-h-[28rem] overflow-hidden sm:min-h-[36rem] lg:min-h-[min(88vh,48rem)]">
           <MarketingPhoto
             src="/marketing/hero-night.jpg"
-            alt="High school football under stadium lights"
+            alt="Athletic field under stadium lights at night"
             className="absolute inset-0"
             imageClassName="object-[center_35%] saturate-[.45] brightness-[.55] contrast-[1.05] sm:object-center"
             priority
@@ -108,7 +108,7 @@ export default function HomePage() {
           </div>
           <MarketingPhoto
             src="/marketing/gym.jpg"
-            alt="High school basketball gymnasium"
+            alt="Empty running track"
             className="min-h-[16rem] sm:min-h-[22rem] lg:col-span-7 lg:min-h-[36rem]"
             imageClassName="object-center"
             mono
@@ -119,7 +119,7 @@ export default function HomePage() {
         <section className="relative">
           <MarketingPhoto
             src="/marketing/football-field.jpg"
-            alt="High school football field during a game"
+            alt="Empty soccer field at dusk"
             className="h-40 sm:h-56 lg:h-[22rem]"
             imageClassName="object-[center_40%] saturate-[.85]"
             sizes="100vw"
@@ -144,7 +144,7 @@ export default function HomePage() {
         <section className="grid items-stretch lg:grid-cols-12">
           <MarketingPhoto
             src="/marketing/baseball.jpg"
-            alt="Baseball and softball field"
+            alt="Football field with goalposts and bleachers"
             className="min-h-[18rem] sm:min-h-[24rem] lg:col-span-7 lg:min-h-[32rem]"
             imageClassName="object-[center_60%]"
             sizes="(min-width: 1024px) 60vw, 100vw"
@@ -199,7 +199,7 @@ export default function HomePage() {
           </div>
           <MarketingPhoto
             src="/marketing/stadium-bleachers.jpg"
-            alt="High school stadium bleachers and field"
+            alt="Community athletic field and bleachers at dusk"
             className="order-1 min-h-[16rem] sm:min-h-[22rem] lg:order-2 lg:col-span-7 lg:min-h-[34rem]"
             imageClassName="object-[center_35%]"
             mono

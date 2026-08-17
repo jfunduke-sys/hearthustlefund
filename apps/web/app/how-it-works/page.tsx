@@ -108,7 +108,7 @@ export default function HowItWorksPage() {
       <section className="relative min-h-[18rem] overflow-hidden sm:min-h-[24rem] lg:min-h-[28rem]">
         <MarketingPhoto
           src="/marketing/stadium-bleachers.jpg"
-          alt="High school stadium bleachers and field"
+          alt="Community athletic field and bleachers at dusk"
           className="absolute inset-0"
           imageClassName="object-[center_30%] saturate-[.5] brightness-[.55]"
           priority
@@ -143,7 +143,7 @@ export default function HowItWorksPage() {
         <div className="relative my-4">
           <MarketingPhoto
             src="/marketing/gym.jpg"
-            alt="High school basketball gymnasium"
+            alt="Empty running track"
             className="h-44 sm:h-64 lg:h-80"
             mono
           />
@@ -159,7 +159,7 @@ export default function HowItWorksPage() {
         <section className="grid lg:grid-cols-12">
           <MarketingPhoto
             src="/marketing/baseball.jpg"
-            alt="Baseball and softball field"
+            alt="Football field with goalposts and bleachers"
             className="min-h-[16rem] sm:min-h-[22rem] lg:col-span-5 lg:min-h-full"
             imageClassName="object-[center_70%]"
             sizes="(min-width: 1024px) 42vw, 100vw"
