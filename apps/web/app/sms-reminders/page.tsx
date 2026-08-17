@@ -109,8 +109,8 @@ export default function SmsRemindersInfoPage() {
 
   return (
     <div className="hh-paper min-h-screen">
-      <MarketingSiteHeader />
-      <section className="relative min-h-[16rem] overflow-hidden sm:min-h-[20rem]">
+      <section className="relative min-h-[20rem] overflow-hidden sm:min-h-[24rem]">
+        <MarketingSiteHeader overlay />
         <MarketingPhoto
           src="/marketing/football-field.jpg"
           alt="Empty soccer field at dusk"
@@ -119,11 +119,11 @@ export default function SmsRemindersInfoPage() {
           priority
         />
         <div
-          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/20"
+          className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/75"
           aria-hidden
         />
         <div className="hh-grain absolute inset-0" aria-hidden />
-        <div className="relative z-[2] mx-auto flex min-h-[16rem] max-w-3xl flex-col justify-end px-4 pb-8 pt-12 sm:min-h-[20rem] sm:px-6 sm:pb-10">
+        <div className="relative z-[2] mx-auto flex min-h-[20rem] max-w-3xl flex-col justify-end px-4 pb-8 pt-28 sm:min-h-[24rem] sm:px-6 sm:pb-10 lg:pt-36">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75">
             SMS program
           </p>

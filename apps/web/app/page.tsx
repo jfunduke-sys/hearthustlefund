@@ -26,23 +26,22 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <div className="hh-paper min-h-screen overflow-x-hidden">
-      <MarketingSiteHeader />
-
       <main>
-        <section className="relative min-h-[28rem] overflow-hidden sm:min-h-[36rem] lg:min-h-[min(88vh,48rem)]">
+        <section className="relative min-h-[100svh] overflow-hidden">
+          <MarketingSiteHeader overlay />
           <MarketingPhoto
             src="/marketing/hero-night.jpg"
             alt="Athletic field under stadium lights at night"
             className="absolute inset-0"
-            imageClassName="object-[center_35%] saturate-[.45] brightness-[.55] contrast-[1.05] sm:object-center"
+            imageClassName="object-[center_35%] saturate-[.5] brightness-[.5] contrast-[1.05] sm:object-center"
             priority
           />
           <div
-            className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/25"
+            className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-black/75"
             aria-hidden
           />
           <div className="hh-grain absolute inset-0" aria-hidden />
-          <div className="relative z-[2] mx-auto flex min-h-[28rem] max-w-[90rem] flex-col justify-end px-4 pb-10 pt-16 sm:min-h-[36rem] sm:px-8 sm:pb-14 lg:min-h-[min(88vh,48rem)] lg:px-10 lg:pb-20">
+          <div className="relative z-[2] mx-auto flex min-h-[100svh] max-w-[90rem] flex-col justify-end px-4 pb-10 pt-28 sm:px-8 sm:pb-14 lg:px-10 lg:pb-20 lg:pt-36">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80 sm:text-xs">
               Heart &amp; Hustle Fundraising
             </p>

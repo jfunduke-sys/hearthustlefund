@@ -9,9 +9,12 @@ import { cn } from "@/lib/utils";
 
 export function MarketingSiteHeader({
   className,
+  overlay = false,
 }: {
   /** Optional wrapper classes (e.g. border) */
   className?: string;
+  /** Sit on top of a photographic hero instead of a separate bar */
+  overlay?: boolean;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -41,14 +44,24 @@ export function MarketingSiteHeader({
       <Link
         href="/how-it-works"
         onClick={close}
-        className="text-[13px] font-medium tracking-[0.04em] text-hh-dark hover:text-hh-primary"
+        className={cn(
+          "text-[13px] font-medium tracking-[0.04em]",
+          overlay
+            ? "text-white/90 hover:text-white"
+            : "text-hh-dark hover:text-hh-primary"
+        )}
       >
         How it works
       </Link>
       <Link
         href="/coach/login"
         onClick={close}
-        className="text-[13px] font-medium tracking-[0.04em] text-hh-dark hover:text-hh-primary"
+        className={cn(
+          "text-[13px] font-medium tracking-[0.04em]",
+          overlay
+            ? "text-white/90 hover:text-white"
+            : "text-hh-dark hover:text-hh-primary"
+        )}
       >
         Organizer login
       </Link>
@@ -101,7 +114,29 @@ export function MarketingSiteHeader({
             >
               Home
             </Link>
-            <div className="flex flex-col items-start gap-5">{navLinks}</div>
+            <div className="flex flex-col items-start gap-5">
+              <Link
+                href="/how-it-works"
+                onClick={close}
+                className="text-[13px] font-medium tracking-[0.04em] text-hh-dark hover:text-hh-primary"
+              >
+                How it works
+              </Link>
+              <Link
+                href="/coach/login"
+                onClick={close}
+                className="text-[13px] font-medium tracking-[0.04em] text-hh-dark hover:text-hh-primary"
+              >
+                Organizer login
+              </Link>
+              <Link
+                href="/request-fundraiser"
+                onClick={close}
+                className="inline-flex items-center justify-center bg-hh-primary px-4 py-2 text-[13px] font-medium tracking-[0.04em] text-white hover:bg-[#a33225]"
+              >
+                Request fundraiser
+              </Link>
+            </div>
           </nav>
         </div>
       </div>
@@ -110,7 +145,9 @@ export function MarketingSiteHeader({
   return (
     <header
       className={cn(
-        "relative z-30 border-b border-black/10 bg-[#f3efe6]",
+        overlay
+          ? "absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-black/70 via-black/25 to-transparent"
+          : "relative z-30 border-b border-black/10 bg-[#f3efe6]",
         className
       )}
     >
@@ -122,7 +159,10 @@ export function MarketingSiteHeader({
         >
           <BrandLogo
             priority
-            className="h-[3.25rem] w-auto max-h-[3.25rem] max-w-full object-contain object-left sm:h-14 sm:max-h-14 md:h-[3.75rem] md:max-h-[3.75rem] lg:h-full lg:max-h-full lg:w-auto lg:min-w-0 lg:max-w-full"
+            className={cn(
+              "h-[3.25rem] w-auto max-h-[3.25rem] max-w-full object-contain object-left sm:h-14 sm:max-h-14 md:h-[3.75rem] md:max-h-[3.75rem] lg:h-full lg:max-h-full lg:w-auto lg:min-w-0 lg:max-w-full",
+              overlay && "drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]"
+            )}
           />
         </Link>
 
@@ -135,7 +175,10 @@ export function MarketingSiteHeader({
 
         <button
           type="button"
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center self-center text-hh-dark lg:hidden"
+          className={cn(
+            "inline-flex h-11 w-11 shrink-0 items-center justify-center self-center lg:hidden",
+            overlay ? "text-white" : "text-hh-dark"
+          )}
           aria-expanded={menuOpen}
           aria-controls="marketing-site-menu"
           aria-label={menuOpen ? "Close menu" : "Open menu"}

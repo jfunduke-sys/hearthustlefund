@@ -8,7 +8,7 @@ type Props = {
 };
 
 /** Matches `heart-hustle-logo.png` (shield + Heart & / Hustle / Fundraising wordmark). */
-const intrinsic = { width: 680, height: 150 };
+const intrinsic = { width: 1350, height: 606 };
 
 export function BrandLogo({ className = "h-10 w-auto sm:h-11", priority }: Props) {
   return (

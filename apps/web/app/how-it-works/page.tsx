@@ -103,9 +103,8 @@ function StepBlock({
 export default function HowItWorksPage() {
   return (
     <div className="hh-paper min-h-screen">
-      <MarketingSiteHeader />
-
-      <section className="relative min-h-[18rem] overflow-hidden sm:min-h-[24rem] lg:min-h-[28rem]">
+      <section className="relative min-h-[22rem] overflow-hidden sm:min-h-[28rem] lg:min-h-[32rem]">
+        <MarketingSiteHeader overlay />
         <MarketingPhoto
           src="/marketing/stadium-bleachers.jpg"
           alt="Community athletic field and bleachers at dusk"
@@ -114,11 +113,11 @@ export default function HowItWorksPage() {
           priority
         />
         <div
-          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"
+          className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/30 to-black/75"
           aria-hidden
         />
         <div className="hh-grain absolute inset-0" aria-hidden />
-        <div className="relative z-[2] mx-auto flex min-h-[18rem] max-w-[90rem] flex-col justify-end px-4 pb-10 pt-16 sm:min-h-[24rem] sm:px-8 sm:pb-14 lg:min-h-[28rem] lg:px-10">
+        <div className="relative z-[2] mx-auto flex min-h-[22rem] max-w-[90rem] flex-col justify-end px-4 pb-10 pt-28 sm:min-h-[28rem] sm:px-8 sm:pb-14 lg:min-h-[32rem] lg:px-10 lg:pt-36">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75 sm:text-xs">
             End-to-end overview
           </p>
