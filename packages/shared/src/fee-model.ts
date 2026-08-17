@@ -22,7 +22,7 @@ export const CARD_EPF_FIXED_DOLLARS = 0.3;
 /** ACH Electronic Payment Fee: 1% platform fee (Stripe ACH is much cheaper). */
 export const ACH_EPF_RATE = 0.01;
 
-/** Suggested optional Heart & Hustle Support (opt-in, not default). */
+/** Suggested Heart & Hustle Support (5%, included by default; donor can uncheck). */
 export const HH_SUPPORT_SUGGESTED_RATE = 0.05;
 
 export function isFeeModel(v: unknown): v is FeeModel {

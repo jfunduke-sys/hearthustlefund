@@ -96,6 +96,15 @@ export default function PrivacyPage() {
           </li>
         </ul>
 
+        <h2 className="text-lg font-semibold text-hh-dark">Student and youth privacy</h2>
+        <p>
+          Heart &amp; Hustle is designed to be <strong>FERPA</strong> and{" "}
+          <strong>COPPA</strong> compliant. We do not sell student or children&apos;s
+          personal information. Organizations remain responsible for obtaining any
+          required consents and following their own school, district, and program
+          policies.
+        </p>
+
         <h2 className="text-lg font-semibold text-hh-dark">Retention</h2>
         <p>
           We retain information under data-minimization principles and legal requirements.

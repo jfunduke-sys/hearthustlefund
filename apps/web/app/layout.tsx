@@ -8,7 +8,7 @@ import { getRobotsMetadata, getSiteUrl } from "@/lib/site-config";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 const defaultDescription =
-  "Safe fundraising for youth and high school teams, clubs, and activities — 90% to your program (10% service fee; processing from Company’s share per Terms of service), no data selling, payouts after Stripe clearance per Terms, local support.";
+  "The fundraising platform for high school athletics, activities, and booster clubs. FERPA and COPPA compliant. Also serving youth nonprofits. Heart & Hustle Fundraising.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const base = getSiteUrl();

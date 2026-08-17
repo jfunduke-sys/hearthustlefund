@@ -115,8 +115,10 @@ export default function DonateForm({
   const [coverFee, setCoverFee] = useState(true);
   const [paymentMethod, setPaymentMethod] =
     useState<CheckoutPaymentMethod>("card");
-  const [hhSupportOptIn, setHhSupportOptIn] = useState(false);
-  const [hhSupportAmount, setHhSupportAmount] = useState("");
+  const [hhSupportOptIn, setHhSupportOptIn] = useState(true);
+  const [hhSupportAmount, setHhSupportAmount] = useState(
+    String(suggestedHhSupportDollars(50))
+  );
 
   function scrollToDonateSection() {
     document
@@ -172,11 +174,7 @@ export default function DonateForm({
       : null;
 
   function onStatedAmountChosen(dollars: number) {
-    if (!hhSupportOptIn) {
-      setHhSupportAmount(String(suggestedHhSupportDollars(dollars)));
-    } else if (!hhSupportAmount) {
-      setHhSupportAmount(String(suggestedHhSupportDollars(dollars)));
-    }
+    setHhSupportAmount(String(suggestedHhSupportDollars(dollars)));
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -662,10 +660,10 @@ export default function DonateForm({
                 <div className="rounded-lg border border-slate-200 bg-white p-3 space-y-3">
                   <div>
                     <p className="text-sm font-semibold text-hh-dark">
-                      Support Heart &amp; Hustle — Optional
+                      Support Heart &amp; Hustle
                     </p>
                     <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                      Your optional contribution helps Heart &amp; Hustle maintain
+                      Your contribution helps Heart &amp; Hustle maintain
                       and improve the fundraising platform for teams and programs.
                       This is separate from your donation to the organization.
                     </p>
@@ -673,7 +671,10 @@ export default function DonateForm({
                       Suggested:{" "}
                       <strong>
                         5% ($
-                        {suggestedHhSupportDollars(statedDonation).toFixed(2)})
+                        {Number.isFinite(statedDonation) && statedDonation > 0
+                          ? suggestedHhSupportDollars(statedDonation).toFixed(2)
+                          : suggestedHhSupportDollars(50).toFixed(2)}
+                        )
                       </strong>
                     </p>
                   </div>
@@ -684,7 +685,7 @@ export default function DonateForm({
                       onCheckedChange={(v: boolean | "indeterminate") => {
                         const on = v === true;
                         setHhSupportOptIn(on);
-                        if (on && !hhSupportAmount) {
+                        if (on) {
                           setHhSupportAmount(
                             String(suggestedHhSupportDollars(statedDonation))
                           );
@@ -697,7 +698,7 @@ export default function DonateForm({
                         htmlFor="hh_support"
                         className="text-sm font-normal text-slate-800"
                       >
-                        Add support for Heart &amp; Hustle
+                        Include 5% support — uncheck to remove
                       </Label>
                       {hhSupportOptIn ? (
                         <div className="flex items-center gap-2">

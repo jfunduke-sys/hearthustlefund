@@ -61,7 +61,7 @@ const STEPS: {
     title: "Campaign closes",
     summary: "When the scheduled end date passes, fundraising for that campaign is complete.",
     detail:
-      "Final totals are available in the Organizer dashboard. Under the Terms of service (Fundraising Services Agreement), 90% of funds raised is allocated to the organization and 10% is retained by Heart & Hustle as its service fee; card processing is the Company’s responsibility from its 10% share and does not reduce the program’s 90%.",
+      "Final totals are available in the Organizer dashboard. After the campaign ends, Heart & Hustle prepares the program’s share for payout as described in the Terms of service.",
   },
   {
     title: "Payout to your program",
