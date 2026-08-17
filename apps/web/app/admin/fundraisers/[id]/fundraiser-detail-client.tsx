@@ -51,6 +51,7 @@ export function FundraiserDetailClient({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [notes, setNotes] = useState(initialNotes ?? "");
+  const [feeModelError, setFeeModelError] = useState<string | null>(null);
   const feeModel = normalizeFeeModel(fundraiser.fee_model);
   const isKeep100 = feeModel === "keep_100";
 
@@ -182,8 +183,15 @@ export function FundraiserDetailClient({
             disabled={pending || feeModel === "split_90_10"}
             onClick={() =>
               startTransition(async () => {
-                await setFundraiserFeeModel(fundraiser.id, "split_90_10");
-                router.refresh();
+                setFeeModelError(null);
+                try {
+                  await setFundraiserFeeModel(fundraiser.id, "split_90_10");
+                  router.refresh();
+                } catch (e) {
+                  setFeeModelError(
+                    e instanceof Error ? e.message : "Could not switch fee model."
+                  );
+                }
               })
             }
           >
@@ -195,13 +203,25 @@ export function FundraiserDetailClient({
             disabled={pending || feeModel === "keep_100"}
             onClick={() =>
               startTransition(async () => {
-                await setFundraiserFeeModel(fundraiser.id, "keep_100");
-                router.refresh();
+                setFeeModelError(null);
+                try {
+                  await setFundraiserFeeModel(fundraiser.id, "keep_100");
+                  router.refresh();
+                } catch (e) {
+                  setFeeModelError(
+                    e instanceof Error ? e.message : "Could not switch fee model."
+                  );
+                }
               })
             }
           >
             Use Keep 100%
           </Button>
+          {feeModelError ? (
+            <p className="w-full text-sm text-red-700" role="alert">
+              {feeModelError}
+            </p>
+          ) : null}
           {isKeep100 ? (
             <p className="w-full text-sm text-amber-950">
               Donate links for this campaign now show Electronic Payment Fee +
