@@ -14,13 +14,13 @@ export const metadata: Metadata = {
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="hh-paper min-h-screen">
       <MarketingSiteHeader />
-      <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
-        <p className="text-sm font-semibold uppercase tracking-wide text-hh-primary">
+      <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-hh-primary">
           Help
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-hh-dark sm:text-4xl">
+        <h1 className="mt-3 font-display text-4xl font-medium tracking-tight text-hh-dark sm:text-5xl">
           Support
         </h1>
         <p className="mt-4 text-base leading-relaxed text-slate-600">

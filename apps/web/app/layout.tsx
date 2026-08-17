@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
 import { SiteJsonLd } from "@/components/site-json-ld";
 import { getRobotsMetadata, getSiteUrl } from "@/lib/site-config";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
 
 const defaultDescription =
   "The fundraising platform for high school athletics, activities, and booster clubs. FERPA and COPPA compliant. Also serving youth nonprofits. Heart & Hustle Fundraising.";
@@ -47,7 +52,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} min-h-screen font-sans antialiased`}>
+      <body
+        className={`${inter.variable} ${newsreader.variable} min-h-screen font-sans antialiased`}
+      >
         <SiteJsonLd />
         {children}
       </body>

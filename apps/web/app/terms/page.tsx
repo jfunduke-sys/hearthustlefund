@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import {
   FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION,
   FundraisingServicesAgreementBody,
@@ -18,11 +19,13 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 text-slate-700">
+    <div className="hh-paper min-h-screen">
+      <MarketingSiteHeader />
+      <main className="mx-auto max-w-3xl px-4 py-12 text-slate-700">
       <Link href="/" className="text-sm text-hh-primary hover:underline">
         ← Home
       </Link>
-      <h1 className="mt-6 text-3xl font-bold text-hh-dark">Terms of service</h1>
+      <h1 className="mt-6 font-display text-4xl font-medium tracking-tight text-hh-dark">Terms of service</h1>
       <p className="mt-2 text-sm text-slate-500">
         {BRAND.name}
         <span className="text-slate-400"> · </span>
@@ -81,6 +84,7 @@ export default function TermsPage() {
         </a>
         .
       </p>
+      </main>
     </div>
   );
 }

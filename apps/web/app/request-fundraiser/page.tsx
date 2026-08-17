@@ -11,7 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { MarketingFooter } from "@/components/marketing-footer";
+import { MarketingPhoto } from "@/components/marketing-photo";
 
 function trimOrEmpty(v: FormDataEntryValue | null | undefined) {
   return String(v ?? "").trim();
@@ -202,23 +203,41 @@ export default function RequestFundraiserPage() {
     setAgreeContract(false);
   }
 
-  return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <MarketingSiteHeader />
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-10%,rgba(192,57,43,0.12),transparent),linear-gradient(180deg,#f8fafc_0%,#e2e8f0_100%)]"
-        aria-hidden
-      />
-      <div className="relative mx-auto max-w-xl px-4 py-6 sm:px-6 sm:py-10">
-        <h1 className="text-center text-2xl font-extrabold tracking-tight text-hh-dark sm:text-3xl">
-          {BRAND.name}
-        </h1>
+  const fieldClass =
+    "h-12 rounded-none border-x-0 border-t-0 border-b border-neutral-400 bg-transparent px-0 text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-hh-primary";
 
-        <Card className="mt-8 border-slate-200/90 shadow-xl shadow-hh-dark/5 sm:rounded-2xl">
-          <CardContent className="px-4 py-6 sm:p-8">
+  return (
+    <div className="hh-paper min-h-screen overflow-x-hidden">
+      <MarketingSiteHeader />
+      <div className="grid lg:grid-cols-12">
+        <aside className="relative h-48 sm:h-56 lg:col-span-5 lg:h-auto">
+          <div className="relative h-full min-h-[12rem] lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] xl:top-[7.5rem] xl:h-[calc(100vh-7.5rem)]">
+            <MarketingPhoto
+              src="/marketing/hero-night.jpg"
+              alt="High school football under stadium lights"
+              className="absolute inset-0"
+              imageClassName="object-[center_30%] saturate-[.5] brightness-[.55]"
+              priority
+              sizes="(min-width: 1024px) 42vw, 100vw"
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/15"
+              aria-hidden
+            />
+            <div className="hh-grain absolute inset-0" aria-hidden />
+            <div className="relative z-[2] flex h-full flex-col justify-end px-5 py-6 sm:px-8 lg:px-10 lg:py-12">
+              <h1 className="font-display text-3xl font-medium tracking-tight text-white sm:text-4xl lg:text-5xl">
+                {BRAND.name}
+              </h1>
+            </div>
+          </div>
+        </aside>
+
+        <div className="px-4 py-8 sm:px-8 sm:py-12 lg:col-span-7 lg:px-14 lg:py-14">
+          <div className="mx-auto max-w-xl">
             {done ? (
               <div
-                className="rounded-xl border border-emerald-200 bg-emerald-50/90 p-4 text-sm text-emerald-900 sm:p-5"
+                className="border border-emerald-800/20 bg-emerald-50/80 p-4 text-sm text-emerald-900 sm:p-5"
                 role="status"
               >
                 <p className="leading-relaxed">
@@ -240,7 +259,7 @@ export default function RequestFundraiserPage() {
                     id="school_name"
                     name="school_name"
                     required
-                    className="h-12 text-base"
+                    className={fieldClass}
                   />
                 </div>
                 <div className="space-y-2">
@@ -251,7 +270,7 @@ export default function RequestFundraiserPage() {
                     id="school_district"
                     name="school_district"
                     required
-                    className="h-12 text-base"
+                    className={fieldClass}
                   />
                   <p className="text-xs text-slate-500">
                     If a booster club or private school has no district, enter
@@ -271,7 +290,7 @@ export default function RequestFundraiserPage() {
                       name="school_street"
                       required
                       autoComplete="street-address"
-                      className="h-12 text-base"
+                      className={fieldClass}
                     />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -284,7 +303,7 @@ export default function RequestFundraiserPage() {
                         name="school_city"
                         required
                         autoComplete="address-level2"
-                        className="h-12 text-base"
+                        className={fieldClass}
                       />
                     </div>
                     <div className="space-y-2">
@@ -299,7 +318,7 @@ export default function RequestFundraiserPage() {
                         defaultValue="IL"
                         autoComplete="address-level1"
                         title="Campaigns are currently available in Illinois only."
-                        className="h-12 bg-slate-50/90 text-base"
+                        className={`${fieldClass} bg-transparent`}
                       />
                       <p className="text-xs text-slate-500">
                         Illinois only — this field is set to IL for you.
@@ -315,7 +334,7 @@ export default function RequestFundraiserPage() {
                         required
                         inputMode="numeric"
                         autoComplete="postal-code"
-                        className="h-12 text-base"
+                        className={fieldClass}
                       />
                     </div>
                   </div>
@@ -329,7 +348,7 @@ export default function RequestFundraiserPage() {
                     name="sport_club_activity"
                     required
                     placeholder="e.g. varsity football, marching band, drama"
-                    className="h-12 text-base"
+                    className={fieldClass}
                   />
                 </div>
                 <div className="space-y-3">
@@ -346,7 +365,7 @@ export default function RequestFundraiserPage() {
                         name="fundraiser_start_date"
                         type="date"
                         required
-                        className="h-12 text-base"
+                        className={fieldClass}
                       />
                     </div>
                     <div className="space-y-2">
@@ -358,7 +377,7 @@ export default function RequestFundraiserPage() {
                         name="fundraiser_end_date"
                         type="date"
                         required
-                        className="h-12 text-base"
+                        className={fieldClass}
                       />
                     </div>
                   </div>
@@ -375,7 +394,7 @@ export default function RequestFundraiserPage() {
                     Choose one. Either option works — pick the support level that
                     fits your team.
                   </p>
-                  <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                  <div className="space-y-4 border-y border-black/10 py-4">
                     <label className="flex cursor-pointer gap-3">
                       <input
                         type="radio"
@@ -424,7 +443,7 @@ export default function RequestFundraiserPage() {
                       name="admin_first_name"
                       required
                       autoComplete="given-name"
-                      className="h-12 text-base"
+                      className={fieldClass}
                     />
                   </div>
                   <div className="space-y-2">
@@ -436,7 +455,7 @@ export default function RequestFundraiserPage() {
                       name="admin_last_name"
                       required
                       autoComplete="family-name"
-                      className="h-12 text-base"
+                      className={fieldClass}
                     />
                   </div>
                 </div>
@@ -455,7 +474,7 @@ export default function RequestFundraiserPage() {
                     inputMode="email"
                     autoComplete="email"
                     required
-                    className="h-12 text-base"
+                    className={fieldClass}
                   />
                 </div>
                 <div className="space-y-2">
@@ -469,7 +488,7 @@ export default function RequestFundraiserPage() {
                     inputMode="tel"
                     autoComplete="tel"
                     required
-                    className="h-12 text-base"
+                    className={fieldClass}
                   />
                 </div>
                 <div className="space-y-2">
@@ -483,7 +502,7 @@ export default function RequestFundraiserPage() {
                     min={1}
                     inputMode="numeric"
                     required
-                    className="h-12 text-base"
+                    className={fieldClass}
                   />
                 </div>
                 <div className="space-y-2">
@@ -498,7 +517,7 @@ export default function RequestFundraiserPage() {
                     autoComplete="off"
                     required
                     placeholder="e.g. 5000"
-                    className="h-12 text-base"
+                    className={fieldClass}
                   />
                   <p className="text-xs text-slate-500">
                     Your best estimate of the total dollars this program aims to
@@ -520,7 +539,7 @@ export default function RequestFundraiserPage() {
                     this campaign and cannot be changed after you start.
                   </p>
                   <div className="space-y-3">
-                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                    <label className="flex cursor-pointer items-start gap-3 border border-black/15 p-4 has-[:checked]:border-hh-primary">
                       <input
                         type="radio"
                         name="fee_model"
@@ -537,7 +556,7 @@ export default function RequestFundraiserPage() {
                         </span>
                       </span>
                     </label>
-                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                    <label className="flex cursor-pointer items-start gap-3 border border-black/15 p-4 has-[:checked]:border-hh-primary">
                       <input
                         type="radio"
                         name="fee_model"
@@ -574,7 +593,7 @@ export default function RequestFundraiserPage() {
                     assign a manager per group, and use a per-group scoreboard. Pick
                     no for one combined roster.
                   </p>
-                  <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                  <div className="space-y-3 border-y border-black/10 py-4">
                     <label className="flex cursor-pointer items-center gap-3">
                       <input
                         type="radio"
@@ -609,11 +628,11 @@ export default function RequestFundraiserPage() {
                     id="notes"
                     name="notes"
                     rows={3}
-                    className="min-h-[5.5rem] resize-y text-base"
+                    className="min-h-[5.5rem] resize-y rounded-none border-x-0 border-b border-t-0 border-neutral-400 bg-transparent px-0 text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                     placeholder="Anything else we should know about your program or timeline"
                   />
                 </div>
-                <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/90 p-4">
+                <div className="flex items-start gap-3 border-y border-black/10 py-4">
                   <Checkbox
                     id="ack"
                     checked={ack}
@@ -633,7 +652,7 @@ export default function RequestFundraiserPage() {
                     launching my campaign.
                   </Label>
                 </div>
-                <div className="space-y-5 rounded-xl border border-hh-primary/25 bg-gradient-to-b from-hh-primary/[0.06] to-white p-5 sm:p-6">
+                <div className="space-y-5 border-t border-hh-primary/40 pt-6">
                   <div className="space-y-1">
                     <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
                       Electronic signature
@@ -656,7 +675,7 @@ export default function RequestFundraiserPage() {
                     </p>
                   </div>
 
-                  <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
+                  <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signer_name" className="text-sm font-semibold text-hh-dark">
                         Full legal name
@@ -682,12 +701,12 @@ export default function RequestFundraiserPage() {
                         name="signer_title"
                         required
                         placeholder="Coach, Organizer, AD…"
-                        className="h-11 text-base placeholder:text-sm placeholder:text-slate-400"
+                        className={`${fieldClass} h-11 placeholder:text-sm placeholder:text-slate-400`}
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white/80 p-3.5">
+                  <div className="flex items-start gap-3">
                     <Checkbox
                       id="agree_contract"
                       checked={agreeContract}
@@ -716,16 +735,17 @@ export default function RequestFundraiserPage() {
                 ) : null}
                 <Button
                   type="submit"
-                  className="h-12 w-full text-base font-semibold sm:h-14 sm:text-lg"
+                  className="h-12 w-full rounded-none text-base font-medium tracking-[0.04em] sm:h-12 sm:text-base"
                   disabled={loading}
                 >
                   {loading ? "Submitting…" : "Submit Request"}
                 </Button>
               </form>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
+      <MarketingFooter />
     </div>
   );
 }

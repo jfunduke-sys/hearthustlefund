@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteHeader } from "@/components/marketing-site-header";
+import { MarketingFooter } from "@/components/marketing-footer";
+import { MarketingPhoto } from "@/components/marketing-photo";
 import { BRAND } from "@/lib/brand";
-import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "How it works",
@@ -72,72 +73,131 @@ const STEPS: {
   },
 ];
 
+function StepBlock({
+  step,
+  index,
+}: {
+  step: (typeof STEPS)[number];
+  index: number;
+}) {
+  return (
+    <li className="grid gap-4 border-t border-black/10 py-10 sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:gap-8 sm:py-14">
+      <p className="font-display text-3xl font-medium tabular-nums text-hh-primary sm:text-4xl">
+        {String(index + 1).padStart(2, "0")}
+      </p>
+      <div className="max-w-2xl">
+        <h2 className="font-display text-2xl font-medium tracking-tight text-hh-dark sm:text-3xl">
+          {step.title}
+        </h2>
+        <p className="mt-3 text-base font-medium leading-relaxed text-hh-dark">
+          {step.summary}
+        </p>
+        <p className="mt-3 text-sm leading-relaxed text-neutral-600 sm:text-[15px]">
+          {step.detail}
+        </p>
+      </div>
+    </li>
+  );
+}
+
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="hh-paper min-h-screen">
       <MarketingSiteHeader />
 
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
-        <p className="text-sm font-semibold uppercase tracking-wide text-hh-primary">
-          End-to-end overview
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-hh-dark sm:text-4xl">
-          How it works
-        </h1>
-        <p className="mt-4 max-w-2xl text-lg text-slate-600">
-          From your first school request through the day we hand off your program’s
-          share, here is the full path for {BRAND.name} campaigns in Illinois
-          school programs.
-        </p>
+      <section className="relative min-h-[18rem] overflow-hidden sm:min-h-[24rem] lg:min-h-[28rem]">
+        <MarketingPhoto
+          src="/marketing/stadium-bleachers.jpg"
+          alt="High school stadium bleachers and field"
+          className="absolute inset-0"
+          imageClassName="object-[center_30%] saturate-[.5] brightness-[.55]"
+          priority
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"
+          aria-hidden
+        />
+        <div className="hh-grain absolute inset-0" aria-hidden />
+        <div className="relative z-[2] mx-auto flex min-h-[18rem] max-w-[90rem] flex-col justify-end px-4 pb-10 pt-16 sm:min-h-[24rem] sm:px-8 sm:pb-14 lg:min-h-[28rem] lg:px-10">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75 sm:text-xs">
+            End-to-end overview
+          </p>
+          <h1 className="mt-3 font-display text-4xl font-medium tracking-tight text-white sm:text-6xl">
+            How it works
+          </h1>
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 sm:text-lg">
+            From your first school request through the day we hand off your
+            program’s share, here is the full path for {BRAND.name} campaigns in
+            Illinois school programs.
+          </p>
+        </div>
+      </section>
 
-        <ol className="mt-12 space-y-0">
-          {STEPS.map((step, i) => (
-            <li
-              key={step.title}
-              className="relative border-l-2 border-hh-primary/25 pb-12 pl-8 last:border-l-transparent last:pb-0 sm:pl-10"
-            >
-              <span
-                className="absolute -left-[15px] top-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-hh-primary bg-white text-sm font-bold text-hh-primary shadow-sm sm:-left-[17px] sm:h-9 sm:w-9"
-                aria-hidden
-              >
-                {i + 1}
-              </span>
-              <h2 className="text-xl font-semibold text-hh-dark">{step.title}</h2>
-              <p className="mt-1 text-sm font-medium text-slate-700">{step.summary}</p>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">{step.detail}</p>
-            </li>
+      <main>
+        <ol className="mx-auto max-w-4xl px-4 sm:px-8 lg:px-10">
+          {STEPS.slice(0, 3).map((step, i) => (
+            <StepBlock key={step.title} step={step} index={i} />
           ))}
         </ol>
 
-        <div className="mt-14 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-semibold text-hh-dark">Ready to begin?</h2>
-          <p className="mt-2 text-sm text-slate-600">
-            Schools start with a request. Approved Organizers use{" "}
-            <strong>Organizer login</strong> with their emailed code the first time,
-            then email and password after that.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button asChild>
-              <Link href="/request-fundraiser">Request a fundraiser</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/coach/login">Organizer login</Link>
-            </Button>
-          </div>
+        <div className="relative my-4">
+          <MarketingPhoto
+            src="/marketing/gym.jpg"
+            alt="High school basketball gymnasium"
+            className="h-44 sm:h-64 lg:h-80"
+            mono
+          />
+          <div className="hh-grain absolute inset-0" aria-hidden />
         </div>
 
-        <p className="mt-10 text-center text-sm text-slate-500">
-          <Link href="/privacy" className="underline underline-offset-2">
-            Privacy policy
-          </Link>
-          <span className="mx-2 text-slate-300" aria-hidden>
-            ·
-          </span>
-          <Link href="/terms" className="underline underline-offset-2">
-            Terms of service
-          </Link>
-        </p>
+        <ol className="mx-auto max-w-4xl px-4 sm:px-8 lg:px-10" start={4}>
+          {STEPS.slice(3, 6).map((step, i) => (
+            <StepBlock key={step.title} step={step} index={i + 3} />
+          ))}
+        </ol>
+
+        <section className="grid lg:grid-cols-12">
+          <MarketingPhoto
+            src="/marketing/baseball.jpg"
+            alt="Baseball and softball field"
+            className="min-h-[16rem] sm:min-h-[22rem] lg:col-span-5 lg:min-h-full"
+            imageClassName="object-[center_70%]"
+            sizes="(min-width: 1024px) 42vw, 100vw"
+          />
+          <ol className="px-4 sm:px-8 lg:col-span-7 lg:px-12" start={7}>
+            {STEPS.slice(6).map((step, i) => (
+              <StepBlock key={step.title} step={step} index={i + 6} />
+            ))}
+          </ol>
+        </section>
+
+        <section className="mx-auto max-w-3xl px-4 py-16 sm:px-8 sm:py-24">
+          <h2 className="font-display text-3xl font-medium tracking-tight text-hh-dark sm:text-4xl">
+            Ready to begin?
+          </h2>
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-700">
+            Schools start with a request. Approved Organizers use{" "}
+            <strong>Organizer login</strong> with their emailed code the first
+            time, then email and password after that.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link
+              href="/request-fundraiser"
+              className="inline-flex items-center bg-hh-primary px-6 py-3 text-sm font-medium tracking-[0.04em] text-white hover:bg-[#a33225]"
+            >
+              Request a fundraiser
+            </Link>
+            <Link
+              href="/coach/login"
+              className="inline-flex items-center border border-hh-dark px-6 py-3 text-sm font-medium tracking-[0.04em] text-hh-dark hover:bg-hh-dark hover:text-white"
+            >
+              Organizer login
+            </Link>
+          </div>
+        </section>
       </main>
+
+      <MarketingFooter includeSms={false} />
     </div>
   );
 }

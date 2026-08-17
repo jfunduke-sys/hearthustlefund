@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SmsOptInScreenshots } from "@/components/sms-opt-in-screenshots";
 import { MarketingSiteHeader } from "@/components/marketing-site-header";
+import { MarketingPhoto } from "@/components/marketing-photo";
 import { BRAND } from "@/lib/brand";
 import {
   ANDROID_PLAY_STORE_URL,
@@ -107,16 +108,32 @@ export default function SmsRemindersInfoPage() {
     "https://www.hearthustlefund.com";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="hh-paper min-h-screen">
       <MarketingSiteHeader />
+      <section className="relative min-h-[16rem] overflow-hidden sm:min-h-[20rem]">
+        <MarketingPhoto
+          src="/marketing/football-field.jpg"
+          alt="High school football field"
+          className="absolute inset-0"
+          imageClassName="object-[center_40%] saturate-[.5] brightness-[.55]"
+          priority
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/20"
+          aria-hidden
+        />
+        <div className="hh-grain absolute inset-0" aria-hidden />
+        <div className="relative z-[2] mx-auto flex min-h-[16rem] max-w-3xl flex-col justify-end px-4 pb-8 pt-12 sm:min-h-[20rem] sm:px-6 sm:pb-10">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/75">
+            SMS program
+          </p>
+          <h1 className="mt-3 font-display text-3xl font-medium tracking-tight text-white sm:text-5xl">
+            Fundraising reminder texts
+          </h1>
+        </div>
+      </section>
       <main className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
-        <p className="text-sm font-semibold uppercase tracking-wide text-hh-primary">
-          SMS program
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-hh-dark sm:text-4xl">
-          Fundraising reminder texts
-        </h1>
-        <p className="mt-4 text-base leading-relaxed text-slate-600">
+        <p className="text-base leading-relaxed text-slate-600">
           <strong>{PLATFORM.displayName}</strong> ({appUrl}) sends{" "}
           <strong>optional</strong>, short automated SMS reminders during an{" "}
           <strong>active</strong> school/team fundraiser. Reminders help
