@@ -58,15 +58,15 @@ export default function HomePage() {
               private fundraising.
             </p>
             <p
-              className="mt-8 max-w-xl text-[11px] font-medium uppercase tracking-[0.16em] text-white/70 sm:text-xs"
+              className="mt-8 max-w-2xl text-sm font-semibold tracking-wide text-white sm:text-base"
               aria-label="Compliance and privacy"
             >
               FERPA compliant
-              <span className="mx-2 text-white/40" aria-hidden>
+              <span className="mx-2.5 text-white/55" aria-hidden>
                 ·
               </span>
               COPPA compliant
-              <span className="mx-2 text-white/40" aria-hidden>
+              <span className="mx-2.5 text-white/55" aria-hidden>
                 ·
               </span>
               We never sell data
