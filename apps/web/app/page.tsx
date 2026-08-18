@@ -184,9 +184,9 @@ export default function HomePage() {
                 Local, not faceless
               </p>
               <p className="mt-3 text-sm leading-relaxed text-neutral-700 sm:text-base">
-                The platform is built and operated locally—you work with real
-                people who understand schools, booster clubs, and community
-                programs, not an anonymous national help desk.
+                Heart &amp; Hustle is built and operated in Illinois. You work
+                with people who know Illinois high schools, booster clubs, and
+                community programs—not an anonymous national help desk.
               </p>
             </div>
           </div>
