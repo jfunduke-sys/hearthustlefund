@@ -4,23 +4,17 @@ import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { MarketingPhoto } from "@/components/marketing-photo";
 import { BRAND } from "@/lib/brand";
+import { marketingSocial } from "@/lib/marketing-seo";
 
+const homeTitle = `High School Fundraising Platform | ${BRAND.name}`;
 const homeDescription =
-  "The fundraising platform for high school athletics, activities, and booster clubs. FERPA and COPPA compliant. Also serving youth nonprofits and community programs. Heart & Hustle Fundraising.";
+  "Heart & Hustle is a high school fundraising platform for athletics, activities, and booster clubs. FERPA and COPPA compliant school fundraisers with personal donation links—no catalogs, no data selling. Also serving youth nonprofits and community programs in Illinois.";
 
 export const metadata: Metadata = {
-  title: { absolute: BRAND.name },
+  title: { absolute: homeTitle },
   description: homeDescription,
   alternates: { canonical: "/" },
-  openGraph: {
-    title: BRAND.name,
-    description: homeDescription,
-    url: "/",
-  },
-  twitter: {
-    title: BRAND.name,
-    description: homeDescription,
-  },
+  ...marketingSocial(homeTitle, homeDescription, "/"),
 };
 
 export default function HomePage() {
@@ -31,7 +25,7 @@ export default function HomePage() {
           <MarketingSiteHeader overlay />
           <MarketingPhoto
             src="/marketing/hero-night.jpg"
-            alt="Athletic field under stadium lights at night"
+            alt="High school sports field under stadium lights at night"
             className="absolute inset-0"
             imageClassName="object-[center_35%] saturate-[.5] brightness-[.5] contrast-[1.05] sm:object-center"
             priority
@@ -48,10 +42,10 @@ export default function HomePage() {
             <h1 className="mt-4 max-w-4xl font-display text-[2.35rem] font-medium leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
               Built by Heart. Powered by Hustle.
             </h1>
-            <p className="mt-5 max-w-xl text-lg font-medium leading-snug text-white sm:text-2xl">
+            <h2 className="mt-5 max-w-xl text-lg font-medium leading-snug text-white sm:text-2xl">
               The #1 fundraising platform for high school athletics, activities,
               and booster clubs.
-            </p>
+            </h2>
             <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/80 sm:text-base">
               Built for teams, clubs, and activities—and ready for youth
               nonprofits and other community programs that want the same simple,

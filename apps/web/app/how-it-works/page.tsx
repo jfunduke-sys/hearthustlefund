@@ -4,12 +4,18 @@ import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { MarketingPhoto } from "@/components/marketing-photo";
 import { BRAND } from "@/lib/brand";
+import { HowToJsonLd } from "@/components/howto-json-ld";
+import { marketingSocial } from "@/lib/marketing-seo";
+
+const howItWorksTitle = "How a School Fundraiser Works";
+const howItWorksDescription =
+  "See how Heart & Hustle high school fundraising works—from requesting a school fundraiser and Illinois paperwork through campaign launch, donations, and payout to your program.";
 
 export const metadata: Metadata = {
-  title: "How it works",
-  description:
-    "From school request through campaign launch, donations, and program payout — the Heart & Hustle Fundraising flow.",
+  title: howItWorksTitle,
+  description: howItWorksDescription,
   alternates: { canonical: "/how-it-works" },
+  ...marketingSocial(howItWorksTitle, howItWorksDescription, "/how-it-works"),
 };
 
 const STEPS: {
@@ -103,6 +109,7 @@ function StepBlock({
 export default function HowItWorksPage() {
   return (
     <div className="hh-paper min-h-screen">
+      <HowToJsonLd steps={STEPS} />
       <section className="relative min-h-[22rem] overflow-hidden sm:min-h-[28rem] lg:min-h-[32rem]">
         <MarketingSiteHeader overlay />
         <MarketingPhoto
@@ -122,7 +129,7 @@ export default function HowItWorksPage() {
             End-to-end overview
           </p>
           <h1 className="mt-3 font-display text-4xl font-medium tracking-tight text-white sm:text-6xl">
-            How it works
+            How a school fundraiser works
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/85 sm:text-lg">
             From your first school request through the day we hand off your

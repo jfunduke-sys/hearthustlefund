@@ -3,6 +3,7 @@ import { Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
 import { SiteJsonLd } from "@/components/site-json-ld";
+import { MARKETING_OG_IMAGE } from "@/lib/marketing-seo";
 import { getRobotsMetadata, getSiteUrl } from "@/lib/site-config";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -13,7 +14,7 @@ const newsreader = Newsreader({
 });
 
 const defaultDescription =
-  "The fundraising platform for high school athletics, activities, and booster clubs. FERPA and COPPA compliant. Also serving youth nonprofits. Heart & Hustle Fundraising.";
+  "High school fundraising platform for athletics, activities, and booster clubs. FERPA and COPPA compliant school fundraisers with personal donation links. Also serving youth nonprofits in Illinois.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const base = getSiteUrl();
@@ -21,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(base.endsWith("/") ? base.slice(0, -1) : base),
     title: {
-      default: BRAND.name,
+      default: `High School Fundraising Platform | ${BRAND.name}`,
       template: `%s | ${BRAND.name}`,
     },
     description: defaultDescription,
@@ -29,18 +30,23 @@ export async function generateMetadata(): Promise<Metadata> {
       icon: "/icon.svg",
     },
     robots: getRobotsMetadata(),
+    verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+      : undefined,
     openGraph: {
       type: "website",
       locale: "en_US",
       siteName: BRAND.name,
-      title: BRAND.name,
+      title: `High School Fundraising Platform | ${BRAND.name}`,
       description: defaultDescription,
       url: base,
+      images: [MARKETING_OG_IMAGE],
     },
     twitter: {
-      card: "summary",
-      title: BRAND.name,
+      card: "summary_large_image",
+      title: `High School Fundraising Platform | ${BRAND.name}`,
       description: defaultDescription,
+      images: [MARKETING_OG_IMAGE.url],
     },
   };
 }

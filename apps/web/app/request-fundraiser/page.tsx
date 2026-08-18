@@ -226,8 +226,11 @@ export default function RequestFundraiserPage() {
             />
             <div className="hh-grain absolute inset-0" aria-hidden />
             <div className="relative z-[2] flex h-full flex-col justify-end px-5 py-6 sm:px-8 lg:px-10 lg:py-12">
-              <h1 className="font-display text-3xl font-medium tracking-tight text-white sm:text-4xl lg:text-5xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
                 {BRAND.name}
+              </p>
+              <h1 className="mt-2 font-display text-3xl font-medium tracking-tight text-white sm:text-4xl lg:text-5xl">
+                Request a school fundraiser
               </h1>
             </div>
           </div>

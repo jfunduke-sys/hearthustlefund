@@ -18,7 +18,14 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       /** App and admin UIs; coach area uses `noindex` in `app/coach/layout.tsx` instead. */
-      disallow: ["/admin", "/api/"],
+      disallow: [
+        "/admin",
+        "/api/",
+        "/coach",
+        "/hh-enter",
+        "/forgot-password",
+        "/reset-password",
+      ],
     },
     sitemap: `${base}/sitemap.xml`,
   };
