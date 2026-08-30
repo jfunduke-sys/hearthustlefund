@@ -52,7 +52,7 @@ export function SiteJsonLd() {
         operatingSystem: "Web, iOS, Android",
         url,
         description:
-          "100% return school and sports fundraising platform. Stated donations go back to the program; FERPA and COPPA compliant.",
+          "100% return school and sports fundraising platform. Stated donations go back to the program; designed for FERPA and COPPA requirements.",
         offers: {
           "@type": "Offer",
           url: `${url}/request-fundraiser`,

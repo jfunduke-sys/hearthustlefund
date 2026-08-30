@@ -49,11 +49,7 @@ export default function HomePage() {
                 className="mt-3 text-[13px] font-medium leading-relaxed tracking-[0.04em] text-white/92 sm:text-[15px]"
                 aria-label="Compliance and privacy"
               >
-                FERPA compliant
-                <span className="mx-2 text-white/50" aria-hidden>
-                  ·
-                </span>
-                COPPA compliant
+                Designed to be FERPA and COPPA compliant
                 <span className="mx-2 text-white/50" aria-hidden>
                   ·
                 </span>
@@ -172,9 +168,9 @@ export default function HomePage() {
                 Privacy you can stand behind
               </p>
               <p className="mt-3 text-sm leading-relaxed text-neutral-700 sm:text-base">
-                FERPA and COPPA compliant. We don&apos;t sell student, donor, or
-                participant data. Supporters give to the team—not to a
-                marketplace built on reselling leads.
+                Designed to be FERPA and COPPA compliant. We don&apos;t sell
+                student, donor, or participant data. Supporters give to the
+                team—not to a marketplace built on reselling leads.
               </p>
             </div>
           </div>

@@ -10,7 +10,7 @@ export const MARKETING_OG_IMAGE = {
 
 /** Default site description — used in root layout, JSON-LD, and fallbacks. */
 export const MARKETING_SITE_DESCRIPTION =
-  "100% return school and sports fundraising for high school athletics, activities, and booster clubs. FERPA and COPPA compliant—stated donations go back to your program. Personal donation links, no catalogs, no data selling. Illinois and youth nonprofits.";
+  "100% return school and sports fundraising for high school athletics, activities, and booster clubs. Designed for FERPA and COPPA requirements—stated donations go back to your program. Personal donation links, no catalogs, no data selling. Illinois and youth nonprofits.";
 
 export function marketingSocial(title: string, description: string, path: string) {
   return {

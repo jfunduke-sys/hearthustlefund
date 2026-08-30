@@ -13,6 +13,10 @@ export const athleteSignupBodySchema = z.object({
   fullName: z.string().trim().min(1).max(200),
   teamName: z.string().trim().min(1).max(200),
   jerseyNumber: z.string().trim().max(20).nullable().optional(),
+  confirmAge13OrOlder: z.literal(true, {
+    message:
+      "You must confirm you are at least 13 years old to create an account.",
+  }),
 });
 
 export type AthleteSignupResult =

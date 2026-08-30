@@ -13,7 +13,11 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { NEW_PASSWORD_REQUIREMENT_COPY } from "@heart-and-hustle/shared";
+import {
+  NEW_PASSWORD_REQUIREMENT_COPY,
+  PARTICIPANT_AGE_ATTESTATION_CHECKBOX_COPY,
+  PARTICIPANT_AGE_ATTESTATION_REQUIRED_ERROR,
+} from "@heart-and-hustle/shared";
 import { getApiBase, supabase } from "../lib/supabase";
 import { getPostAuthHrefForCurrentUser } from "../lib/post-auth-route";
 
@@ -40,6 +44,7 @@ export default function SetupScreen() {
   const [jersey, setJersey] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,6 +66,10 @@ export default function SetupScreen() {
       setError(NEW_PASSWORD_REQUIREMENT_COPY);
       return;
     }
+    if (!ageConfirmed) {
+      setError(PARTICIPANT_AGE_ATTESTATION_REQUIRED_ERROR);
+      return;
+    }
     Keyboard.dismiss();
     setLoading(true);
     try {
@@ -79,6 +88,7 @@ export default function SetupScreen() {
             fullName: fullName.trim(),
             teamName: teamName ?? "",
             jerseyNumber: jersey.trim() || null,
+            confirmAge13OrOlder: true,
           }),
         });
       } catch (fetchErr) {
@@ -216,6 +226,22 @@ export default function SetupScreen() {
           Dashboard → Your Contact Info (separate from creating your account).
         </Text>
 
+        <Pressable
+          style={styles.ageCheckRow}
+          onPress={() => setAgeConfirmed((v) => !v)}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: ageConfirmed }}
+        >
+          <View
+            style={[styles.ageCheckBox, ageConfirmed && styles.ageCheckBoxOn]}
+          >
+            {ageConfirmed ? <Text style={styles.ageCheckMark}>✓</Text> : null}
+          </View>
+          <Text style={styles.ageCheckLabel}>
+            {PARTICIPANT_AGE_ATTESTATION_CHECKBOX_COPY}
+          </Text>
+        </Pressable>
+
         {error ? <Text style={styles.err}>{error}</Text> : null}
         <Pressable style={styles.btn} onPress={() => void onSubmit()} disabled={loading}>
           {loading ? (
@@ -247,6 +273,39 @@ const styles = StyleSheet.create({
   afterPasswordHint: {
     marginTop: 14,
     marginBottom: 0,
+  },
+  ageCheckRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    marginTop: 16,
+  },
+  ageCheckBox: {
+    width: 22,
+    height: 22,
+    borderWidth: 1.5,
+    borderColor: "#94a3b8",
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    marginTop: 1,
+  },
+  ageCheckBoxOn: {
+    borderColor: "#C0392B",
+    backgroundColor: "#C0392B",
+  },
+  ageCheckMark: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 16,
+  },
+  ageCheckLabel: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#334155",
   },
   input: {
     borderWidth: 1,

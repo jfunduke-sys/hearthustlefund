@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { BRAND } from "@/lib/brand";
 import {
   NEW_PASSWORD_REQUIREMENT_COPY,
+  PARTICIPANT_AGE_ATTESTATION_CHECKBOX_COPY,
+  PARTICIPANT_AGE_ATTESTATION_REQUIRED_ERROR,
   PLATFORM,
   SMS_REMINDER_CONSENT_CHECKBOX_COPY,
 } from "@heart-and-hustle/shared";
@@ -164,6 +166,7 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
   const [jersey, setJersey] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{
@@ -183,6 +186,10 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
       setError(NEW_PASSWORD_REQUIREMENT_COPY);
       return;
     }
+    if (!ageConfirmed) {
+      setError(PARTICIPANT_AGE_ATTESTATION_REQUIRED_ERROR);
+      return;
+    }
     setLoading(true);
     try {
       const supabase = createClient();
@@ -196,6 +203,7 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
           fullName: fullName.trim(),
           teamName: fundraiser.team_name,
           jerseyNumber: jersey.trim() || null,
+          confirmAge13OrOlder: true,
         }),
       });
       const regJson = (await regRes.json()) as { error?: string };
@@ -372,6 +380,17 @@ export default function ParticipateForm({ fundraiser }: { fundraiser: Fr }) {
               required
             />
           </div>
+          <label className="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-slate-700">
+            <Checkbox
+              checked={ageConfirmed}
+              onCheckedChange={(v) => setAgeConfirmed(v === true)}
+              className="mt-0.5"
+              aria-labelledby="participant-age-attestation-label"
+            />
+            <span id="participant-age-attestation-label">
+              {PARTICIPANT_AGE_ATTESTATION_CHECKBOX_COPY}
+            </span>
+          </label>
           {error ? (
             <p className="text-sm text-red-600" role="alert">
               {error}
