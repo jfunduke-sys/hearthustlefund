@@ -7,9 +7,9 @@ import { BRAND } from "@/lib/brand";
 import { HowToJsonLd } from "@/components/howto-json-ld";
 import { marketingSocial } from "@/lib/marketing-seo";
 
-const howItWorksTitle = "How a School Fundraiser Works";
+const howItWorksTitle = "How 100% Return School Fundraising Works";
 const howItWorksDescription =
-  "See how Heart & Hustle high school fundraising works—from requesting a school fundraiser and Illinois paperwork through campaign launch, donations, and payout to your program.";
+  "How Heart & Hustle 100% return sports and school fundraising works—from your request and Illinois paperwork through campaign launch, donations, and payout to your program.";
 
 export const metadata: Metadata = {
   title: howItWorksTitle,

@@ -8,7 +8,7 @@ const SUPPORT_EMAIL =
 export const metadata: Metadata = {
   title: "Support",
   description:
-    "Contact Heart & Hustle Fundraising for help with your school fundraiser, the app, campaigns, and accounts.",
+    "Contact Heart & Hustle Fundraising for help with 100% return school and sports fundraisers, the app, campaigns, and accounts.",
   alternates: { canonical: "/support" },
 };
 

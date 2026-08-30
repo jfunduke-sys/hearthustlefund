@@ -4,11 +4,10 @@ import { MarketingSiteHeader } from "@/components/marketing-site-header";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { MarketingPhoto } from "@/components/marketing-photo";
 import { BRAND } from "@/lib/brand";
-import { marketingSocial } from "@/lib/marketing-seo";
+import { marketingSocial, MARKETING_SITE_DESCRIPTION } from "@/lib/marketing-seo";
 
-const homeTitle = `High School Fundraising Platform | ${BRAND.name}`;
-const homeDescription =
-  "Heart & Hustle is a high school fundraising platform where 100% of stated donations go back to your program. FERPA and COPPA compliant school fundraisers with personal donation links—no catalogs, no data selling.";
+const homeTitle = `100% Return School & Sports Fundraising | ${BRAND.name}`;
+const homeDescription = MARKETING_SITE_DESCRIPTION;
 
 export const metadata: Metadata = {
   title: { absolute: homeTitle },
@@ -42,31 +41,33 @@ export default function HomePage() {
             <h1 className="mt-4 max-w-4xl font-display text-[2.35rem] font-medium leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
               Built by Heart. Powered by Hustle.
             </h1>
-            <h2 className="mt-5 max-w-xl text-lg font-medium leading-snug text-white sm:text-2xl">
+            <div className="mt-6 max-w-2xl border-l-[3px] border-white/45 pl-5 sm:mt-8 sm:pl-6">
+              <p className="font-display text-[1.65rem] font-medium leading-[1.12] text-white sm:text-3xl lg:text-[2.15rem]">
+                100% back to your program.
+              </p>
+              <p
+                className="mt-3 text-[13px] font-medium leading-relaxed tracking-[0.04em] text-white/92 sm:text-[15px]"
+                aria-label="Compliance and privacy"
+              >
+                FERPA compliant
+                <span className="mx-2 text-white/50" aria-hidden>
+                  ·
+                </span>
+                COPPA compliant
+                <span className="mx-2 text-white/50" aria-hidden>
+                  ·
+                </span>
+                We never sell data
+              </p>
+            </div>
+            <h2 className="mt-7 max-w-xl text-lg font-medium leading-snug text-white sm:mt-8 sm:text-2xl">
               The #1 fundraising platform for high school athletics, activities,
               and booster clubs.
             </h2>
             <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/80 sm:text-base">
-              Built for teams, clubs, and activities—and ready for youth
-              nonprofits and other community programs that want the same simple,
-              private fundraising.
-            </p>
-            <p className="mt-8 max-w-2xl text-base font-semibold leading-snug text-white sm:text-lg">
-              100% back to your program.
-            </p>
-            <p
-              className="mt-3 max-w-2xl text-sm font-semibold tracking-wide text-white/95 sm:text-base"
-              aria-label="Compliance and privacy"
-            >
-              FERPA compliant
-              <span className="mx-2.5 text-white/55" aria-hidden>
-                ·
-              </span>
-              COPPA compliant
-              <span className="mx-2.5 text-white/55" aria-hidden>
-                ·
-              </span>
-              We never sell data
+              100% return sports and school fundraising—built for teams, clubs,
+              and activities, with the same simple tools for youth nonprofits and
+              other community programs.
             </p>
           </div>
         </section>
@@ -74,6 +75,13 @@ export default function HomePage() {
         <section className="grid lg:grid-cols-12">
           <div className="flex flex-col justify-center px-4 py-14 sm:px-8 sm:py-20 lg:col-span-5 lg:px-10 lg:py-24">
             <ul className="max-w-md space-y-8 text-base leading-relaxed text-neutral-700 sm:text-lg">
+              <li>
+                <strong className="font-semibold text-hh-dark">
+                  100% return to your program
+                </strong>{" "}
+                — stated donations go to your team, club, or activity. Payment
+                processing is separate at checkout, not taken from the gift.
+              </li>
               <li>
                 <strong className="font-semibold text-hh-dark">
                   Made for high schools
@@ -130,10 +138,13 @@ export default function HomePage() {
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-neutral-700 sm:text-lg">
             Most fundraising platforms take a hidden cut, push products nobody
             asked for, or turn your participants and donors into a marketing list
-            for sale. We don&apos;t. Coaches, athletic directors, activity
-            sponsors, and booster clubs get personal donation links—not catalogs
-            and quota pressure. Youth nonprofits and other community groups can
-            run the same kind of campaign.
+            for sale. We don&apos;t. Every campaign runs on{" "}
+            <strong className="font-semibold text-hh-dark">
+              100% return school fundraising
+            </strong>
+            —stated gifts go to your program, not a platform fee. Coaches,
+            athletic directors, activity sponsors, and booster clubs get personal
+            donation links—not catalogs and quota pressure.
           </p>
         </section>
 

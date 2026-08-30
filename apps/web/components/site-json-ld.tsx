@@ -1,11 +1,11 @@
 import { BRAND } from "@/lib/brand";
+import { MARKETING_SITE_DESCRIPTION } from "@/lib/marketing-seo";
 import { getSiteUrl } from "@/lib/site-config";
 
 /** Organization + WebSite + SoftwareApplication JSON-LD for the marketing site. */
 export function SiteJsonLd() {
   const url = getSiteUrl();
-  const description =
-    "Fundraising platform for high school athletics, activities, and booster clubs. FERPA and COPPA compliant school fundraisers with personal donation links. Also serving youth nonprofits and community programs in Illinois.";
+  const description = MARKETING_SITE_DESCRIPTION;
 
   const graph = {
     "@context": "https://schema.org",
@@ -26,6 +26,8 @@ export function SiteJsonLd() {
           name: "Illinois",
         },
         knowsAbout: [
+          "100% return school fundraising",
+          "100% return sports fundraising",
           "high school fundraising",
           "school fundraiser",
           "booster club fundraising",
@@ -49,11 +51,14 @@ export function SiteJsonLd() {
         applicationSubCategory: "Fundraising",
         operatingSystem: "Web, iOS, Android",
         url,
-        description,
+        description:
+          "100% return school and sports fundraising platform. Stated donations go back to the program; FERPA and COPPA compliant.",
         offers: {
           "@type": "Offer",
           url: `${url}/request-fundraiser`,
           availability: "https://schema.org/OnlineOnly",
+          description:
+            "100% return school and sports fundraising for Illinois high school programs.",
           areaServed: {
             "@type": "State",
             name: "Illinois",

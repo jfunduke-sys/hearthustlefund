@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { marketingSocial } from "@/lib/marketing-seo";
 
-const requestTitle = "Request a High School Fundraiser";
+const requestTitle = "Request 100% Return School Fundraising";
 const requestDescription =
-  "Start a school fundraiser for your high school team, activity, or booster club. Submit one intake form to request a Heart & Hustle campaign in Illinois.";
+  "Start a 100% return school or sports fundraiser for your high school team, activity, or booster club. One intake form to request a Heart & Hustle campaign in Illinois.";
 
 export const metadata: Metadata = {
   title: requestTitle,

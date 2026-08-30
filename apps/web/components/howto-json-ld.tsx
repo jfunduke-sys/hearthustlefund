@@ -16,9 +16,9 @@ export function HowToJsonLd({ steps }: { steps: Step[] }) {
     "@graph": [
       {
         "@type": "HowTo",
-        name: `How a ${BRAND.name} school fundraiser works`,
+        name: `How ${BRAND.name} 100% return school fundraising works`,
         description:
-          "From the first school fundraiser request through campaign launch, donations, and payout to the program.",
+          "From the first school fundraiser request through campaign launch, donations, and 100% return payout to the program.",
         url: pageUrl,
         step: steps.map((step, i) => ({
           "@type": "HowToStep",
@@ -31,6 +31,14 @@ export function HowToJsonLd({ steps }: { steps: Step[] }) {
       {
         "@type": "FAQPage",
         mainEntity: [
+          {
+            "@type": "Question",
+            name: "What does 100% return mean for school fundraising?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Your program receives 100% of each stated donation. Donors pay payment processing separately at checkout so the gift is not reduced by a platform fee. Heart & Hustle does not take a percentage of the stated donation.",
+            },
+          },
           {
             "@type": "Question",
             name: "How do I start a school fundraiser with Heart & Hustle?",
