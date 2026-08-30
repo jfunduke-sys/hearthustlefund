@@ -11,3 +11,4 @@ export * from "./phone-match";
 export * from "./sms-reminder-consent";
 export * from "./organization-agreement";
 export * from "./fee-model";
+export * from "./fee-model-split-legacy";

@@ -164,8 +164,8 @@ export async function updateFundraiserComplianceNotes(
 }
 
 /**
- * SuperAdmin-only: switch a fundraiser between 90/10 and Keep 100%.
- * Default for all campaigns remains split_90_10 until Winter go-live.
+ * SuperAdmin-only: switch a fundraiser between legacy 90/10 and 100% back.
+ * New requests always use keep_100; legacy campaigns may still be on split_90_10.
  * Use Keep 100% only on dedicated test fundraisers while Fall campaigns run.
  */
 export async function setFundraiserFeeModel(

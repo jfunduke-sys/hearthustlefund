@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import type { FeeModel } from "@heart-and-hustle/shared";
+import {
+  FSA_SECTION_3_SPLIT_90_10,
+} from "@heart-and-hustle/shared";
 
 /** Bump when the document body text changes (SuperAdmin + public /terms). */
-export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "13" as const;
+export const FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION = "14" as const;
 
 type Props = {
   pfrReg: string;
@@ -20,11 +23,8 @@ function FundraisingStructureSection({ feeModel }: { feeModel?: FeeModel | null 
   const split = (
     <>
       <p className="mt-2">
-        <strong>90/10 split.</strong> 90% of funds raised are allocated to
-        Organization. 10% is retained by Company as its service fee. Payment
-        processing is the sole responsibility of Company and is paid from
-        Company&apos;s 10% service fee. It is not charged to the donor and does
-        not reduce Organization&apos;s 90% share.
+        <strong>{FSA_SECTION_3_SPLIT_90_10.heading}</strong>{" "}
+        {FSA_SECTION_3_SPLIT_90_10.body}
       </p>
     </>
   );
@@ -50,15 +50,7 @@ function FundraisingStructureSection({ feeModel }: { feeModel?: FeeModel | null 
       ) : feeModel === "split_90_10" ? (
         split
       ) : (
-        <>
-          <p className="mt-2">
-            On the campaign request, Organization selects one fee structure for
-            that campaign. The signed agreement for the campaign states which
-            structure applies and cannot be changed after the campaign starts.
-          </p>
-          {split}
-          {keep100}
-        </>
+        keep100
       )}
     </section>
   );
@@ -763,13 +755,17 @@ export function FundraisingServicesAgreementBody({
             </>
           ) : (
             <>
-              Company&apos;s compensation for a campaign is the structure
-              Organization selected on the campaign request and stated in Section
-              3 of that campaign&apos;s signed agreement (90/10 split or 100%
-              back). Company does not use, employ, or pay outside solicitors,
+              Company does not retain a percentage of the stated donation.
+              Organization receives one hundred percent (100%) of each stated
+              gift. Donors pay a separate Electronic Payment Fee as described in
+              Section 3, and may add an optional contribution to Company at
+              checkout. Company does not use, employ, or pay outside solicitors,
               agents, or commissioned salespeople for the Organization&apos;s
               campaigns; participants are unpaid volunteers of the Organization
-              and receive no commission, salary, or fee from Company.
+              and receive no commission, salary, or fee from Company. No other
+              commissions, salaries, or fees are charged by Company or its agents
+              or employees in connection with this Agreement, except the donor-paid
+              amounts described in Section 3.
             </>
           )}
         </p>

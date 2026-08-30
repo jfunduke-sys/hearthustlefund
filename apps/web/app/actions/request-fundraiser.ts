@@ -3,7 +3,10 @@
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FUNDRAISING_SERVICES_AGREEMENT_DOC_VERSION } from "@/lib/fundraising-services-agreement-document";
-import { isFeeModel, type FeeModel } from "@heart-and-hustle/shared";
+import {
+  DEFAULT_FEE_MODEL_FOR_NEW_REQUESTS,
+  type FeeModel,
+} from "@heart-and-hustle/shared";
 
 export type FundraiserRequestInput = {
   school_name: string;
@@ -72,8 +75,8 @@ function validate(input: FundraiserRequestInput): string | null {
     input.kickoff_setup_preference !== "self_run"
   )
     return "Please choose how you'd like to prepare for your fundraiser launch.";
-  if (!isFeeModel(input.fee_model))
-    return "Please choose a fundraising structure: 90/10 split or 100% back.";
+  if (input.fee_model !== DEFAULT_FEE_MODEL_FOR_NEW_REQUESTS)
+    return "Invalid fundraising structure for this request.";
   if (!clean(input.signer_name))
     return "Type your full legal name to sign the Fundraising Services Agreement.";
   if (!clean(input.signer_title))

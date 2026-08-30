@@ -1,8 +1,8 @@
 /**
- * Dual fee models for Heart & Hustle fundraisers.
+ * Fee models for Heart & Hustle fundraisers.
  *
- * - split_90_10: existing Fall model (default). Org owed 90% of gross charged.
- * - keep_100: Winter model. No 10% commission; Electronic Payment Fee + optional Support.
+ * - keep_100: Standard for new campaigns. No commission; EPF + optional Support.
+ * - split_90_10: Legacy only — see fee-model-split-legacy.ts.
  */
 
 export type FeeModel = "split_90_10" | "keep_100";
@@ -12,8 +12,11 @@ export type FeePaymentMode = "donor_covered" | "deducted_from_donation";
 /** How the donor will pay in Stripe Checkout (chosen before redirect). */
 export type CheckoutPaymentMethod = "card" | "us_bank_account";
 
-export const FEE_MODEL_SPLIT_90_10: FeeModel = "split_90_10";
+export { FEE_MODEL_SPLIT_90_10 } from "./fee-model-split-legacy";
 export const FEE_MODEL_KEEP_100: FeeModel = "keep_100";
+
+/** All new campaign requests use 100% back. */
+export const DEFAULT_FEE_MODEL_FOR_NEW_REQUESTS: FeeModel = "keep_100";
 
 /** Card Electronic Payment Fee: 3.9% + $0.30 (covers Stripe ≈2.9%+$0.30 + ~1% H&H). */
 export const CARD_EPF_RATE = 0.039;
@@ -29,6 +32,7 @@ export function isFeeModel(v: unknown): v is FeeModel {
   return v === "split_90_10" || v === "keep_100";
 }
 
+/** Fallback when fee_model is missing — preserves legacy 90/10 campaigns. */
 export function normalizeFeeModel(v: unknown): FeeModel {
   return isFeeModel(v) ? v : "split_90_10";
 }
@@ -113,13 +117,8 @@ export function formatFeeModelLabel(model: FeeModel | null | undefined): string 
   return "90/10 split";
 }
 
-/** Short request-form / contract labels for the two campaign fee structures. */
+/** Request-form / contract copy for the standard 100% back structure. */
 export const FEE_STRUCTURE_REQUEST_COPY = {
-  split_90_10: {
-    title: "90/10 split",
-    summary:
-      "Your program receives 90% of every donation. Heart & Hustle keeps 10% as its service fee and takes care of payment processing from that share—not the donor, and not out of your 90%.",
-  },
   keep_100: {
     title: "100% back",
     summary:

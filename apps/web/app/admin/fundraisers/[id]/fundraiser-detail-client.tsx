@@ -184,9 +184,10 @@ export function FundraiserDetailClient({
               </>
             ) : (
               <>
-                Default is <strong>90/10</strong> for campaigns without a request
-                choice. New requests pick 90/10 or 100% back on the form; that
-                choice is locked when the campaign starts.
+                New requests use <strong>100% back</strong>. Legacy campaigns may
+                still be on 90/10. SuperAdmin can switch test campaigns before
+                launch; signed requests lock the structure when the campaign
+                starts.
               </>
             )}
           </p>

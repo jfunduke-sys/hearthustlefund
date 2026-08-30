@@ -34,7 +34,7 @@ create table if not exists public.school_requests (
   fundraiser_terms_acknowledged_at timestamptz,
   fsa_intake_version text,
   fsa_intake_acknowledged_at timestamptz,
-  fee_model text not null default 'split_90_10',
+  fee_model text not null default 'keep_100',
   created_at timestamptz default now()
 );
 
@@ -78,7 +78,7 @@ create table if not exists public.fundraisers (
 
 alter table public.fundraisers add column if not exists join_code text;
 alter table public.fundraisers
-  add column if not exists fee_model text not null default 'split_90_10';
+  add column if not exists fee_model text not null default 'keep_100';
 alter table public.fundraisers
   add column if not exists participant_access_revoked_at timestamptz;
 create unique index if not exists fundraisers_join_code_uq
@@ -590,7 +590,7 @@ create table if not exists public.organization_agreements (
   countersigned_at timestamptz,
   -- Estimated target GROSS for this campaign (225 ILCS 460/7(b)).
   estimated_target_gross numeric(12, 2),
-  fee_model text not null default 'split_90_10',
+  fee_model text not null default 'keep_100',
   created_at timestamptz default now()
 );
 alter table public.organization_agreements enable row level security;

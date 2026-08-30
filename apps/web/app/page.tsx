@@ -8,7 +8,7 @@ import { marketingSocial } from "@/lib/marketing-seo";
 
 const homeTitle = `High School Fundraising Platform | ${BRAND.name}`;
 const homeDescription =
-  "Heart & Hustle is a high school fundraising platform for athletics, activities, and booster clubs. FERPA and COPPA compliant school fundraisers with personal donation links—no catalogs, no data selling. Also serving youth nonprofits and community programs in Illinois.";
+  "Heart & Hustle is a high school fundraising platform where 100% of stated donations go back to your program. FERPA and COPPA compliant school fundraisers with personal donation links—no catalogs, no data selling.";
 
 export const metadata: Metadata = {
   title: { absolute: homeTitle },
@@ -51,8 +51,11 @@ export default function HomePage() {
               nonprofits and other community programs that want the same simple,
               private fundraising.
             </p>
+            <p className="mt-8 max-w-2xl text-base font-semibold leading-snug text-white sm:text-lg">
+              100% back to your program.
+            </p>
             <p
-              className="mt-8 max-w-2xl text-sm font-semibold tracking-wide text-white sm:text-base"
+              className="mt-3 max-w-2xl text-sm font-semibold tracking-wide text-white/95 sm:text-base"
               aria-label="Compliance and privacy"
             >
               FERPA compliant

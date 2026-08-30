@@ -9,7 +9,7 @@
 export const ORGANIZATION_AGREEMENT_ESIGN_CONSENT =
   "By typing my full legal name and checking this box, I agree this is my electronic signature; I am authorized to sign this Fundraising Services Agreement on behalf of my organization for this fundraising campaign; and my electronic signature is as legally binding as a handwritten one under the U.S. E-SIGN Act and applicable Illinois law.";
 
-/** Company service fee as a fraction of gross funds raised (the 90/10 split). */
+/** Legacy 90/10 service fee rate — see fee-model-split-legacy.ts. */
 export const FUNDRAISING_SERVICE_FEE_RATE = 0.1;
 
 export interface AgreementBudget {
