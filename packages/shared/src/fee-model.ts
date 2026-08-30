@@ -116,14 +116,3 @@ export function formatFeeModelLabel(model: FeeModel | null | undefined): string 
   if (model === "keep_100") return "100% back";
   return "90/10 split";
 }
-
-/** Request-form / contract copy for the standard 100% back structure. */
-export const FEE_STRUCTURE_REQUEST_COPY = {
-  keep_100: {
-    title: "100% back",
-    summary:
-      "Your program receives 100% of the stated donation. Donors pay a separate Electronic Payment Fee (card: 3.9% + $0.30; bank transfer: 1%) so processing is not taken from your gift.",
-  },
-  donorTip:
-    "At checkout, Heart & Hustle will also ask donors for an optional contribution to help us provide a safe, secure fundraising platform.",
-} as const;

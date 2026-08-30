@@ -4,7 +4,6 @@ import { useState } from "react";
 import { submitFundraiserRequest } from "@/app/actions/request-fundraiser";
 import {
   ORGANIZATION_AGREEMENT_ESIGN_CONSENT,
-  FEE_STRUCTURE_REQUEST_COPY,
   DEFAULT_FEE_MODEL_FOR_NEW_REQUESTS,
 } from "@heart-and-hustle/shared";
 import { MarketingSiteHeader } from "@/components/marketing-site-header";
@@ -525,20 +524,6 @@ export default function RequestFundraiserPage() {
                     commitment.
                   </p>
                 </div>
-                <div className="space-y-3 border border-black/15 p-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-                    Fundraising structure
-                  </p>
-                  <p className="text-base font-semibold text-hh-dark">
-                    {FEE_STRUCTURE_REQUEST_COPY.keep_100.title}
-                  </p>
-                  <p className="text-sm leading-relaxed text-slate-600">
-                    {FEE_STRUCTURE_REQUEST_COPY.keep_100.summary}
-                  </p>
-                  <p className="text-sm leading-relaxed text-slate-600">
-                    {FEE_STRUCTURE_REQUEST_COPY.donorTip}
-                  </p>
-                </div>
                 <fieldset className="space-y-3">
                   <legend className="sr-only">
                     Teams or groups for this campaign
@@ -631,8 +616,10 @@ export default function RequestFundraiserPage() {
                       >
                         Fundraising Services Agreement
                       </Link>
-                      , then sign below as the Organizer for this campaign. Each
-                      team files its own agreement.
+                      , then sign below as the Organizer for this campaign.
+                      Every campaign runs on <strong>100% back to your program</strong>
+                      —payment and fee details are in the agreement. Each team
+                      files its own agreement.
                     </p>
                   </div>
 
